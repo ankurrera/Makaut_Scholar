@@ -1,0 +1,28 @@
+name: makaut_scholar
+description: A new Flutter project.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # Core dependencies
+  supabase_flutter: ^2.8.0
+  flutter_dotenv: ^5.2.1
+  provider: ^6.1.1  # Added for State Management
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+
+  # CRITICAL: This allows Flutter to read your .env file
+  assets:
+    - .env
