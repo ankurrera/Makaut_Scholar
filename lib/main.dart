@@ -8,7 +8,7 @@ import 'services/auth_service.dart';
 import 'features/auth/login/login_screen.dart';
 import 'features/auth/signup/signup_screen.dart';
 import 'features/profile/create_profile_screen.dart';
-import 'features/home/home_screen.dart';
+import 'features/navigation/main_nav_shell.dart';
 import 'features/splash/splash_screen.dart';
 
 void main() async {
@@ -41,21 +41,25 @@ class MakautScholarApp extends StatelessWidget {
       title: 'MAKAUT Scholar',
       debugShowCheckedModeBanner: false,
 
-      // 4. Professional Academic Theme
+      // 4. Academic Themes (Light & Dark)
+      themeMode: ThemeMode.system,
+      
+      // Light Theme
       theme: ThemeData(
         useMaterial3: true,
-        primaryColor: const Color(0xFF1E88E5), // Academic Blue
-        scaffoldBackgroundColor: Colors.grey[50], // Soft white
-
-        // AppBar Styling
+        brightness: Brightness.light,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF7F56D9), // Purple Seed
+          brightness: Brightness.light,
+          surface: const Color(0xFFFFFFFF),
+        ),
+        scaffoldBackgroundColor: const Color(0xFFF2F2F7), // Soft Light Grey
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF1E88E5),
-          foregroundColor: Colors.white,
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
           elevation: 0,
           centerTitle: true,
         ),
-
-        // Input Fields Styling
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: Colors.white,
@@ -70,23 +74,61 @@ class MakautScholarApp extends StatelessWidget {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF1E88E5), width: 2),
+            borderSide: const BorderSide(color: Color(0xFF7F56D9), width: 2),
           ),
         ),
-
-        // Button Styling
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF1E88E5),
+            backgroundColor: const Color(0xFF7F56D9),
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            textStyle: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ),
+
+      // Dark Theme (Existing)
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.dark,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF7F56D9),
+          brightness: Brightness.dark,
+          surface: const Color(0xFF121212),
+          onSurface: Colors.white,
+        ),
+        scaffoldBackgroundColor: const Color(0xFF121212),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF1E1E2C),
+          foregroundColor: Colors.white,
+          elevation: 0,
+          centerTitle: true,
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: const Color(0xFF1E1E2C),
+          contentPadding: const EdgeInsets.all(16),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade700),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFF7F56D9), width: 2),
+          ),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF7F56D9),
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ),
       ),
@@ -97,7 +139,7 @@ class MakautScholarApp extends StatelessWidget {
         '/': (context) => const SplashScreen(),
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignupScreen(),
-        '/home': (context) => const HomeScreen(),
+        '/home': (context) => const MainNavShell(),
         '/create_profile': (context) => const CreateProfileScreen(),
       },
     );
