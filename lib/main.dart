@@ -7,6 +7,7 @@ import 'core/supabase_client.dart';
 import 'services/auth_service.dart';
 import 'features/auth/login/login_screen.dart';
 import 'features/auth/signup/signup_screen.dart';
+import 'features/profile/create_profile_screen.dart';
 import 'features/home/home_screen.dart';
 import 'features/splash/splash_screen.dart';
 
@@ -32,7 +33,7 @@ void main() async {
 }
 
 class MakautScholarApp extends StatelessWidget {
-  const MakautScholarApp({Key? key}) : super(key: key);
+  const MakautScholarApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -97,6 +98,7 @@ class MakautScholarApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignupScreen(),
         '/home': (context) => const HomeScreen(),
+        '/create_profile': (context) => const CreateProfileScreen(),
       },
     );
   }
