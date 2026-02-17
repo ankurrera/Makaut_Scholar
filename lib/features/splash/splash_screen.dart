@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -26,7 +26,14 @@ class _SplashScreenState extends State<SplashScreen> {
     final session = authService.currentSession;
 
     if (session != null) {
-      Navigator.pushReplacementNamed(context, '/home');
+      // Check if profile exists and is complete
+      final profile = await authService.getProfile();
+      if (!mounted) return;
+      if (profile != null && profile['college_name'] != null && profile['college_name'].toString().isNotEmpty) {
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        Navigator.pushReplacementNamed(context, '/create_profile');
+      }
     } else {
       Navigator.pushReplacementNamed(context, '/login');
     }
@@ -34,19 +41,43 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    const backgroundColor = Color(0xFF0A0A0A);
+    const primaryAccent = Color(0xFFCCFF00); // Lime Green
+
     return Scaffold(
+      backgroundColor: backgroundColor,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.school_rounded, size: 80, color: Theme.of(context).primaryColor),
-            const SizedBox(height: 24),
-            const Text(
-              "MAKAUT Scholar",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF1E88E5)),
+            // Glowing Icon
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFF1C1C1E),
+                boxShadow: [
+                   BoxShadow(
+                      color: primaryAccent.withValues(alpha: 0.2),
+                      blurRadius: 40,
+                      spreadRadius: 10,
+                   ),
+                ],
+              ),
+              child: const Icon(Icons.school_rounded, size: 80, color: primaryAccent),
             ),
             const SizedBox(height: 32),
-            const CircularProgressIndicator(),
+            const Text(
+              "MAKAUT Scholar",
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+             const SizedBox(height: 8),
+             Text(
+              "Your Academic Companion",
+              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+            ),
+            const SizedBox(height: 48),
+            const CircularProgressIndicator(color: primaryAccent),
           ],
         ),
       ),
