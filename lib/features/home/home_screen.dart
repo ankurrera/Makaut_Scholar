@@ -1,5 +1,8 @@
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'dart:ui'; // For ImageFilter
 import '../../services/auth_service.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -48,384 +51,537 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
-    const backgroundColor = Color(0xFF051105); // Deep Dark Green
-    const primaryAccent = Color(0xFFCCFF00); // Lime Green
-    const cardDark = Color(0xFF1C1C1E);
-    const cardWhite = Colors.white;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: backgroundColor,
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF0F2610), // Dark Forest Green top
-              Color(0xFF000000), // Black bottom
-            ],
-          ),
+    // Dynamic Palette based on Theme
+    final bgTop = isDark ? const Color(0xFF1E1E2C) : const Color(0xFFF2F2F7);
+    final bgBottom = isDark ? const Color(0xFF121212) : const Color(0xFFFFFFFF);
+    
+    // Accents: Lighter for Dark Mode (pop against dark), Darker for Light Mode (readable against light)
+    final accentLavender = isDark ? const Color(0xFFD0BCFF) : const Color(0xFF6750A4);
+    final accentMint = isDark ? const Color(0xFF81C784) : const Color(0xFF2E7D32);
+    final accentPink = isDark ? const Color(0xFFF06292) : const Color(0xFFC2185B);
+    final accentBlue = isDark ? const Color(0xFF64B5F6) : const Color(0xFF1565C0);
+    final accentOrange = isDark ? const Color(0xFFFFB74D) : const Color(0xFFEF6C00);
+
+
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [bgTop, bgBottom],
+          stops: [0.0, 0.8],
         ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      ),
+      child: Stack(
+        children: [
+          // Ambient Background Glows (Simulated)
+          Positioned(
+            top: -100, left: -50,
+            child: _buildAmbientGlow(accentLavender.withValues(alpha: 0.15)),
+          ),
+          Positioned(
+            bottom: 100, right: -50,
+            child: _buildAmbientGlow(accentBlue.withValues(alpha: 0.1)),
+          ),
+
+          // Main Scrollable Content
+          SafeArea(
+            bottom: false,
+            child: ListView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 100), // Bottom padding for dock
               children: [
-                // 1. Header (0ms delay)
+                // 1. Hero Section
                 StaggeredSlideFade(
                   delayMs: 0,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: _buildHeroSection(_userName, context),
+                ),
+
+                const SizedBox(height: 32),
+
+                // 2. Feature Grid (Bento)
+                StaggeredSlideFade(
+                  delayMs: _baseDelay,
+                  child: _buildFeatureGrid(accentLavender, accentMint, accentPink, accentBlue, accentOrange),
+                ),
+
+                const SizedBox(height: 24),
+
+                // 3. Analytics Section
+                StaggeredSlideFade(
+                  delayMs: _baseDelay * 2,
+                  child: _buildAnalyticsSection(accentBlue),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAmbientGlow(Color color) {
+    return Container(
+      width: 300,
+      height: 300,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color,
+        boxShadow: [
+          BoxShadow(color: color, blurRadius: 100, spreadRadius: 50),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeroSection(String name, BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black;
+    final subTextColor = isDark ? Colors.white70 : Colors.black54;
+
+    return Row(
+      children: [
+        GlassContainer(
+          padding: const EdgeInsets.all(4),
+          shape: BoxShape.circle,
+          child: const CircleAvatar(
+            radius: 24,
+            backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=11'),
+          ),
+        ),
+        const SizedBox(width: 16),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Good Evening,",
+              style: TextStyle(fontSize: 14, color: subTextColor),
+            ),
+            Text(
+              name,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: textColor,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        ),
+        const Spacer(),
+        GlassIconButton(
+          icon: Iconsax.notification,
+          onTap: () {},
+        ),
+        const SizedBox(width: 12),
+        GlassIconButton(
+          icon: Iconsax.setting_2,
+          onTap: () => _logout(context),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFeatureGrid(Color lavender, Color mint, Color pink, Color blue, Color orange) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black;
+    final subTextColor = isDark ? Colors.white70 : Colors.black54;
+
+    return Column(
+      children: [
+        // Row 1: Notes (Large) + Stacked Cards
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Large Notes Card
+            Expanded(
+              flex: 3,
+              child: ScaleButton(
+                onTap: () {},
+                child: GlassCard(
+                  height: 220,
+                  color: lavender.withValues(alpha: 0.1),
+                  child: Stack(
                     children: [
-                      Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 20,
-                            backgroundImage: const NetworkImage('https://i.pravatar.cc/150?img=11'),
-                            backgroundColor: Colors.grey[800],
-                          ),
-                          const Spacer(),
-                          _buildIconButton(Icons.download_rounded, () {}),
-                          const SizedBox(width: 8),
-                          _buildIconButton(Icons.settings_outlined, () => _logout(context)),
-                        ],
+                      Positioned(
+                        right: -20, bottom: -20,
+                        child: Icon(Iconsax.book_1, size: 100, color: lavender.withValues(alpha: 0.2)),
                       ),
-                      const SizedBox(height: 20),
-                      Text(
-                        "Hey, $_userName",
-                        style: TextStyle(fontSize: 16, color: Colors.grey[400]),
-                      ),
-                      const Text(
-                        "Welcome Back",
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          height: 1.2,
+                      Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: lavender.withValues(alpha: 0.2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(Iconsax.book, color: lavender, size: 24),
+                            ),
+                            const Spacer(),
+                            Text(
+                              "Academic Notes",
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: textColor),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              "45 Files • Updated 2h ago",
+                              style: TextStyle(fontSize: 12, color: subTextColor),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
                 ),
-                
-                const SizedBox(height: 24),
+              ),
+            ),
+            const SizedBox(width: 16),
+            // Stacked Cards
+            Expanded(
+              flex: 2,
+              child: Column(
+                children: [
+                  // PYQ
+                  _buildSmallGlassCard(
+                    title: "PYQ Bank",
+                    icon: Iconsax.document_text,
+                    color: mint,
+                    height: 100,
+                  ),
+                  const SizedBox(height: 16),
+                  // Important
+                  _buildSmallGlassCard(
+                    title: "Exam Focus",
+                    icon: Iconsax.star,
+                    color: pink,
+                    height: 104, // To align heights (220 total - 16 gap = 204 / 2 = 102~104)
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
 
-                // 2. Bento Grid
+        const SizedBox(height: 16),
+
+        // Row 2: Syllabus (New Button)
+        ScaleButton(
+          onTap: () {},
+          child: GlassCard(
+            height: 80,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40, height: 40,
+                    decoration: BoxDecoration(
+                      color: orange.withValues(alpha: 0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Iconsax.book_saved, color: orange, size: 24),
+                  ),
+                  const SizedBox(width: 16),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Syllabus",
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: textColor),
+                      ),
+                      Text(
+                        "View Course Structure",
+                        style: TextStyle(fontSize: 12, color: subTextColor),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  Icon(Iconsax.arrow_right_3, color: isDark ? Colors.white54 : Colors.black45, size: 24),
+                ],
+              ),
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 16),
+
+        // Row 3: Progress
+        ScaleButton(
+          onTap: () {},
+          child: GlassCard(
+            height: 80,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 40, height: 40,
+                    child: CircularProgressIndicator(
+                      value: 0.65,
+                      strokeWidth: 4,
+                      backgroundColor: Colors.grey.withValues(alpha: 0.1),
+                      color: blue,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Continue Studying",
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: textColor),
+                      ),
+                      Text(
+                        "DBMS Unit 3 • 65% Done",
+                        style: TextStyle(fontSize: 12, color: blue),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  Icon(Iconsax.play_circle, color: blue, size: 32),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSmallGlassCard({required String title, required IconData icon, required Color color, required double height}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black;
+
+    return ScaleButton(
+      onTap: () {},
+      child: GlassCard(
+        height: height,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: color, size: 28),
+              const Spacer(),
+              Text(
+                title,
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: textColor),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAnalyticsSection(Color accentColor) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4),
+          child: Text(
+            "Weekly Activity",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: textColor),
+          ),
+        ),
+        const SizedBox(height: 12),
+        GlassCard(
+          height: 140,
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                // Circular Chart
                 Expanded(
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    child: Column(
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Left Column
-                            Expanded(
-                              flex: 1,
-                              child: Column(
-                                children: [
-                                  // Notes (100ms)
-                                  StaggeredSlideFade(
-                                    delayMs: _baseDelay * 1,
-                                    child: _buildBentoCard(
-                                      height: 180,
-                                      color: primaryAccent,
-                                      title: "Notes",
-                                      icon: Icons.auto_stories,
-                                      iconColor: Colors.black,
-                                      textColor: Colors.black,
-                                      isLargeIcon: true,
-                                      onTap: () {}, // Navigate
-                                      decorationWidget: Positioned(
-                                        bottom: 10, left: 10,
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                          decoration: BoxDecoration(
-                                            color: Colors.black.withValues(alpha: 0.1),
-                                            borderRadius: BorderRadius.circular(8),
-                                          ),
-                                          child: const Text("Unit-wise Q&A", style: TextStyle(fontSize: 10, color: Colors.black)),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  // Continue (200ms)
-                                  StaggeredSlideFade(
-                                    delayMs: _baseDelay * 2,
-                                    child: _buildBentoCard(
-                                      height: 100,
-                                      color: cardWhite,
-                                      title: "Continue",
-                                      icon: Icons.bar_chart,
-                                      iconColor: Colors.black,
-                                      textColor: Colors.black,
-                                      onTap: () {},
-                                      child: Column( // Custom child for progress
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          const Text("Continue", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black)),
-                                          const SizedBox(height: 4),
-                                          const Text("DBMS - Unit 2", style: TextStyle(fontSize: 10, color: Colors.black54)),
-                                          const Spacer(),
-                                          const Text("40% Completed", style: TextStyle(fontSize: 10, color: Colors.black87, fontWeight: FontWeight.bold)),
-                                          const SizedBox(height: 4),
-                                          const AnimatedProgressBar(percent: 0.4),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                   const SizedBox(height: 16),
-                                  // Upgrade (250ms) - Pulsing
-                                  StaggeredSlideFade(
-                                    delayMs: _baseDelay * 3, // slightly later
-                                    child: PulseDecoration(
-                                      child: _buildBentoCard(
-                                        height: 100, 
-                                        color: const Color(0xFFD4FF00), 
-                                        title: "Upgrade",
-                                        icon: Icons.diamond,
-                                        iconColor: Colors.black,
-                                        textColor: Colors.black,
-                                        onTap: () {},
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            // Right Column
-                            Expanded(
-                              flex: 1,
-                              child: Column(
-                                children: [
-                                  // PYQ (150ms) - Interleaved
-                                  StaggeredSlideFade(
-                                    delayMs: (_baseDelay * 1.5).toInt(),
-                                    child: _buildBentoCard(
-                                      height: 100,
-                                      color: cardDark,
-                                      title: "PYQ",
-                                      icon: Icons.history_edu,
-                                      iconColor: Colors.white,
-                                      textColor: Colors.white,
-                                      onTap: () {},
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  // Important (250ms)
-                                  StaggeredSlideFade(
-                                    delayMs: (_baseDelay * 2.5).toInt(),
-                                    child: _buildBentoCard(
-                                      height: 100,
-                                      color: cardWhite,
-                                      title: "Important",
-                                      icon: Icons.local_fire_department_rounded,
-                                      iconColor: Colors.orangeAccent,
-                                      textColor: Colors.black,
-                                      onTap: () {},
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  // Subjects (350ms)
-                                  StaggeredSlideFade(
-                                    delayMs: (_baseDelay * 3.5).toInt(),
-                                    child: _buildBentoCard(
-                                      height: 180,
-                                      color: cardDark,
-                                      title: "Subjects",
-                                      icon: Icons.library_books_outlined,
-                                      iconColor: const Color(0xFF69F0AE),
-                                      textColor: Colors.white,
-                                      isLargeIcon: true,
-                                      onTap: () {},
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        
-                        const SizedBox(height: 16),
-                        
-                        // 3. Syllabus Banner (400ms)
-                        StaggeredSlideFade(
-                          delayMs: _baseDelay * 4,
-                          child: ScaleButton(
-                            onTap: () {},
-                            child: Container(
-                              height: 80,
-                              padding: const EdgeInsets.symmetric(horizontal: 20),
-                              decoration: BoxDecoration(
-                                color: cardWhite,
-                                borderRadius: BorderRadius.circular(24),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.1),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: Row(
-                                children: [
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        "Syllabus",
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                      Text(
-                                        "Official MAKAUT Syllabus",
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const Spacer(),
-                                  const Icon(Icons.class_outlined, size: 40, color: Colors.blueAccent),
-                                ],
-                              ),
+                  flex: 2,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          SizedBox(
+                            width: 80, height: 80,
+                            child: CircularProgressIndicator(
+                              value: 0.75,
+                              strokeWidth: 8,
+                              strokeCap: StrokeCap.round,
+                                backgroundColor: isDark ? Colors.grey.withValues(alpha: 0.1) : Colors.grey.withValues(alpha: 0.2),
+                              color: accentColor,
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 20),
-                      ],
-                    ),
+                          Text(
+                            "75%",
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: accentColor),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                // Bar Chart (Simulated)
+                Expanded(
+                  flex: 3,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      _buildBar(0.4, accentColor),
+                      _buildBar(0.6, accentColor),
+                      _buildBar(0.3, accentColor),
+                      _buildBar(0.9, accentColor),
+                      _buildBar(0.5, accentColor),
+                      _buildBar(0.2, accentColor),
+                      _buildBar(0.7, accentColor),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildIconButton(IconData icon, VoidCallback onTap) {
-    return ScaleButton(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(8), // Explicit padding for touch area
-        decoration: BoxDecoration(
-          color: const Color(0xFF1C1C1E),
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
-        ),
-        child: Icon(icon, color: Colors.grey[400], size: 20),
-      ),
-    );
-  }
-
-  Widget _buildBentoCard({
-    required double height,
-    required Color color,
-    required String title,
-    required IconData icon,
-    required Color iconColor,
-    required Color textColor,
-    required VoidCallback onTap,
-    bool isLargeIcon = false,
-    String? subtitle,
-    Widget? decorationWidget,
-    Widget? child, // Optional custom child override
-  }) {
-    // If custom child is provided (like for Continue card), use it.
-    // Otherwise build standard layout.
-    
-    Widget content = child ?? Stack(
-      children: [
-        // Title
-        Positioned(
-          top: 0,
-          left: 0,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 16, 
-                  fontWeight: FontWeight.w600, 
-                  color: textColor,
-                ),
-              ),
-              if (subtitle != null) ...[
-                 const SizedBox(height: 4),
-                 Text(
-                  subtitle,
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: textColor.withValues(alpha: 0.7),
-                    height: 1.2,
-                  ),
-                 ),
-              ]
-            ],
-          ),
-        ),
-        
-        // Icon
-        Positioned(
-          bottom: 0,
-          right: 0,
-          child: isLargeIcon 
-            ? Icon(icon, size: 60, color: iconColor.withValues(alpha: 0.8))
-            : Icon(icon, size: 32, color: iconColor),
-        ),
-        
-        if (decorationWidget != null) decorationWidget,
       ],
     );
+  }
 
-    return ScaleButton(
-      onTap: onTap,
+  Widget _buildBar(double heightFactor, Color color) {
+    return FractionallySizedBox(
+      heightFactor: heightFactor * 0.8, // Scale down to fit
       child: Container(
-        height: height,
-        padding: const EdgeInsets.all(16),
+        width: 6,
         decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.2), // Subtle shadow
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          color: color.withValues(alpha: 0.6),
+          borderRadius: BorderRadius.circular(3),
         ),
-        child: content,
       ),
     );
   }
 }
 
-// --- Animation Widgets ---
+// --- Reusable Glass Widgets ---
+
+class GlassCard extends StatelessWidget {
+  final double? height;
+  final double? width;
+  final Widget child;
+  final Color? color;
+  final EdgeInsetsGeometry? padding;
+
+  const GlassCard({
+    super.key,
+    this.height,
+    this.width,
+    required this.child,
+    this.color, this.padding
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GlassContainer(
+      height: height,
+      width: width,
+      color: color,
+      child: child,
+    );
+  }
+}
+
+class GlassContainer extends StatelessWidget {
+  final double? height;
+  final double? width;
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+  final BoxShape shape;
+  final Color? color;
+
+  const GlassContainer({
+    super.key,
+    this.height,
+    this.width,
+    required this.child,
+    this.padding,
+    this.shape = BoxShape.rectangle,
+    this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: shape == BoxShape.circle ? BorderRadius.zero : BorderRadius.circular(32),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25), // Heavy Apple-style Blur
+        child: Container(
+          height: height,
+          width: width,
+          padding: padding,
+          decoration: BoxDecoration(
+            color: color ?? (Theme.of(context).brightness == Brightness.dark 
+                ? Colors.white.withValues(alpha: 0.12) 
+                : Colors.white.withValues(alpha: 0.85)), // More solid White for Light Mode to pop against grey/white bg
+            shape: shape,
+            borderRadius: shape == BoxShape.circle ? null : BorderRadius.circular(32),
+            border: Border.all(
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? Colors.white.withValues(alpha: 0.2) 
+                  : Colors.black.withValues(alpha: 0.1), // Slightly darker border for Light Mode
+              width: 0.5,
+            ),
+            boxShadow: Theme.of(context).brightness == Brightness.dark ? [] : [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05), // Subtle shadow for lift
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+                spreadRadius: 0,
+              ),
+            ],
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+class GlassIconButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const GlassIconButton({super.key, required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return ScaleButton(
+      onTap: onTap,
+      child: GlassContainer(
+        padding: const EdgeInsets.all(12),
+        shape: BoxShape.circle,
+        child: Icon(icon, color: isDark ? Colors.white : Colors.black, size: 20),
+      ),
+    );
+  }
+}
+
+
+// --- Animations (Reused from Previous) ---
 
 class ScaleButton extends StatefulWidget {
   final Widget child;
   final VoidCallback onTap;
-  final Duration duration;
-  final double scaleDown;
 
-  const ScaleButton({
-    super.key,
-    required this.child,
-    required this.onTap,
-    this.duration = const Duration(milliseconds: 120),
-    this.scaleDown = 0.97,
-  });
+  const ScaleButton({super.key, required this.child, required this.onTap});
 
   @override
   State<ScaleButton> createState() => _ScaleButtonState();
@@ -438,8 +594,8 @@ class _ScaleButtonState extends State<ScaleButton> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: widget.duration);
-    _scaleAnimation = Tween<double>(begin: 1.0, end: widget.scaleDown).animate(
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 120));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.97).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
   }
@@ -459,10 +615,7 @@ class _ScaleButtonState extends State<ScaleButton> with SingleTickerProviderStat
         widget.onTap();
       },
       onTapCancel: () => _controller.reverse(),
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: widget.child,
-      ),
+      child: ScaleTransition(scale: _scaleAnimation, child: widget.child),
     );
   }
 }
@@ -470,14 +623,8 @@ class _ScaleButtonState extends State<ScaleButton> with SingleTickerProviderStat
 class StaggeredSlideFade extends StatefulWidget {
   final Widget child;
   final int delayMs;
-  final Duration duration;
 
-  const StaggeredSlideFade({
-    super.key,
-    required this.child,
-    required this.delayMs,
-    this.duration = const Duration(milliseconds: 250),
-  });
+  const StaggeredSlideFade({super.key, required this.child, required this.delayMs});
 
   @override
   State<StaggeredSlideFade> createState() => _StaggeredSlideFadeState();
@@ -491,13 +638,9 @@ class _StaggeredSlideFadeState extends State<StaggeredSlideFade> with SingleTick
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: widget.duration);
-    _opacity = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
-    _slide = Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
+    _opacity = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    _slide = Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     Future.delayed(Duration(milliseconds: widget.delayMs), () {
       if (mounted) _controller.forward();
@@ -512,105 +655,6 @@ class _StaggeredSlideFadeState extends State<StaggeredSlideFade> with SingleTick
 
   @override
   Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _opacity,
-      child: SlideTransition(
-        position: _slide,
-        child: widget.child,
-      ),
-    );
-  }
-}
-
-class PulseDecoration extends StatefulWidget {
-  final Widget child;
-  const PulseDecoration({super.key, required this.child});
-
-  @override
-  State<PulseDecoration> createState() => _PulseDecorationState();
-}
-
-class _PulseDecorationState extends State<PulseDecoration> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scale;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 800));
-    _scale = Tween<double>(begin: 1.0, end: 1.03).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-
-    // Pulse every 5 seconds
-    _startPulseLoop();
-  }
-
-  void _startPulseLoop() async {
-    while (mounted) {
-      await Future.delayed(const Duration(seconds: 5));
-      if (mounted) {
-        await _controller.forward();
-        await _controller.reverse();
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ScaleTransition(
-      scale: _scale,
-      child: widget.child,
-    );
-  }
-}
-
-class AnimatedProgressBar extends StatefulWidget {
-  final double percent; // 0.0 to 1.0
-  const AnimatedProgressBar({super.key, required this.percent});
-
-  @override
-  State<AnimatedProgressBar> createState() => _AnimatedProgressBarState();
-}
-
-class _AnimatedProgressBarState extends State<AnimatedProgressBar> {
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Container(
-          height: 6,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Colors.grey[200],
-            borderRadius: BorderRadius.circular(3),
-          ),
-          child: Stack(
-            children: [
-              TweenAnimationBuilder<double>(
-                tween: Tween<double>(begin: 0, end: widget.percent),
-                duration: const Duration(milliseconds: 700),
-                curve: Curves.easeOut,
-                builder: (context, value, _) {
-                  return Container(
-                    width: constraints.maxWidth * value,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFCCFF00), // Lime
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
+    return FadeTransition(opacity: _opacity, child: SlideTransition(position: _slide, child: widget.child));
   }
 }
