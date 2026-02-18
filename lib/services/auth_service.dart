@@ -1,6 +1,14 @@
 import 'package:flutter/foundation.dart';
+import 'dart:io' show File;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/supabase_client.dart';
+
+class NetworkException implements Exception {
+  final String message;
+  NetworkException(this.message);
+  @override
+  String toString() => message;
+}
 
 class AuthService extends ChangeNotifier {
   // Access the client via your existing service
@@ -97,7 +105,27 @@ class AuthService extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Fetches the current user's profile data
+  /// Fetches all subjects from the Syllabus table (as source of truth), excluding laboratories
+  Future<List<String>> fetchDepartmentSubjects(String department, int semester) async {
+    final data = await _client
+        .from('syllabus')
+        .select('subject')
+        .eq('department', department)
+        .eq('semester', semester);
+    
+    final subjects = (data as List)
+        .map((row) => row['subject'] as String)
+        .where((subject) {
+          final s = subject.toLowerCase();
+          return !s.contains('laboratory') && !RegExp(r'\blab\b').hasMatch(s);
+        })
+        .toSet()
+        .toList()
+      ..sort();
+    return subjects;
+  }
+
+  /// Fetches the current user's profile data. Throws NetworkException if offline.
   Future<Map<String, dynamic>?> getProfile() async {
     try {
       final user = _client.auth.currentUser;
@@ -105,9 +133,190 @@ class AuthService extends ChangeNotifier {
       final data = await _client.from('profiles').select().eq('id', user.id).maybeSingle();
       return data;
     } catch (e) {
+      if (e.toString().contains('SocketException') || e.toString().contains('Failed host lookup')) {
+        throw NetworkException('You are currently offline.');
+      }
       if (kDebugMode) print('Error fetching profile: $e');
       return null;
     }
+  }
+
+  /// Fetches distinct subjects for a department + semester
+  Future<List<String>> fetchSubjects(String department, int semester) async {
+    final data = await _client
+        .from('notes')
+        .select('subject')
+        .eq('department', department)
+        .eq('semester', semester);
+    final subjects = (data as List)
+        .map((row) => row['subject'] as String)
+        .toSet()
+        .toList()
+      ..sort();
+    return subjects;
+  }
+
+  /// Fetches unique unit counts for all subjects in a department + semester
+  Future<Map<String, int>> fetchSubjectUnitCounts(String department, int semester) async {
+    final data = await _client
+        .from('notes')
+        .select('subject, unit')
+        .eq('department', department)
+        .eq('semester', semester);
+    
+    final Map<String, Set<int>> subjectUnits = {};
+    for (final row in (data as List)) {
+      final sub = row['subject'] as String;
+      final unit = row['unit'] as int;
+      subjectUnits.putIfAbsent(sub, () => {}).add(unit);
+    }
+    
+    return subjectUnits.map((sub, units) => MapEntry(sub, units.length));
+  }
+
+  /// Fetches notes for a department + semester + subject, ordered by unit
+  Future<List<Map<String, dynamic>>> fetchNotes(
+      String department, int semester, String subject) async {
+    final data = await _client
+        .from('notes')
+        .select()
+        .eq('department', department)
+        .eq('semester', semester)
+        .eq('subject', subject)
+        .order('unit', ascending: true)
+        .order('uploaded_at', ascending: false);
+    return List<Map<String, dynamic>>.from(data);
+  }
+
+  /// Fetches distinct semesters that have syllabus for a department
+  Future<List<int>> fetchSyllabusSemesters(String department) async {
+    final data = await _client
+        .from('syllabus')
+        .select('semester')
+        .eq('department', department);
+    final sems = (data as List)
+        .map((row) => row['semester'] as int)
+        .toSet()
+        .toList()
+      ..sort();
+    return sems;
+  }
+
+  /// Fetches distinct subjects that have syllabus for a department + semester
+  Future<List<String>> fetchSyllabusSubjects(String department, int semester) async {
+    final data = await _client
+        .from('syllabus')
+        .select('subject')
+        .eq('department', department)
+        .eq('semester', semester);
+    final subjects = (data as List)
+        .map((row) => row['subject'] as String)
+        .toSet()
+        .toList()
+      ..sort();
+    return subjects;
+  }
+
+  /// Fetches syllabus entries for a department + semester + subject
+  Future<List<Map<String, dynamic>>> fetchSyllabus(
+      String department, int semester, String subject) async {
+    final data = await _client
+        .from('syllabus')
+        .select()
+        .eq('department', department)
+        .eq('semester', semester)
+        .eq('subject', subject)
+        .order('uploaded_at', ascending: false);
+    return List<Map<String, dynamic>>.from(data);
+  }
+
+  /// Fetches distinct semesters that have PYQs for a department
+  Future<List<int>> fetchPyqSemesters(String department) async {
+    final data = await _client
+        .from('pyq')
+        .select('semester')
+        .eq('department', department);
+    final sems = (data as List)
+        .map((row) => row['semester'] as int)
+        .toSet()
+        .toList()
+      ..sort();
+    return sems;
+  }
+
+  /// Fetches distinct subjects that have PYQs for a department + semester
+  Future<List<String>> fetchPyqSubjects(String department, int semester) async {
+    final data = await _client
+        .from('pyq')
+        .select('subject')
+        .eq('department', department)
+        .eq('semester', semester);
+    final subjects = (data as List)
+        .map((row) => row['subject'] as String)
+        .toSet()
+        .toList()
+      ..sort();
+    return subjects;
+  }
+
+  /// Fetches unique paper (year) counts for all subjects in a department + semester
+  Future<Map<String, int>> fetchSubjectPyqCounts(String department, int semester) async {
+    final data = await _client
+        .from('pyq')
+        .select('subject, year')
+        .eq('department', department)
+        .eq('semester', semester);
+    
+    final Map<String, Set<String>> subjectYears = {};
+    for (final row in (data as List)) {
+      final sub = row['subject'] as String;
+      final year = row['year'].toString();
+      subjectYears.putIfAbsent(sub, () => {}).add(year);
+    }
+    
+    return subjectYears.map((sub, years) => MapEntry(sub, years.length));
+  }
+
+  /// Fetches unique important questions count for all subjects in a department + semester
+  Future<Map<String, int>> fetchSubjectImpCounts(String department, int semester) async {
+    final data = await _client
+        .from('important_questions')
+        .select('subject')
+        .eq('department', department)
+        .eq('semester', semester);
+
+    final counts = <String, int>{};
+    for (var row in (data as List)) {
+      final sub = row['subject'] as String;
+      counts[sub] = (counts[sub] ?? 0) + 1;
+    }
+    return counts;
+  }
+
+  /// Fetches Important Questions for a department + semester + subject
+  Future<List<Map<String, dynamic>>> fetchImpQuestions(
+      String department, int semester, String subject) async {
+    final data = await _client
+        .from('important_questions')
+        .select()
+        .eq('department', department)
+        .eq('semester', semester)
+        .eq('subject', subject)
+        .order('uploaded_at', ascending: false);
+    return List<Map<String, dynamic>>.from(data);
+  }
+
+  /// Fetches PYQ papers for a department + semester + subject, ordered by year desc
+  Future<List<Map<String, dynamic>>> fetchPyqPapers(
+      String department, int semester, String subject) async {
+    final data = await _client
+        .from('pyq')
+        .select()
+        .eq('department', department)
+        .eq('semester', semester)
+        .eq('subject', subject)
+        .order('year', ascending: false);
+    return List<Map<String, dynamic>>.from(data);
   }
 
   /// Updates the user's profile with additional details
@@ -128,6 +337,68 @@ class AuthService extends ChangeNotifier {
       'department': department,
       'updated_at': DateTime.now().toIso8601String(),
     });
+    notifyListeners();
+  }
+
+  /// Uploads an avatar image and saves the URL to the profile
+  Future<String> uploadAvatar(String filePath) async {
+    final user = _client.auth.currentUser;
+    if (user == null) throw Exception('Not logged in');
+
+    final ext = filePath.split('.').last.toLowerCase();
+    final storagePath = '${user.id}/avatar.$ext';
+
+    // Upload (upsert to overwrite existing)
+    await _client.storage.from('avatars').upload(
+      storagePath,
+      File(filePath),
+      fileOptions: const FileOptions(upsert: true),
+    );
+
+    // Get public URL
+    final url = _client.storage.from('avatars').getPublicUrl(storagePath);
+
+    // Save URL to profile
+    await _client.from('profiles').update({
+      'avatar_url': url,
+      'updated_at': DateTime.now().toIso8601String(),
+    }).eq('id', user.id);
+
+    notifyListeners();
+    return url;
+  }
+
+  /// Deletes the user's avatar
+  Future<void> deleteAvatar() async {
+    final user = _client.auth.currentUser;
+    if (user == null) throw Exception('Not logged in');
+
+    // Get current avatar path from profile
+    final profile = await getProfile();
+    final avatarUrl = profile?['avatar_url'] as String?;
+    
+    if (avatarUrl != null && avatarUrl.isNotEmpty) {
+      // Extract storage path from URL
+      final uri = Uri.parse(avatarUrl);
+      final pathSegments = uri.pathSegments;
+      // Path format: .../avatars/<userId>/avatar.<ext>
+      final idx = pathSegments.indexOf('avatars');
+      if (idx >= 0 && idx + 2 < pathSegments.length) {
+        final storagePath = pathSegments.sublist(idx + 1).join('/');
+        try {
+          await _client.storage.from('avatars').remove([storagePath]);
+        } catch (_) {
+          // Ignore storage deletion errors
+        }
+      }
+    }
+
+    // Clear avatar_url in profile
+    await _client.from('profiles').update({
+      'avatar_url': null,
+      'updated_at': DateTime.now().toIso8601String(),
+    }).eq('id', user.id);
+
     notifyListeners();
   }
 

@@ -113,13 +113,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   height: 120,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: primaryAccent.withValues(alpha: 0.2), // Corrected alpha usage
-                        blurRadius: 40,
-                        spreadRadius: 10,
-                      ),
-                    ],
                     gradient: const RadialGradient(
                       colors: [
                         Color(0xFF2A2A2A),

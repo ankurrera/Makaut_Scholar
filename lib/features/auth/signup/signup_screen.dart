@@ -144,13 +144,6 @@ class _SignupScreenState extends State<SignupScreen> {
                   height: 100,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: primaryAccent.withValues(alpha: 0.2),
-                        blurRadius: 40,
-                        spreadRadius: 10,
-                      ),
-                    ],
                     gradient: const RadialGradient(
                       colors: [
                         Color(0xFF2A2A2A),

@@ -90,13 +90,6 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: const Color(0xFF1C1C1E),
-                      boxShadow: [
-                        BoxShadow(
-                          color: primaryAccent.withValues(alpha: 0.2),
-                          blurRadius: 30,
-                          spreadRadius: 5,
-                        ),
-                      ],
                     ),
                     child: const Icon(Icons.person_outline, size: 40, color: primaryAccent),
                   ),
