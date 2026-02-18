@@ -13,7 +13,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
-  late Animation<double> _glowAnimation;
+
 
   @override
   void initState() {
@@ -34,9 +34,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.6, curve: Curves.easeOut)),
     );
 
-    _glowAnimation = Tween<double>(begin: 10.0, end: 25.0).animate(
-      CurvedAnimation(parent: _controller, curve: const Interval(0.6, 1.0, curve: Curves.easeInOut)),
-    );
+
 
     // 3. Start Animation and Check Session
     _controller.forward();
@@ -66,12 +64,22 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     final session = authService.currentSession;
 
     if (session != null) {
-      // Check if profile exists and is complete
-      final profile = await authService.getProfile();
-      if (!mounted) return;
-      if (profile != null && profile['college_name'] != null && profile['college_name'].toString().isNotEmpty) {
-        Navigator.pushReplacementNamed(context, '/home');
-      } else {
+      try {
+        // Check if profile exists and is complete
+        final profile = await authService.getProfile();
+        if (!mounted) return;
+        if (profile != null && profile['college_name'] != null && profile['college_name'].toString().isNotEmpty) {
+          Navigator.pushReplacementNamed(context, '/home');
+        } else {
+          Navigator.pushReplacementNamed(context, '/create_profile');
+        }
+      } on NetworkException catch (_) {
+        if (!mounted) return;
+        // Redirect to home if offline
+        Navigator.pushReplacementNamed(context, '/home', arguments: {'isOffline': true});
+      } catch (e) {
+        if (!mounted) return;
+        // Other errors, maybe fallback or stay on create_profile
         Navigator.pushReplacementNamed(context, '/create_profile');
       }
     } else {
@@ -112,13 +120,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: const Color(0xFF1C1C1E),
-                          boxShadow: [
-                            BoxShadow(
-                              color: primaryAccent.withValues(alpha: 0.15),
-                              blurRadius: 40,
-                              spreadRadius: _glowAnimation.value, // Breathing effect
-                            ),
-                          ],
                         ),
                         child: const Icon(Icons.school_rounded, size: 80, color: primaryAccent),
                       ),

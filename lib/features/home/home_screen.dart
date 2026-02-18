@@ -3,7 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'dart:ui'; // For ImageFilter
+import 'dart:async';
 import '../../services/auth_service.dart';
+import '../notes/semester_screen.dart';
+import '../syllabus/syllabus_semester_screen.dart';
+import '../pyq/pyq_semester_screen.dart';
+import '../important_questions/important_questions_semester_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,14 +20,118 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   String _userName = 'Scholar';
   String? _profileName;
+  String? _profileDepartment;
+  String _greeting = '';
+  Timer? _greetingTimer;
 
-  // Animation constants
-  static const int _baseDelay = 100;
+  // ── LIGHT MODE PALETTE ──
+  final Color _bgPrimary = const Color(0xFFF4F5F7);
+  final Color _bgSecondary = const Color(0xFFFFFFFF);
+  final Color _bgTertiary = const Color(0xFFF0F1F5);
+  final Color _borderSubtle = const Color(0xFFE6E8EC);
+
+  final Color _primary500 = const Color(0xFF7C6FF6);
+  final Color _primary400 = const Color(0xFF9B90FF);
+  final Color _primary300 = const Color(0xFFC5BFFF);
+  final Color _primaryGradientStart = const Color(0xFF8E82FF);
+  final Color _primaryGradientEnd = const Color(0xFFB7AEFF);
+
+  final Color _mintSoft = const Color(0xFFCDEBE7);
+  final Color _pinkSoft = const Color(0xFFF4C7D7);
+  final Color _blueSoft = const Color(0xFFD9E6FF);
+  final Color _purpleSoft = const Color(0xFFE8E4FF);
+
+  final Color _textPrimary = const Color(0xFF1E1E1E);
+  final Color _textSecondary = const Color(0xFF8E8E93);
+  final Color _textTertiary = const Color(0xFFB4B6BD);
+
+  // ── DARK MODE PALETTE (backgrounds only) ──
+  final Color _bgPrimaryDark = const Color(0xFF0F1115);
+  final Color _bgSecondaryDark = const Color(0xFF171A21);
+  final Color _borderSubtleDark = const Color(0xFF2A2F3A);
+
+  final Color _primary500Dark = const Color(0xFF8E82FF);
+  final Color _primary300Dark = const Color(0xFF6E63E6);
+  final Color _primaryGlowDark = const Color(0xFF7C6FF6);
+
+  final Color _textPrimaryDark = const Color(0xFFF5F6FA);
+  final Color _textSecondaryDark = const Color(0xFF9AA0A6);
+  final Color _textTertiaryDark = const Color(0xFF6C727F);
+
+  // Animation delay
+  static const int _baseDelay = 200;
 
   @override
   void initState() {
     super.initState();
     _loadProfile();
+    _updateGreeting();
+    // Update greeting every 60 seconds
+    _greetingTimer = Timer.periodic(const Duration(seconds: 60), (_) => _updateGreeting());
+    
+    // Check for offline status after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkOfflineStatus();
+    });
+  }
+
+  void _checkOfflineStatus() {
+    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    if (args != null && args['isOffline'] == true) {
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Iconsax.info_circle, color: isDark ? _primary500Dark : _primary400, size: 20),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  'You are currently offline. Please review your available resources until you are back online.',
+                  style: TextStyle(
+                    fontSize: 13, 
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: isDark ? const Color(0xFF2C2C2E) : const Color(0xFF1C1C1E),
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.fromLTRB(24, 0, 24, 100),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(
+              color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.transparent,
+            ),
+          ),
+          duration: const Duration(seconds: 6),
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _greetingTimer?.cancel();
+    super.dispose();
+  }
+
+  void _updateGreeting() {
+    // Use IST (UTC+5:30)
+    final now = DateTime.now().toUtc().add(const Duration(hours: 5, minutes: 30));
+    final hour = now.hour;
+    String greeting;
+    if (hour >= 5 && hour < 12) {
+      greeting = 'Good Morning';
+    } else if (hour >= 12 && hour < 17) {
+      greeting = 'Good Afternoon';
+    } else {
+      greeting = 'Good Evening';
+    }
+    if (mounted) setState(() => _greeting = greeting);
   }
 
   Future<void> _loadProfile() async {
@@ -38,6 +147,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         } else if (user?.userMetadata?['name'] != null) {
           _userName = user!.userMetadata!['name'].split(' ').first;
         }
+        _profileDepartment = profile?['department'] as String?;
       });
     }
   }
@@ -51,531 +161,517 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    // Dynamic Palette based on Theme
-    final bgTop = isDark ? const Color(0xFF1E1E2C) : const Color(0xFFF2F2F7);
-    final bgBottom = isDark ? const Color(0xFF121212) : const Color(0xFFFFFFFF);
     
-    // Accents: Lighter for Dark Mode (pop against dark), Darker for Light Mode (readable against light)
-    final accentLavender = isDark ? const Color(0xFFD0BCFF) : const Color(0xFF6750A4);
-    final accentMint = isDark ? const Color(0xFF81C784) : const Color(0xFF2E7D32);
-    final accentPink = isDark ? const Color(0xFFF06292) : const Color(0xFFC2185B);
-    final accentBlue = isDark ? const Color(0xFF64B5F6) : const Color(0xFF1565C0);
-    final accentOrange = isDark ? const Color(0xFFFFB74D) : const Color(0xFFEF6C00);
-
-
-
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [bgTop, bgBottom],
-          stops: [0.0, 0.8],
-        ),
-      ),
-      child: Stack(
-        children: [
-          // Ambient Background Glows (Simulated)
-          Positioned(
-            top: -100, left: -50,
-            child: _buildAmbientGlow(accentLavender.withValues(alpha: 0.15)),
-          ),
-          Positioned(
-            bottom: 100, right: -50,
-            child: _buildAmbientGlow(accentBlue.withValues(alpha: 0.1)),
-          ),
-
-          // Main Scrollable Content
-          SafeArea(
-            bottom: false,
-            child: ListView(
-              physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 100), // Bottom padding for dock
-              children: [
-                // 1. Hero Section
-                StaggeredSlideFade(
-                  delayMs: 0,
-                  child: _buildHeroSection(_userName, context),
-                ),
-
-                const SizedBox(height: 32),
-
-                // 2. Feature Grid (Bento)
-                StaggeredSlideFade(
-                  delayMs: _baseDelay,
-                  child: _buildFeatureGrid(accentLavender, accentMint, accentPink, accentBlue, accentOrange),
-                ),
-
-                const SizedBox(height: 24),
-
-                // 3. Analytics Section
-                StaggeredSlideFade(
-                  delayMs: _baseDelay * 2,
-                  child: _buildAnalyticsSection(accentBlue),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAmbientGlow(Color color) {
-    return Container(
-      width: 300,
-      height: 300,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color,
-        boxShadow: [
-          BoxShadow(color: color, blurRadius: 100, spreadRadius: 50),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeroSection(String name, BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = isDark ? Colors.white : Colors.black;
-    final subTextColor = isDark ? Colors.white70 : Colors.black54;
+    
+    return Scaffold(
+      backgroundColor: isDark ? _bgPrimaryDark : _bgPrimary,
+      body: SafeArea(
+        bottom: false,
+        child: ListView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(24, 20, 24, 120), // Bottom padding for dock
+          children: [
+            // 1. Header
+            StaggeredSlideFade(
+              delayMs: 0,
+              child: _buildHeader(isDark),
+            ),
 
-    return Row(
-      children: [
-        GlassContainer(
-          padding: const EdgeInsets.all(4),
-          shape: BoxShape.circle,
-          child: const CircleAvatar(
-            radius: 24,
-            backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=11'),
-          ),
+            const SizedBox(height: 24),
+
+            // 2. Tabs
+            StaggeredSlideFade(
+              delayMs: _baseDelay,
+              child: _buildPillTabs(isDark),
+            ),
+
+            const SizedBox(height: 24),
+
+            // 3. Weekly Goal
+            StaggeredSlideFade(
+              delayMs: _baseDelay * 2,
+              child: _buildWeeklyGoal(isDark),
+            ),
+
+            const SizedBox(height: 24),
+
+            // 4. Feature Grid (Mapped to ref)
+            StaggeredSlideFade(
+              delayMs: _baseDelay * 3,
+              child: _buildFeatureGrid(isDark),
+            ),
+
+             const SizedBox(height: 24),
+
+            // 5. Progress/Analytics
+            StaggeredSlideFade(
+              delayMs: _baseDelay * 4,
+              child: _buildAnalyticsSection(isDark),
+            ),
+          ],
         ),
-        const SizedBox(width: 16),
+      ),
+    );
+  }
+
+  Widget _buildHeader(bool isDark) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Good Evening,",
-              style: TextStyle(fontSize: 14, color: subTextColor),
+              '$_greeting,',
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.w500,
+                color: isDark ? _textSecondaryDark : _textSecondary,
+                height: 1.2,
+              ),
             ),
             Text(
-              name,
+              _userName,
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 28,
                 fontWeight: FontWeight.bold,
-                color: textColor,
-                letterSpacing: 0.5,
+                color: isDark ? _textPrimaryDark : _textPrimary,
+                height: 1.2,
               ),
             ),
           ],
         ),
-        const Spacer(),
-        GlassIconButton(
-          icon: Iconsax.notification,
-          onTap: () {},
-        ),
-        const SizedBox(width: 12),
-        GlassIconButton(
-          icon: Iconsax.setting_2,
-          onTap: () => _logout(context),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFeatureGrid(Color lavender, Color mint, Color pink, Color blue, Color orange) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = isDark ? Colors.white : Colors.black;
-    final subTextColor = isDark ? Colors.white70 : Colors.black54;
-
-    return Column(
-      children: [
-        // Row 1: Notes (Large) + Stacked Cards
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Large Notes Card
-            Expanded(
-              flex: 3,
-              child: ScaleButton(
-                onTap: () {},
-                child: GlassCard(
-                  height: 220,
-                  color: lavender.withValues(alpha: 0.1),
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        right: -20, bottom: -20,
-                        child: Icon(Iconsax.book_1, size: 100, color: lavender.withValues(alpha: 0.2)),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: lavender.withValues(alpha: 0.2),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(Iconsax.book, color: lavender, size: 24),
-                            ),
-                            const Spacer(),
-                            Text(
-                              "Academic Notes",
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: textColor),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              "45 Files • Updated 2h ago",
-                              style: TextStyle(fontSize: 12, color: subTextColor),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+        GestureDetector(
+          onTap: () => Navigator.pushNamed(context, '/profile'),
+          child: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: isDark 
+                  ? [_primary500Dark, _primary300Dark]
+                  : [_primaryGradientStart, _primaryGradientEnd],
+              ),
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Text(
+                _userName.isNotEmpty ? _userName[0].toUpperCase() : 'S',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
-            const SizedBox(width: 16),
-            // Stacked Cards
-            Expanded(
-              flex: 2,
-              child: Column(
-                children: [
-                  // PYQ
-                  _buildSmallGlassCard(
-                    title: "PYQ Bank",
-                    icon: Iconsax.document_text,
-                    color: mint,
-                    height: 100,
-                  ),
-                  const SizedBox(height: 16),
-                  // Important
-                  _buildSmallGlassCard(
-                    title: "Exam Focus",
-                    icon: Iconsax.star,
-                    color: pink,
-                    height: 104, // To align heights (220 total - 16 gap = 204 / 2 = 102~104)
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-
-        const SizedBox(height: 16),
-
-        // Row 2: Syllabus (New Button)
-        ScaleButton(
-          onTap: () {},
-          child: GlassCard(
-            height: 80,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
-              child: Row(
-                children: [
-                  Container(
-                    width: 40, height: 40,
-                    decoration: BoxDecoration(
-                      color: orange.withValues(alpha: 0.2),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(Iconsax.book_saved, color: orange, size: 24),
-                  ),
-                  const SizedBox(width: 16),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Syllabus",
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: textColor),
-                      ),
-                      Text(
-                        "View Course Structure",
-                        style: TextStyle(fontSize: 12, color: subTextColor),
-                      ),
-                    ],
-                  ),
-                  const Spacer(),
-                  Icon(Iconsax.arrow_right_3, color: isDark ? Colors.white54 : Colors.black45, size: 24),
-                ],
-              ),
-            ),
-          ),
-        ),
-
-        const SizedBox(height: 16),
-
-        // Row 3: Progress
-        ScaleButton(
-          onTap: () {},
-          child: GlassCard(
-            height: 80,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 40, height: 40,
-                    child: CircularProgressIndicator(
-                      value: 0.65,
-                      strokeWidth: 4,
-                      backgroundColor: Colors.grey.withValues(alpha: 0.1),
-                      color: blue,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Continue Studying",
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: textColor),
-                      ),
-                      Text(
-                        "DBMS Unit 3 • 65% Done",
-                        style: TextStyle(fontSize: 12, color: blue),
-                      ),
-                    ],
-                  ),
-                  const Spacer(),
-                  Icon(Iconsax.play_circle, color: blue, size: 32),
-                ],
-              ),
-            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildSmallGlassCard({required String title, required IconData icon, required Color color, required double height}) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = isDark ? Colors.white : Colors.black;
+  Widget _buildPillTabs(bool isDark) {
+    return Row(
+      children: [
+        _buildPillTab("Today", true, isDark),
+        const SizedBox(width: 12),
+        _buildPillTab("Learning plan", false, isDark),
+        const SizedBox(width: 12),
+        _buildPillTab("Weekly plan", false, isDark),
+      ],
+    );
+  }
 
-    return ScaleButton(
-      onTap: () {},
-      child: GlassCard(
-        height: height,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: color, size: 28),
-              const Spacer(),
-              Text(
-                title,
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: textColor),
-              ),
-            ],
-          ),
+  Widget _buildPillTab(String text, bool isSelected, bool isDark) {
+    final activeColor = isDark ? _primary500Dark : _primary500;
+    final inactiveColor = isDark ? _bgSecondaryDark : _bgSecondary;
+    final textColor = isDark ? _textSecondaryDark : _textSecondary;
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      decoration: BoxDecoration(
+        color: isSelected ? activeColor : inactiveColor,
+        borderRadius: BorderRadius.circular(30),
+
+        border: isSelected ? null : Border.all(color: isDark ? _borderSubtleDark : _borderSubtle),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: isSelected ? (isDark ? _textPrimaryDark : Colors.white) : textColor,
+          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+          fontSize: 14,
         ),
       ),
     );
   }
 
-  Widget _buildAnalyticsSection(Color accentColor) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = isDark ? Colors.white : Colors.black;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4),
-          child: Text(
-            "Weekly Activity",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: textColor),
+  Widget _buildWeeklyGoal(bool isDark) {
+    return SoftCard(
+      onTap: () {},
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Row(
+        children: [
+          Icon(Iconsax.flag, color: (isDark ? _primary500Dark : _primary500).withValues(alpha: 0.6), size: 24),
+          const SizedBox(width: 16),
+          Text(
+            "Set your weekly goal!",
+            style: TextStyle(color: isDark ? _textSecondaryDark : _textSecondary, fontSize: 15),
           ),
-        ),
-        const SizedBox(height: 12),
-        GlassCard(
-          height: 140,
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                // Circular Chart
-                Expanded(
-                  flex: 2,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          SizedBox(
-                            width: 80, height: 80,
-                            child: CircularProgressIndicator(
-                              value: 0.75,
-                              strokeWidth: 8,
-                              strokeCap: StrokeCap.round,
-                                backgroundColor: isDark ? Colors.grey.withValues(alpha: 0.1) : Colors.grey.withValues(alpha: 0.2),
-                              color: accentColor,
-                            ),
-                          ),
-                          Text(
-                            "75%",
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: accentColor),
-                          ),
-                        ],
+          const Spacer(),
+          Icon(Iconsax.arrow_right_3, color: isDark ? _textSecondaryDark : _textSecondary, size: 20),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeatureGrid(bool isDark) {
+    // In the reference image:
+    // "Empathy Writing" (Hero) is Light/White even in Dark Mode.
+    // "Courses" (Pastels) are Light Pastel in Dark Mode.
+    // This creates high contrast against the dark background.
+    
+    return SizedBox(
+      height: 460, // Increased height for 3 items
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Left Column: Academic Notes (Big Hero Card)
+          Expanded(
+            flex: 5,
+            child: ScaleButton(
+              onTap: () {
+                final dept = _profileDepartment ?? 'CSE';
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => SemesterScreen(department: dept),
+                  ),
+                );
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: _purpleSoft,
+                  borderRadius: BorderRadius.circular(32),
+                ),
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                     Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: _bgSecondary.withValues(alpha: 0.65),
+                        shape: BoxShape.circle,
                       ),
-                    ],
+                      child: Icon(Iconsax.book, color: _primary500, size: 24),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      "Academic\nNotes",
+                      style: TextStyle(
+                        fontSize: 22, 
+                        fontWeight: FontWeight.bold, 
+                        color: _textPrimary,
+                        height: 1.2
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      "Craft words that connect emotionally with users",
+                      style: TextStyle(fontSize: 14, color: _textPrimary.withValues(alpha: 0.6)),
+                    ),
+                    const Spacer(),
+                    Row(
+                      children: [
+                         Column(
+                           crossAxisAlignment: CrossAxisAlignment.start,
+                           children: [
+                              Text("Time", style: TextStyle(fontSize: 12, color: _textSecondary)),
+                              Text("10:30am", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: _textPrimary)),
+                           ],
+                         ),
+                         const Spacer(),
+                         Container(
+                           padding: const EdgeInsets.all(12),
+                           decoration: BoxDecoration(
+                             color: _primary500,
+                             shape: BoxShape.circle,
+                           ),
+                           child: Icon(Icons.arrow_outward, color: Colors.white, size: 20),
+                         )
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ),
+          
+          const SizedBox(width: 16),
+
+          // Right Column: Stacked Cards
+          Expanded(
+            flex: 4,
+            child: Column(
+              children: [
+                // PYQ Bank (Blue)
+                Expanded(
+                  child: PastelCard(
+                    color: _blueSoft,
+                    icon: Iconsax.archive_book,
+                    title: "PYQ Bank",
+                    subtitle: "2018-24",
+                    onTap: () {
+                      final dept = _profileDepartment ?? 'CSE';
+                      Navigator.push(context, MaterialPageRoute(
+                        builder: (_) => PyqSemesterScreen(department: dept),
+                      ));
+                    },
                   ),
                 ),
-                // Bar Chart (Simulated)
+                const SizedBox(height: 16),
+                // Exam Focus (Pink)
                 Expanded(
-                  flex: 3,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      _buildBar(0.4, accentColor),
-                      _buildBar(0.6, accentColor),
-                      _buildBar(0.3, accentColor),
-                      _buildBar(0.9, accentColor),
-                      _buildBar(0.5, accentColor),
-                      _buildBar(0.2, accentColor),
-                      _buildBar(0.7, accentColor),
-                    ],
+                  child: PastelCard(
+                    color: _pinkSoft,
+                    icon: Iconsax.flash,
+                    title: "Exam Focus",
+                    subtitle: "Oct 16",
+                    onTap: () {
+                      final dept = _profileDepartment ?? 'CSE';
+                      Navigator.push(context, MaterialPageRoute(
+                        builder: (_) => ImportantQuestionsSemesterScreen(department: dept),
+                      ));
+                    },
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Syllabus (Green)
+                Expanded(
+                  child: PastelCard(
+                    color: _mintSoft,
+                    icon: Iconsax.book_1,
+                    title: "Syllabus",
+                    subtitle: "PDF",
+                    onTap: () {
+                      final dept = _profileDepartment ?? 'CSE';
+                      Navigator.push(context, MaterialPageRoute(
+                        builder: (_) => SyllabusSemesterScreen(department: dept),
+                      ));
+                    },
                   ),
                 ),
               ],
             ),
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBar(double heightFactor, Color color) {
-    return FractionallySizedBox(
-      heightFactor: heightFactor * 0.8, // Scale down to fit
-      child: Container(
-        width: 6,
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.6),
-          borderRadius: BorderRadius.circular(3),
-        ),
+        ],
       ),
     );
   }
+
+  Widget _buildAnalyticsSection(bool isDark) {
+     return SoftCard(
+       onTap: () {},
+       padding: const EdgeInsets.all(24),
+       child: Column(
+         crossAxisAlignment: CrossAxisAlignment.start,
+         children: [
+           Row(
+             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+             children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Study Day 6", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _textPrimary)),
+                    const SizedBox(height: 4),
+                    Text("October 2025", style: TextStyle(fontSize: 12, color: _textSecondary)),
+                  ],
+                ),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: _primary500,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Iconsax.chart_2, color: Colors.white, size: 20),
+                )
+             ],
+           ),
+           const SizedBox(height: 24),
+           // Simulated Chart
+           Row(
+             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+             crossAxisAlignment: CrossAxisAlignment.end,
+             children: [
+               _buildChartBar("Sun", 0.4, false, isDark),
+               _buildChartBar("Mon", 0.3, false, isDark),
+               _buildChartBar("Tue", 0.6, false, isDark),
+               _buildChartBar("Wed", 0.8, false, isDark),
+               _buildChartBar("Thu", 0.5, false, isDark),
+               _buildChartBar("Sat", 0.9, true, isDark), // Active
+             ],
+           )
+         ],
+       ),
+     );
+  }
+
+  Widget _buildChartBar(String label, double heightPct, bool isActive, bool isDark) {
+     return Column(
+       children: [
+         isActive 
+         ? Container(
+             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+             margin: const EdgeInsets.only(bottom: 8),
+              decoration: BoxDecoration(color: _textPrimary, borderRadius: BorderRadius.circular(12)),
+              child: Text(label, style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+            )
+          : const SizedBox(),
+          
+          Container(
+            width: 40,
+            height: 120 * heightPct,
+            decoration: BoxDecoration(
+              color: isActive ? _primary500 : Colors.transparent,
+               borderRadius: BorderRadius.circular(20),
+               border: isActive ? null : Border.all(color: _borderSubtle, style: BorderStyle.none), 
+            ),
+            child: isActive ? null : CustomPaint(painter: DottedBackgroundPainter()),
+          ),
+          
+          if (!isActive)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(label, style: TextStyle(color: _textSecondary, fontSize: 12)),
+            ),
+       ],
+     );
+  }
+   
+  // Helper Color Getter (kept for backwards compat)
+  Color get _accentDarkPurple => _primary500;
 }
 
-// --- Reusable Glass Widgets ---
 
-class GlassCard extends StatelessWidget {
-  final double? height;
-  final double? width;
+// --- Reusable Widgets ---
+
+class SoftCard extends StatelessWidget {
   final Widget child;
-  final Color? color;
   final EdgeInsetsGeometry? padding;
-
-  const GlassCard({
-    super.key,
-    this.height,
-    this.width,
-    required this.child,
-    this.color, this.padding
-  });
+  final VoidCallback? onTap;
+  
+  const SoftCard({super.key, required this.child, this.padding, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return GlassContainer(
-      height: height,
-      width: width,
-      color: color,
+    
+    
+    Widget content = Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFFFFF),
+        borderRadius: BorderRadius.circular(32),
+
+      ),
       child: child,
     );
+
+    if (onTap != null) {
+      return ScaleButton(onTap: onTap!, child: content);
+    }
+    return content;
   }
 }
 
-class GlassContainer extends StatelessWidget {
-  final double? height;
-  final double? width;
-  final Widget child;
-  final EdgeInsetsGeometry? padding;
-  final BoxShape shape;
-  final Color? color;
+class PastelCard extends StatelessWidget {
+  final Color color;
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback? onTap;
 
-  const GlassContainer({
-    super.key,
-    this.height,
-    this.width,
-    required this.child,
-    this.padding,
-    this.shape = BoxShape.rectangle,
-    this.color,
+  const PastelCard({
+    super.key, 
+    required this.color, 
+    required this.icon, 
+    required this.title, 
+    required this.subtitle,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: shape == BoxShape.circle ? BorderRadius.zero : BorderRadius.circular(32),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25), // Heavy Apple-style Blur
-        child: Container(
-          height: height,
-          width: width,
-          padding: padding,
-          decoration: BoxDecoration(
-            color: color ?? (Theme.of(context).brightness == Brightness.dark 
-                ? Colors.white.withValues(alpha: 0.12) 
-                : Colors.white.withValues(alpha: 0.85)), // More solid White for Light Mode to pop against grey/white bg
-            shape: shape,
-            borderRadius: shape == BoxShape.circle ? null : BorderRadius.circular(32),
-            border: Border.all(
-              color: Theme.of(context).brightness == Brightness.dark 
-                  ? Colors.white.withValues(alpha: 0.2) 
-                  : Colors.black.withValues(alpha: 0.1), // Slightly darker border for Light Mode
-              width: 0.5,
-            ),
-            boxShadow: Theme.of(context).brightness == Brightness.dark ? [] : [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05), // Subtle shadow for lift
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-                spreadRadius: 0,
-              ),
+    
+    Widget content = Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(32),
+
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+               Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.65),
+                    shape: BoxShape.circle
+                  ),
+                  child: Icon(icon, color: const Color(0xFF1E1E1E), size: 18),
+               ),
             ],
           ),
-          child: child,
-        ),
+          const Spacer(),
+          Text(
+            title, 
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1E1E1E))
+          ),
+           Text(
+            subtitle, 
+            style: const TextStyle(fontSize: 12, color: Color(0xFF8E8E93))
+          ),
+        ],
       ),
     );
+
+    if (onTap != null) {
+      return ScaleButton(onTap: onTap!, child: content);
+    }
+    return content;
   }
 }
 
-class GlassIconButton extends StatelessWidget {
+class SoftIconButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
 
-  const GlassIconButton({super.key, required this.icon, required this.onTap});
+  const SoftIconButton({super.key, required this.icon, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return ScaleButton(
-      onTap: onTap,
-      child: GlassContainer(
-        padding: const EdgeInsets.all(12),
-        shape: BoxShape.circle,
-        child: Icon(icon, color: isDark ? Colors.white : Colors.black, size: 20),
-      ),
-    );
+          return ScaleButton(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFFFFF),
+            shape: BoxShape.circle,
+
+          ),
+          child: Icon(icon, color: const Color(0xFF1E1E1E), size: 24),
+        ),
+     );
   }
 }
-
-
-// --- Animations (Reused from Previous) ---
 
 class ScaleButton extends StatefulWidget {
   final Widget child;
@@ -594,8 +690,8 @@ class _ScaleButtonState extends State<ScaleButton> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 120));
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.97).animate(
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 100));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
   }
@@ -620,6 +716,26 @@ class _ScaleButtonState extends State<ScaleButton> with SingleTickerProviderStat
   }
 }
 
+class DottedBackgroundPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    var paint = Paint()
+      ..color = Colors.grey.withValues(alpha: 0.2)
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
+      
+    // Draw simple pattern
+    final double spacing = 4;
+    for (double i = 0; i < size.width + size.height; i += spacing) {
+      canvas.drawLine(Offset(0, i), Offset(i, 0), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
+// Keep the animation widget
 class StaggeredSlideFade extends StatefulWidget {
   final Widget child;
   final int delayMs;
@@ -638,9 +754,9 @@ class _StaggeredSlideFadeState extends State<StaggeredSlideFade> with SingleTick
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 600)); // Slower, smoother
     _opacity = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-    _slide = Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    _slide = Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
 
     Future.delayed(Duration(milliseconds: widget.delayMs), () {
       if (mounted) _controller.forward();
