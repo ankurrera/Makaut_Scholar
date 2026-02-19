@@ -676,7 +676,7 @@
             <div class="form-grid">
                 <div class="form-group">
                     <label>Department</label>
-                    <select id="noteDept">
+                    <select id="noteDept" onchange="loadSubjects('noteDept', 'noteSem', 'noteSubject')">
                         <option value="">Select</option>
                         <option>CSE</option>
                         <option>ECE</option>
@@ -688,7 +688,7 @@
                 </div>
                 <div class="form-group">
                     <label>Semester</label>
-                    <select id="noteSem">
+                    <select id="noteSem" onchange="loadSubjects('noteDept', 'noteSem', 'noteSubject')">
                         <option value="">Select</option>
                         <option value="1">Semester 1</option>
                         <option value="2">Semester 2</option>
@@ -702,7 +702,9 @@
                 </div>
                 <div class="form-group">
                     <label>Subject</label>
-                    <input type="text" id="noteSubject" placeholder="e.g. Data Structures" />
+                    <select id="noteSubject">
+                        <option value="">Select Dept & Sem first</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>Unit</label>
@@ -831,7 +833,7 @@
             <div class="form-grid">
                 <div class="form-group">
                     <label>Department</label>
-                    <select id="pyqDept">
+                    <select id="pyqDept" onchange="loadSubjects('pyqDept', 'pyqSem', 'pyqSubject')">
                         <option value="">Select</option>
                         <option>CSE</option>
                         <option>ECE</option>
@@ -843,7 +845,7 @@
                 </div>
                 <div class="form-group">
                     <label>Semester</label>
-                    <select id="pyqSem">
+                    <select id="pyqSem" onchange="loadSubjects('pyqDept', 'pyqSem', 'pyqSubject')">
                         <option value="">Select</option>
                         <option value="1">Semester 1</option>
                         <option value="2">Semester 2</option>
@@ -857,7 +859,9 @@
                 </div>
                 <div class="form-group">
                     <label>Subject</label>
-                    <input type="text" id="pyqSubject" placeholder="e.g. Operating Systems" />
+                    <select id="pyqSubject">
+                        <option value="">Select Dept & Sem first</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>Year</label>
@@ -915,7 +919,7 @@
             <div class="form-grid">
                 <div class="form-group">
                     <label>Department</label>
-                    <select id="impDept">
+                    <select id="impDept" onchange="loadSubjects('impDept', 'impSem', 'impSubject')">
                         <option value="">Select</option>
                         <option>CSE</option>
                         <option>ECE</option>
@@ -927,7 +931,7 @@
                 </div>
                 <div class="form-group">
                     <label>Semester</label>
-                    <select id="impSem">
+                    <select id="impSem" onchange="loadSubjects('impDept', 'impSem', 'impSubject')">
                         <option value="">Select</option>
                         <option value="1">Semester 1</option>
                         <option value="2">Semester 2</option>
@@ -941,7 +945,9 @@
                 </div>
                 <div class="form-group">
                     <label>Subject</label>
-                    <input type="text" id="impSubject" placeholder="e.g. Computer Networks" />
+                    <select id="impSubject">
+                        <option value="">Select Dept & Sem first</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>Title</label>
@@ -1091,6 +1097,53 @@
         initFileDrop('sylFileDrop', 'sylFileInput', 'sylFileName');
         initFileDrop('pyqFileDrop', 'pyqFileInput', 'pyqFileName');
         initFileDrop('impFileDrop', 'impFileInput', 'impFileName');
+
+        // ══════════════════════════════════════════
+        //  SUBJECTS – Load for Dropdown
+        // ══════════════════════════════════════════
+        async function loadSubjects(deptId, semId, targetId) {
+            const dept = document.getElementById(deptId).value;
+            const sem = document.getElementById(semId).value;
+            const target = document.getElementById(targetId);
+
+            target.innerHTML = '<option value="">Select Subject</option>';
+
+            if (!dept || !sem) return;
+
+            target.innerHTML = '<option value="">Loading...</option>';
+
+            try {
+                const { data, error } = await sb
+                    .from('department_subjects')
+                    .select('subject')
+                    .eq('department', dept)
+                    .eq('semester', parseInt(sem))
+                    .order('subject');
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    const filtered = data.filter(s => {
+                        const sub = s.subject.toLowerCase();
+                        // Filter out "laboratory" and "lab" (as a whole word)
+                        return !sub.includes('laboratory') && !/\blab\b/.test(sub);
+                    });
+
+                    if (filtered.length > 0) {
+                        target.innerHTML = '<option value="">Select Subject</option>' +
+                            filtered.map(s => `<option value="${esc(s.subject)}">${esc(s.subject)}</option>`).join('');
+                    } else {
+                        target.innerHTML = '<option value="">No matching subjects found</option>';
+                    }
+                } else {
+                    target.innerHTML = '<option value="">No subjects found</option>';
+                }
+            } catch (e) {
+                console.error('Error loading subjects:', e);
+                target.innerHTML = '<option value="">Error loading subjects</option>';
+                toast('Error loading subjects: ' + e.message, 'error');
+            }
+        }
 
         // ══════════════════════════════════════════
         //  NOTES – Upload
