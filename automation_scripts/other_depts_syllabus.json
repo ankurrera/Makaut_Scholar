@@ -1,0 +1,1698 @@
+{
+  "IT": {
+    "1": [
+      {
+        "paper_id": 558,
+        "subject": "Physics-I"
+      },
+      {
+        "paper_id": 560,
+        "subject": "Mathematics - IA"
+      },
+      {
+        "paper_id": 562,
+        "subject": "Basic Electrical Engineering"
+      },
+      {
+        "paper_id": 563,
+        "subject": "Physics-I Laboratory"
+      },
+      {
+        "paper_id": 565,
+        "subject": "Basic Electrical Engineering Laboratory"
+      },
+      {
+        "paper_id": 567,
+        "subject": "Workshop/Manufacturing Practices"
+      }
+    ],
+    "2": [
+      {
+        "paper_id": 547,
+        "subject": "Chemistry-I"
+      },
+      {
+        "paper_id": 548,
+        "subject": "Mathematics-IIA"
+      },
+      {
+        "paper_id": 550,
+        "subject": "Programming for Problem Solving"
+      },
+      {
+        "paper_id": 551,
+        "subject": "English"
+      },
+      {
+        "paper_id": 553,
+        "subject": "Chemistry-I Laboratory"
+      },
+      {
+        "paper_id": 554,
+        "subject": "Programming for Problem Solving"
+      },
+      {
+        "paper_id": 555,
+        "subject": "Engineering Graphics & Design"
+      },
+      {
+        "paper_id": 557,
+        "subject": "Language Laboratory"
+      }
+    ],
+    "3": [
+      {
+        "paper_id": 95,
+        "subject": "Computer Organisation"
+      },
+      {
+        "paper_id": 106,
+        "subject": "Data Structure & Algorithms"
+      },
+      {
+        "paper_id": 139,
+        "subject": "Analog & Digital Electronics"
+      },
+      {
+        "paper_id": 226,
+        "subject": "Analog & Digital Electronics [Lab]"
+      },
+      {
+        "paper_id": 227,
+        "subject": "Data Structure & Algorithms [Lab]"
+      },
+      {
+        "paper_id": 228,
+        "subject": "Computer Organisation [Lab]"
+      },
+      {
+        "paper_id": 568,
+        "subject": "Mathematics-III (Differential Calculus)"
+      },
+      {
+        "paper_id": 569,
+        "subject": "Economics for Engineers (Humanities-II)"
+      },
+      {
+        "paper_id": 570,
+        "subject": "IT Workshop (Sci Lab / MATLAB / Python / R)"
+      }
+    ],
+    "4": [
+      {
+        "paper_id": 14,
+        "subject": "Formal Language & Automata Theory"
+      },
+      {
+        "paper_id": 16,
+        "subject": "Computer Architecture"
+      },
+      {
+        "paper_id": 614,
+        "subject": "Discrete Mathematics"
+      },
+      {
+        "paper_id": 615,
+        "subject": "Design & Analysis of Algorithms"
+      },
+      {
+        "paper_id": 616,
+        "subject": "Biology"
+      },
+      {
+        "paper_id": 617,
+        "subject": "Environmental Sciences"
+      },
+      {
+        "paper_id": 618,
+        "subject": "Design & Analysis of Algorithms [Lab]"
+      },
+      {
+        "paper_id": 619,
+        "subject": "Compter Architecture [Lab]"
+      }
+    ],
+    "5": [
+      {
+        "paper_id": 298,
+        "subject": "Object-Oriented Programming"
+      },
+      {
+        "paper_id": 667,
+        "subject": "Operating Systems"
+      },
+      {
+        "paper_id": 668,
+        "subject": "Compiler Design"
+      },
+      {
+        "paper_id": 669,
+        "subject": "Software Engineering"
+      },
+      {
+        "paper_id": 670,
+        "subject": "Introduction to Industrial Management (Humanities III)"
+      },
+      {
+        "paper_id": 671,
+        "subject": "Theory of Computation"
+      },
+      {
+        "paper_id": 672,
+        "subject": "Artificial Intelligence"
+      },
+      {
+        "paper_id": 673,
+        "subject": "Advanced Computer Architecture"
+      },
+      {
+        "paper_id": 674,
+        "subject": "Computer Graphics"
+      },
+      {
+        "paper_id": 675,
+        "subject": "Constitution of India/ Essence of Indian Knowledge Tradition"
+      },
+      {
+        "paper_id": 676,
+        "subject": "Software Engineering"
+      },
+      {
+        "paper_id": 677,
+        "subject": "Operating Systems"
+      },
+      {
+        "paper_id": 678,
+        "subject": "Object Oriented Programming"
+      }
+    ],
+    "6": [
+      {
+        "paper_id": 19,
+        "subject": "Computer Networks"
+      },
+      {
+        "paper_id": 351,
+        "subject": "Database Management System"
+      },
+      {
+        "paper_id": 734,
+        "subject": "Advanced Algorithms"
+      },
+      {
+        "paper_id": 735,
+        "subject": "Distributed Systems"
+      },
+      {
+        "paper_id": 736,
+        "subject": "Signals & Systems"
+      },
+      {
+        "paper_id": 737,
+        "subject": "Image Processing"
+      },
+      {
+        "paper_id": 738,
+        "subject": "Parallel and Distributed Algorithms"
+      },
+      {
+        "paper_id": 739,
+        "subject": "Data Warehousing and Data Mining"
+      },
+      {
+        "paper_id": 740,
+        "subject": "Human Computer Interaction"
+      },
+      {
+        "paper_id": 741,
+        "subject": "Pattern Recognition"
+      },
+      {
+        "paper_id": 742,
+        "subject": "Numerical Methods"
+      },
+      {
+        "paper_id": 743,
+        "subject": "Human Resource Development and Organizational Behavior"
+      },
+      {
+        "paper_id": 744,
+        "subject": "Research Methodology"
+      },
+      {
+        "paper_id": 745,
+        "subject": "Database Management System Lab"
+      },
+      {
+        "paper_id": 746,
+        "subject": "Computer Networks Lab"
+      }
+    ],
+    "7": [
+      {
+        "paper_id": 145,
+        "subject": "Internet Technology"
+      },
+      {
+        "paper_id": 433,
+        "subject": "Multimedia"
+      },
+      {
+        "paper_id": 434,
+        "subject": "E-Commerce"
+      },
+      {
+        "paper_id": 435,
+        "subject": "Soft Computing"
+      },
+      {
+        "paper_id": 436,
+        "subject": "Image Processing"
+      },
+      {
+        "paper_id": 437,
+        "subject": "Distributed Operating System"
+      },
+      {
+        "paper_id": 438,
+        "subject": "Cloud Computing"
+      },
+      {
+        "paper_id": 439,
+        "subject": "Data Warehousing and Data Mining"
+      },
+      {
+        "paper_id": 440,
+        "subject": "Sensor Networks"
+      },
+      {
+        "paper_id": 441,
+        "subject": "Mobile Computing"
+      },
+      {
+        "paper_id": 442,
+        "subject": "Bio Informatics"
+      },
+      {
+        "paper_id": 443,
+        "subject": "Control System"
+      },
+      {
+        "paper_id": 444,
+        "subject": "Modelling & Simulation"
+      },
+      {
+        "paper_id": 445,
+        "subject": "Microelectronics & VLSI Design"
+      },
+      {
+        "paper_id": 446,
+        "subject": "Advanced Data Communication & Coding"
+      }
+    ],
+    "8": [
+      {
+        "paper_id": 495,
+        "subject": "Organisational Behaviour"
+      },
+      {
+        "paper_id": 496,
+        "subject": "Project Management"
+      },
+      {
+        "paper_id": 509,
+        "subject": "Advanced Computer Architecture"
+      },
+      {
+        "paper_id": 510,
+        "subject": "Parallel Computing"
+      },
+      {
+        "paper_id": 511,
+        "subject": "Natural Language Processing"
+      },
+      {
+        "paper_id": 512,
+        "subject": "Cryptography & Network Security"
+      },
+      {
+        "paper_id": 513,
+        "subject": "Technology Management"
+      },
+      {
+        "paper_id": 514,
+        "subject": "Cyber Law & Security Policy"
+      },
+      {
+        "paper_id": 515,
+        "subject": "Optical Networking"
+      },
+      {
+        "paper_id": 516,
+        "subject": "Low Power Circuits & Systems"
+      },
+      {
+        "paper_id": 517,
+        "subject": "Business Analytics"
+      },
+      {
+        "paper_id": 518,
+        "subject": "Robotics"
+      },
+      {
+        "paper_id": 519,
+        "subject": "Design Lab / Industrial problem related practical training"
+      },
+      {
+        "paper_id": 520,
+        "subject": "Project-2"
+      },
+      {
+        "paper_id": 521,
+        "subject": "Grand Viva"
+      }
+    ]
+  },
+  "ECE": {
+    "1": [
+      {
+        "paper_id": 559,
+        "subject": "Chemistry-I"
+      },
+      {
+        "paper_id": 561,
+        "subject": "Mathematics - IB"
+      },
+      {
+        "paper_id": 562,
+        "subject": "Basic Electrical Engineering"
+      },
+      {
+        "paper_id": 564,
+        "subject": "Chemistry-I Laboratory"
+      },
+      {
+        "paper_id": 565,
+        "subject": "Basic Electrical Engineering Laboratory"
+      },
+      {
+        "paper_id": 566,
+        "subject": "Engineering Graphics & Design"
+      }
+    ],
+    "2": [
+      {
+        "paper_id": 546,
+        "subject": "Physics-I"
+      },
+      {
+        "paper_id": 549,
+        "subject": "Mathematics-IIB"
+      },
+      {
+        "paper_id": 550,
+        "subject": "Programming for Problem Solving"
+      },
+      {
+        "paper_id": 551,
+        "subject": "English"
+      },
+      {
+        "paper_id": 552,
+        "subject": "Physics-I Laboratory"
+      },
+      {
+        "paper_id": 554,
+        "subject": "Programming for Problem Solving"
+      },
+      {
+        "paper_id": 556,
+        "subject": "Workshop/Manufacturing Practices"
+      },
+      {
+        "paper_id": 557,
+        "subject": "Language Laboratory"
+      }
+    ],
+    "3": [
+      {
+        "paper_id": 108,
+        "subject": "Network Theory"
+      },
+      {
+        "paper_id": 230,
+        "subject": "Electronic Devices"
+      },
+      {
+        "paper_id": 231,
+        "subject": "Signals & Systems"
+      },
+      {
+        "paper_id": 571,
+        "subject": "Digital System Design"
+      },
+      {
+        "paper_id": 572,
+        "subject": "Data Structure & Algorithm (ES)"
+      },
+      {
+        "paper_id": 573,
+        "subject": "Mathematics III (Probability & Statistics)"
+      },
+      {
+        "paper_id": 574,
+        "subject": "Digital System Design Lab"
+      },
+      {
+        "paper_id": 575,
+        "subject": "Electronic Devices Lab"
+      },
+      {
+        "paper_id": 576,
+        "subject": "Data Structure Lab"
+      },
+      {
+        "paper_id": 577,
+        "subject": "Environmental Science"
+      }
+    ],
+    "4": [
+      {
+        "paper_id": 620,
+        "subject": "Analog Communication"
+      },
+      {
+        "paper_id": 621,
+        "subject": "Analog Electronic Circuits"
+      },
+      {
+        "paper_id": 622,
+        "subject": "Microprocessor & Microcontrollers"
+      },
+      {
+        "paper_id": 623,
+        "subject": "Design and Analysis of Algorithm (ES)"
+      },
+      {
+        "paper_id": 624,
+        "subject": "Numerical Methods (BS)"
+      },
+      {
+        "paper_id": 625,
+        "subject": "Biology for Engineers"
+      },
+      {
+        "paper_id": 626,
+        "subject": "Analog Communication Lab"
+      },
+      {
+        "paper_id": 627,
+        "subject": "Analog Electronic Circuits Lab"
+      },
+      {
+        "paper_id": 628,
+        "subject": "Microprocessor & Microcontrollers Lab"
+      },
+      {
+        "paper_id": 629,
+        "subject": "Numerical Methods Lab"
+      },
+      {
+        "paper_id": 630,
+        "subject": "Soft Skill Development Lab"
+      }
+    ],
+    "5": [
+      {
+        "paper_id": 305,
+        "subject": "Computer Architecture"
+      },
+      {
+        "paper_id": 679,
+        "subject": "Electromagnetic Waves"
+      },
+      {
+        "paper_id": 680,
+        "subject": "Digital Communication & Stochastic Process"
+      },
+      {
+        "paper_id": 681,
+        "subject": "Digital Signal Processing"
+      },
+      {
+        "paper_id": 682,
+        "subject": "Nano Electronics"
+      },
+      {
+        "paper_id": 683,
+        "subject": "Speech and Audio Processing"
+      },
+      {
+        "paper_id": 684,
+        "subject": "Power Electronics"
+      },
+      {
+        "paper_id": 685,
+        "subject": "Scientific Computing"
+      },
+      {
+        "paper_id": 686,
+        "subject": "Soft Skill and Interpersonal Communication"
+      },
+      {
+        "paper_id": 687,
+        "subject": "Cyber Law & Intellectual Property Rights"
+      },
+      {
+        "paper_id": 688,
+        "subject": "Human Resource Management"
+      },
+      {
+        "paper_id": 689,
+        "subject": "Effective Technical Communication"
+      },
+      {
+        "paper_id": 690,
+        "subject": "Electromagnetic Wave Lab"
+      },
+      {
+        "paper_id": 691,
+        "subject": "Digital Communication Lab."
+      },
+      {
+        "paper_id": 692,
+        "subject": "Digital Signal Processing Lab."
+      }
+    ],
+    "6": [
+      {
+        "paper_id": 747,
+        "subject": "Control System and Instrumentation"
+      },
+      {
+        "paper_id": 748,
+        "subject": "Computer Network"
+      },
+      {
+        "paper_id": 749,
+        "subject": "Economics for Engineers"
+      },
+      {
+        "paper_id": 750,
+        "subject": "Introduction to MEMS"
+      },
+      {
+        "paper_id": 751,
+        "subject": "Bio-Medical Electronics"
+      },
+      {
+        "paper_id": 752,
+        "subject": "CMOS VLSI Design"
+      },
+      {
+        "paper_id": 753,
+        "subject": "Information Theory and Coding"
+      },
+      {
+        "paper_id": 754,
+        "subject": "Electronic Measurement & Measuring Instruments"
+      },
+      {
+        "paper_id": 755,
+        "subject": "Operating System"
+      },
+      {
+        "paper_id": 756,
+        "subject": "Object Oriented Programming"
+      },
+      {
+        "paper_id": 757,
+        "subject": "Computer Network Lab"
+      },
+      {
+        "paper_id": 758,
+        "subject": "Control and Instrumentation Laboratory"
+      },
+      {
+        "paper_id": 759,
+        "subject": "Mini Project/ Electronic Design Workshop"
+      },
+      {
+        "paper_id": 760,
+        "subject": "Universal Human Values"
+      }
+    ],
+    "7": [
+      {
+        "paper_id": 116,
+        "subject": "RF & Microwave Engineering"
+      },
+      {
+        "paper_id": 117,
+        "subject": "Microelectronics & VLSI Designs"
+      },
+      {
+        "paper_id": 119,
+        "subject": "Database Management System"
+      },
+      {
+        "paper_id": 423,
+        "subject": "Wireless Communication & Network"
+      },
+      {
+        "paper_id": 424,
+        "subject": "Optical Communication & Network"
+      },
+      {
+        "paper_id": 425,
+        "subject": "Computer Networks"
+      },
+      {
+        "paper_id": 426,
+        "subject": "FPGA & Reconfigurable Computing"
+      },
+      {
+        "paper_id": 427,
+        "subject": "Radar Engineering"
+      },
+      {
+        "paper_id": 428,
+        "subject": "Embedded Systems"
+      },
+      {
+        "paper_id": 429,
+        "subject": "Biomedical Instrumentation"
+      },
+      {
+        "paper_id": 430,
+        "subject": "Artificial Intelligence"
+      },
+      {
+        "paper_id": 431,
+        "subject": "Robotics"
+      },
+      {
+        "paper_id": 432,
+        "subject": "Power Electronics"
+      }
+    ],
+    "8": [
+      {
+        "paper_id": 484,
+        "subject": "Organisational Behaviour"
+      },
+      {
+        "paper_id": 485,
+        "subject": "Smart Antenna"
+      },
+      {
+        "paper_id": 486,
+        "subject": "Digital Image Processing"
+      },
+      {
+        "paper_id": 487,
+        "subject": "Satellite Communication & Remote Sensing"
+      },
+      {
+        "paper_id": 488,
+        "subject": "Neural N/W & Applications"
+      },
+      {
+        "paper_id": 489,
+        "subject": "Material Sc. & Engg"
+      },
+      {
+        "paper_id": 490,
+        "subject": "Renewable Energy"
+      },
+      {
+        "paper_id": 491,
+        "subject": "Audio & Speech Processing"
+      },
+      {
+        "paper_id": 492,
+        "subject": "Design Lab / Industrial problem related practical training"
+      },
+      {
+        "paper_id": 493,
+        "subject": "Project part-2"
+      },
+      {
+        "paper_id": 494,
+        "subject": "Grand viva"
+      }
+    ]
+  },
+  "EE": {
+    "1": [
+      {
+        "paper_id": 559,
+        "subject": "Chemistry-I"
+      },
+      {
+        "paper_id": 561,
+        "subject": "Mathematics - IB"
+      },
+      {
+        "paper_id": 562,
+        "subject": "Basic Electrical Engineering"
+      },
+      {
+        "paper_id": 564,
+        "subject": "Chemistry-I Laboratory"
+      },
+      {
+        "paper_id": 565,
+        "subject": "Basic Electrical Engineering Laboratory"
+      },
+      {
+        "paper_id": 566,
+        "subject": "Engineering Graphics & Design"
+      }
+    ],
+    "2": [
+      {
+        "paper_id": 546,
+        "subject": "Physics-I"
+      },
+      {
+        "paper_id": 549,
+        "subject": "Mathematics-IIB"
+      },
+      {
+        "paper_id": 550,
+        "subject": "Programming for Problem Solving"
+      },
+      {
+        "paper_id": 551,
+        "subject": "English"
+      },
+      {
+        "paper_id": 552,
+        "subject": "Physics-I Laboratory"
+      },
+      {
+        "paper_id": 554,
+        "subject": "Programming for Problem Solving"
+      },
+      {
+        "paper_id": 556,
+        "subject": "Workshop/Manufacturing Practices"
+      },
+      {
+        "paper_id": 557,
+        "subject": "Language Laboratory"
+      }
+    ],
+    "3": [
+      {
+        "paper_id": 94,
+        "subject": "Electric Circuit Theory"
+      },
+      {
+        "paper_id": 107,
+        "subject": "Mathematics-III"
+      },
+      {
+        "paper_id": 148,
+        "subject": "Electromagnetic Field Theory"
+      },
+      {
+        "paper_id": 238,
+        "subject": "Analog Electronics"
+      },
+      {
+        "paper_id": 578,
+        "subject": "Engineering Mechanics"
+      },
+      {
+        "paper_id": 579,
+        "subject": "Biology for Engineers"
+      },
+      {
+        "paper_id": 580,
+        "subject": "Indian Constitution"
+      },
+      {
+        "paper_id": 581,
+        "subject": "Electric Circuit Theory Laboratory"
+      },
+      {
+        "paper_id": 582,
+        "subject": "Analog Electronics Lab"
+      },
+      {
+        "paper_id": 583,
+        "subject": "Numerical Methods Lab"
+      }
+    ],
+    "4": [
+      {
+        "paper_id": 39,
+        "subject": "Electrical Machine-I"
+      },
+      {
+        "paper_id": 40,
+        "subject": "Electrical and Electronics Measurement"
+      },
+      {
+        "paper_id": 41,
+        "subject": "Thermal Power Engineering"
+      },
+      {
+        "paper_id": 263,
+        "subject": "Value and Ethics in Profession"
+      },
+      {
+        "paper_id": 265,
+        "subject": "Environmental Science"
+      },
+      {
+        "paper_id": 631,
+        "subject": "Digital Electronic"
+      },
+      {
+        "paper_id": 632,
+        "subject": "Electric Machine-I Lab"
+      },
+      {
+        "paper_id": 633,
+        "subject": "Digital Electronics Lab"
+      },
+      {
+        "paper_id": 634,
+        "subject": "Electrical and Electronic Measurement Lab"
+      },
+      {
+        "paper_id": 635,
+        "subject": "Thermal Power Engineering Lab"
+      }
+    ],
+    "5": [
+      {
+        "paper_id": 150,
+        "subject": "Electrical Machine - II"
+      },
+      {
+        "paper_id": 151,
+        "subject": "Power System - I"
+      },
+      {
+        "paper_id": 307,
+        "subject": "Control System"
+      },
+      {
+        "paper_id": 693,
+        "subject": "Power Electronics"
+      },
+      {
+        "paper_id": 694,
+        "subject": "High Voltage Engineering"
+      },
+      {
+        "paper_id": 695,
+        "subject": "Power Plant Engineering"
+      },
+      {
+        "paper_id": 696,
+        "subject": "Renewable & Non Conventional Energy"
+      },
+      {
+        "paper_id": 697,
+        "subject": "Data Structure & Algorithm"
+      },
+      {
+        "paper_id": 698,
+        "subject": "Object Oriented Programming"
+      },
+      {
+        "paper_id": 699,
+        "subject": "Computer Organisation"
+      },
+      {
+        "paper_id": 700,
+        "subject": "Electric Machine-II Laboratory"
+      },
+      {
+        "paper_id": 701,
+        "subject": "Power System-I Laboratory"
+      },
+      {
+        "paper_id": 702,
+        "subject": "Control system laboratory"
+      },
+      {
+        "paper_id": 703,
+        "subject": "Power Electronics Laboratory"
+      }
+    ],
+    "6": [
+      {
+        "paper_id": 44,
+        "subject": "POWER SYSTEMS-II"
+      },
+      {
+        "paper_id": 310,
+        "subject": "Microprocessor & Microcontroller"
+      },
+      {
+        "paper_id": 761,
+        "subject": "DIGITAL CONTROL SYSTEM"
+      },
+      {
+        "paper_id": 762,
+        "subject": "HVDC TRANSMISSION"
+      },
+      {
+        "paper_id": 763,
+        "subject": "Electrical Machine Design"
+      },
+      {
+        "paper_id": 764,
+        "subject": "Electrical and Hybrid Vehicle"
+      },
+      {
+        "paper_id": 765,
+        "subject": "Power Quality and Facts"
+      },
+      {
+        "paper_id": 766,
+        "subject": "Industrial Electrical Systems"
+      },
+      {
+        "paper_id": 767,
+        "subject": "Digital Signal Processing"
+      },
+      {
+        "paper_id": 768,
+        "subject": "Communication Engineering"
+      },
+      {
+        "paper_id": 769,
+        "subject": "VLSI and Micro Electronics"
+      },
+      {
+        "paper_id": 770,
+        "subject": "Economics for Engineers"
+      },
+      {
+        "paper_id": 771,
+        "subject": "POWER SYSTEM-II Laboratory"
+      },
+      {
+        "paper_id": 772,
+        "subject": "Microprocessor & Microcontroller Laboratory"
+      },
+      {
+        "paper_id": 773,
+        "subject": "Electrical and Electronics Design Laboratory"
+      }
+    ],
+    "7": [
+      {
+        "paper_id": 154,
+        "subject": "Electric Drives"
+      },
+      {
+        "paper_id": 155,
+        "subject": "Power System - III"
+      },
+      {
+        "paper_id": 156,
+        "subject": "Utilization of Electric Power"
+      },
+      {
+        "paper_id": 266,
+        "subject": "Renewable & Non conventional Energy"
+      },
+      {
+        "paper_id": 447,
+        "subject": "Control system-III"
+      },
+      {
+        "paper_id": 448,
+        "subject": "Electric Machine-III"
+      },
+      {
+        "paper_id": 449,
+        "subject": "High voltage Engineering"
+      },
+      {
+        "paper_id": 450,
+        "subject": "Power Plant Engineering"
+      },
+      {
+        "paper_id": 451,
+        "subject": "Power generation and economics"
+      },
+      {
+        "paper_id": 452,
+        "subject": "Computer Network"
+      },
+      {
+        "paper_id": 453,
+        "subject": "AI & Soft Computing"
+      },
+      {
+        "paper_id": 454,
+        "subject": "Digital Communication"
+      },
+      {
+        "paper_id": 455,
+        "subject": "Digital Image Processing"
+      }
+    ],
+    "8": [
+      {
+        "paper_id": 484,
+        "subject": "Organisational Behaviour"
+      },
+      {
+        "paper_id": 522,
+        "subject": "HVDC transmission"
+      },
+      {
+        "paper_id": 523,
+        "subject": "Illumination Engineering"
+      },
+      {
+        "paper_id": 524,
+        "subject": "Energy management & audit"
+      },
+      {
+        "paper_id": 525,
+        "subject": "Power plant instrumentation & Control"
+      },
+      {
+        "paper_id": 526,
+        "subject": "Sensors & Transducers"
+      },
+      {
+        "paper_id": 527,
+        "subject": "Biomedical Instrumentation"
+      },
+      {
+        "paper_id": 528,
+        "subject": "Process control"
+      },
+      {
+        "paper_id": 529,
+        "subject": "Project"
+      },
+      {
+        "paper_id": 530,
+        "subject": "Electrical system design-II"
+      },
+      {
+        "paper_id": 531,
+        "subject": "Grand Viva"
+      }
+    ]
+  },
+  "ME": {
+    "1": [
+      {
+        "paper_id": 558,
+        "subject": "Physics-I"
+      },
+      {
+        "paper_id": 561,
+        "subject": "Mathematics - IB"
+      },
+      {
+        "paper_id": 562,
+        "subject": "Basic Electrical Engineering"
+      },
+      {
+        "paper_id": 563,
+        "subject": "Physics-I Laboratory"
+      },
+      {
+        "paper_id": 565,
+        "subject": "Basic Electrical Engineering Laboratory"
+      },
+      {
+        "paper_id": 567,
+        "subject": "Workshop/Manufacturing Practices"
+      }
+    ],
+    "2": [
+      {
+        "paper_id": 547,
+        "subject": "Chemistry-I"
+      },
+      {
+        "paper_id": 549,
+        "subject": "Mathematics-IIB"
+      },
+      {
+        "paper_id": 550,
+        "subject": "Programming for Problem Solving"
+      },
+      {
+        "paper_id": 551,
+        "subject": "English"
+      },
+      {
+        "paper_id": 553,
+        "subject": "Chemistry-I Laboratory"
+      },
+      {
+        "paper_id": 554,
+        "subject": "Programming for Problem Solving"
+      },
+      {
+        "paper_id": 555,
+        "subject": "Engineering Graphics & Design"
+      },
+      {
+        "paper_id": 557,
+        "subject": "Language Laboratory"
+      }
+    ],
+    "3": [
+      {
+        "paper_id": 243,
+        "subject": "Thermodynamics"
+      },
+      {
+        "paper_id": 591,
+        "subject": "Manufacturing Processes"
+      },
+      {
+        "paper_id": 592,
+        "subject": "Mathematics III"
+      },
+      {
+        "paper_id": 593,
+        "subject": "Biology"
+      },
+      {
+        "paper_id": 594,
+        "subject": "Basic Electronics Engineering"
+      },
+      {
+        "paper_id": 595,
+        "subject": "Engineering Mechanics"
+      },
+      {
+        "paper_id": 596,
+        "subject": "Practice of Manufacturing Processes"
+      }
+    ],
+    "4": [
+      {
+        "paper_id": 646,
+        "subject": "Materials Engineering"
+      },
+      {
+        "paper_id": 647,
+        "subject": "Applied Thermodynamics"
+      },
+      {
+        "paper_id": 648,
+        "subject": "Fluid Mechanics & Fluid Machines"
+      },
+      {
+        "paper_id": 649,
+        "subject": "Strength of Materials"
+      },
+      {
+        "paper_id": 650,
+        "subject": "Metrology and Instrumentation"
+      },
+      {
+        "paper_id": 651,
+        "subject": "Practice of Manufacturing Processes and Systems Laboratory"
+      },
+      {
+        "paper_id": 652,
+        "subject": "Machine Drawing I"
+      },
+      {
+        "paper_id": 653,
+        "subject": "Environmental Science"
+      }
+    ],
+    "5": [
+      {
+        "paper_id": 268,
+        "subject": "Kinematics & Theory of Machines"
+      },
+      {
+        "paper_id": 269,
+        "subject": "Heat Transfer"
+      },
+      {
+        "paper_id": 717,
+        "subject": "Solid Mechanics"
+      },
+      {
+        "paper_id": 718,
+        "subject": "Effective Technical Communication"
+      },
+      {
+        "paper_id": 719,
+        "subject": "Essence of Indian Knowledge Tradition"
+      },
+      {
+        "paper_id": 720,
+        "subject": "Mechanical Engineering Laboratory I (Thermal)"
+      },
+      {
+        "paper_id": 721,
+        "subject": "Machine Drawing-II"
+      },
+      {
+        "paper_id": 722,
+        "subject": "Project-I (30 hrs. Total)"
+      }
+    ],
+    "6": [
+      {
+        "paper_id": 203,
+        "subject": "Manufacturing Technology"
+      },
+      {
+        "paper_id": 204,
+        "subject": "Design of Machine Elements"
+      },
+      {
+        "paper_id": 387,
+        "subject": "Air Conditioning & Refrigeration"
+      },
+      {
+        "paper_id": 388,
+        "subject": "Mechatronics"
+      },
+      {
+        "paper_id": 389,
+        "subject": "Fluid Power Control"
+      },
+      {
+        "paper_id": 390,
+        "subject": "Materials Handling"
+      },
+      {
+        "paper_id": 392,
+        "subject": "Turbo Machinery"
+      },
+      {
+        "paper_id": 782,
+        "subject": "Internal Combustion Engines and Gas Turbines"
+      },
+      {
+        "paper_id": 783,
+        "subject": "Advanced Fluid Mechanics"
+      },
+      {
+        "paper_id": 784,
+        "subject": "Composite Materials"
+      },
+      {
+        "paper_id": 785,
+        "subject": "Robotics"
+      },
+      {
+        "paper_id": 786,
+        "subject": "Principles and Practices of Management"
+      },
+      {
+        "paper_id": 787,
+        "subject": "Operations Research"
+      },
+      {
+        "paper_id": 788,
+        "subject": "Constitution of India"
+      },
+      {
+        "paper_id": 789,
+        "subject": "Mechanical Engineering Laboratory (Design) II"
+      },
+      {
+        "paper_id": 790,
+        "subject": "Project-II (90 hrs. Total)"
+      }
+    ],
+    "7": [
+      {
+        "paper_id": 462,
+        "subject": "Power Plant Engineering"
+      },
+      {
+        "paper_id": 463,
+        "subject": "Advanced Manufacturing Technology"
+      },
+      {
+        "paper_id": 464,
+        "subject": "Maintenance Engineering"
+      },
+      {
+        "paper_id": 465,
+        "subject": "Renewable Energy Systems"
+      },
+      {
+        "paper_id": 466,
+        "subject": "Tribology"
+      },
+      {
+        "paper_id": 467,
+        "subject": "Quantity Production Method"
+      },
+      {
+        "paper_id": 468,
+        "subject": "Advanced Welding Technology"
+      },
+      {
+        "paper_id": 469,
+        "subject": "Computational Methods in Engineering"
+      },
+      {
+        "paper_id": 470,
+        "subject": "Software Engineering"
+      },
+      {
+        "paper_id": 471,
+        "subject": "Industrial Instrumentation"
+      },
+      {
+        "paper_id": 472,
+        "subject": "Operations Research"
+      },
+      {
+        "paper_id": 473,
+        "subject": "Biomechanics & Biomaterials"
+      }
+    ],
+    "8": [
+      {
+        "paper_id": 207,
+        "subject": "Industrial Engineering"
+      }
+    ]
+  },
+  "CE": {
+    "1": [
+      {
+        "paper_id": 558,
+        "subject": "Physics-I"
+      },
+      {
+        "paper_id": 561,
+        "subject": "Mathematics - IB"
+      },
+      {
+        "paper_id": 562,
+        "subject": "Basic Electrical Engineering"
+      },
+      {
+        "paper_id": 563,
+        "subject": "Physics-I Laboratory"
+      },
+      {
+        "paper_id": 565,
+        "subject": "Basic Electrical Engineering Laboratory"
+      },
+      {
+        "paper_id": 567,
+        "subject": "Workshop/Manufacturing Practices"
+      }
+    ],
+    "2": [
+      {
+        "paper_id": 547,
+        "subject": "Chemistry-I"
+      },
+      {
+        "paper_id": 549,
+        "subject": "Mathematics-IIB"
+      },
+      {
+        "paper_id": 550,
+        "subject": "Programming for Problem Solving"
+      },
+      {
+        "paper_id": 551,
+        "subject": "English"
+      },
+      {
+        "paper_id": 553,
+        "subject": "Chemistry-I Laboratory"
+      },
+      {
+        "paper_id": 554,
+        "subject": "Programming for Problem Solving"
+      },
+      {
+        "paper_id": 555,
+        "subject": "Engineering Graphics & Design"
+      },
+      {
+        "paper_id": 557,
+        "subject": "Language Laboratory"
+      }
+    ],
+    "3": [
+      {
+        "paper_id": 597,
+        "subject": "Biology for Engineers"
+      },
+      {
+        "paper_id": 598,
+        "subject": "Engineering Mechanics"
+      },
+      {
+        "paper_id": 599,
+        "subject": "Energy Science & Engineering"
+      },
+      {
+        "paper_id": 600,
+        "subject": "Mathematics-III"
+      },
+      {
+        "paper_id": 601,
+        "subject": "Humanities-I (Effective Technical Communication)"
+      },
+      {
+        "paper_id": 602,
+        "subject": "Introduction to Civil Engineering"
+      },
+      {
+        "paper_id": 603,
+        "subject": "Basic Electronics"
+      },
+      {
+        "paper_id": 604,
+        "subject": "Computer-aided Civil Engineering Drawing"
+      },
+      {
+        "paper_id": 605,
+        "subject": "Life Science"
+      }
+    ],
+    "4": [
+      {
+        "paper_id": 654,
+        "subject": "Introduction to Fluid Mechanics"
+      },
+      {
+        "paper_id": 655,
+        "subject": "Introduction to Solid Mechanics"
+      },
+      {
+        "paper_id": 656,
+        "subject": "Soil Mechanics - I"
+      },
+      {
+        "paper_id": 657,
+        "subject": "Environmental Engineering -I"
+      },
+      {
+        "paper_id": 658,
+        "subject": "Surveying & Geomatics"
+      },
+      {
+        "paper_id": 659,
+        "subject": "Concrete Technology"
+      },
+      {
+        "paper_id": 660,
+        "subject": "Civil Engineering - Societal & Global Impact"
+      },
+      {
+        "paper_id": 661,
+        "subject": "Management I (Organizational Behavior)"
+      },
+      {
+        "paper_id": 662,
+        "subject": "Fluid Mechanics Laboratory"
+      },
+      {
+        "paper_id": 663,
+        "subject": "Solid Mechanics Laboratory"
+      },
+      {
+        "paper_id": 664,
+        "subject": "Engineering Geology Laboratory"
+      },
+      {
+        "paper_id": 665,
+        "subject": "Surveying & Geomatics"
+      },
+      {
+        "paper_id": 666,
+        "subject": "Concrete Technology Laboratory"
+      }
+    ],
+    "5": [
+      {
+        "paper_id": 320,
+        "subject": "Design of RC Structures"
+      },
+      {
+        "paper_id": 723,
+        "subject": "Engineering Hydrology"
+      },
+      {
+        "paper_id": 724,
+        "subject": "Structural Analysis - I"
+      },
+      {
+        "paper_id": 725,
+        "subject": "Soil Mechanics - II"
+      },
+      {
+        "paper_id": 726,
+        "subject": "Environmental Engineering - II"
+      },
+      {
+        "paper_id": 727,
+        "subject": "Transportation Engineering"
+      },
+      {
+        "paper_id": 728,
+        "subject": "Constitution of India / Essence of Indian Knowledge Tradition"
+      },
+      {
+        "paper_id": 729,
+        "subject": "RC Design Sessional"
+      },
+      {
+        "paper_id": 730,
+        "subject": "Soil Mechanics Laboratory"
+      },
+      {
+        "paper_id": 731,
+        "subject": "Environmental Engineering Lab"
+      },
+      {
+        "paper_id": 732,
+        "subject": "Transportation Engineering Lab"
+      },
+      {
+        "paper_id": 733,
+        "subject": "Computer Application in CE"
+      }
+    ],
+    "6": [
+      {
+        "paper_id": 401,
+        "subject": "Design of Steel Structures"
+      },
+      {
+        "paper_id": 402,
+        "subject": "Construction Engineering & Management"
+      },
+      {
+        "paper_id": 791,
+        "subject": "Engineering Economics, Estimation & Costing"
+      },
+      {
+        "paper_id": 792,
+        "subject": "Water Resources Engineering"
+      },
+      {
+        "paper_id": 793,
+        "subject": "Stability of Slopes"
+      },
+      {
+        "paper_id": 794,
+        "subject": "Foundation Engineering"
+      },
+      {
+        "paper_id": 795,
+        "subject": "Ground Improvement Technique"
+      },
+      {
+        "paper_id": 796,
+        "subject": "Building Construction Practice"
+      },
+      {
+        "paper_id": 797,
+        "subject": "Structural Analysis-II"
+      },
+      {
+        "paper_id": 798,
+        "subject": "Industrial Structures"
+      },
+      {
+        "paper_id": 799,
+        "subject": "Soft Skills and Interpersonal Communication-I"
+      },
+      {
+        "paper_id": 800,
+        "subject": "Introduction to Philosophical Thoughts"
+      },
+      {
+        "paper_id": 801,
+        "subject": "Water Resource Engineering Laboratory"
+      },
+      {
+        "paper_id": 802,
+        "subject": "Steel Structure Design Sessional"
+      },
+      {
+        "paper_id": 803,
+        "subject": "Quantity Survey Estimation and Valuation Sessional"
+      }
+    ],
+    "7": [
+      {
+        "paper_id": 474,
+        "subject": "Environmental Engineering"
+      },
+      {
+        "paper_id": 475,
+        "subject": "Water Resource Engineering"
+      },
+      {
+        "paper_id": 476,
+        "subject": "Advanced Foundation Engineering"
+      },
+      {
+        "paper_id": 477,
+        "subject": "Soil Stabilization and Ground Improvement Techniques"
+      },
+      {
+        "paper_id": 478,
+        "subject": "Advanced Highway and Transportation Engineering"
+      },
+      {
+        "paper_id": 479,
+        "subject": "Advanced Structural Analysis"
+      },
+      {
+        "paper_id": 480,
+        "subject": "Hydraulic Structures"
+      },
+      {
+        "paper_id": 481,
+        "subject": "Engineering Materials"
+      },
+      {
+        "paper_id": 482,
+        "subject": "Electrical and Electronic Measurement"
+      }
+    ]
+  }
+}

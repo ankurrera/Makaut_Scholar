@@ -1,0 +1,527 @@
+Fetching syllabus subjects from Supabase...
+
+==================================================
+PROPOSED RENAMES (Old -> New)
+==================================================
+[CE] Basic Electrical Engineering Es Ee 101  --->  Basic Electrical Engineering  (1.00)
+[CE] English Hmhu201  --->  English  (1.00)
+[CE] Programming For Problem Solving Escs201  --->  Programming for Problem Solving  (1.00)
+[CE] Design Of Rc Structures  --->  Design of RC Structures  (1.00)
+[CE] Design Of Steel Structure  --->  Design of Steel Structures  (0.98)
+[CE] Hydraulic Structure  --->  Hydraulic Structures  (0.97)
+[CE] Water Resources Engineering 1  --->  Water Resources Engineering  (0.96)
+[CE] Water Resources Engineering 2  --->  Water Resources Engineering  (0.96)
+[CE] Transportation Engineering 1  --->  Transportation Engineering  (0.96)
+[CE] Water Resource Engineering 1  --->  Water Resource Engineering  (0.96)
+[CE] Transportation Engineering 2  --->  Transportation Engineering  (0.96)
+[CE] Water Resource Engineering 2  --->  Water Resource Engineering  (0.96)
+[CE] Environmental Engineering 2  --->  Environmental Engineering  (0.96)
+[CE] Environment Engineering  --->  Environmental Engineering  (0.96)
+[CE] Introduction To Civil Engineering Ce  --->  Introduction to Civil Engineering  (0.96)
+[CE] Basic Electrical Engineering Es Ee101  --->  Basic Electrical Engineering  (0.95)
+[CE] Water Resources Engineering Ce  --->  Water Resources Engineering  (0.95)
+[CE] Transportation Engineering Ce  --->  Transportation Engineering  (0.95)
+[CE] Design Of Steel Structures Ce  --->  Design of Steel Structures  (0.95)
+[CE] Ater Resources Engineering 2  --->  Water Resources Engineering  (0.95)
+[CE] Design Of Rc Structures Ce  --->  Design of RC Structures  (0.94)
+[CE] Foundation Engineering Ce  --->  Foundation Engineering  (0.94)
+[CE] Engineering Mechanics V2  --->  Engineering Mechanics  (0.93)
+[CE] Basic Electrical Engineering Old  --->  Basic Electrical Engineering  (0.93)
+[CE] Engineering Hydrology Ce  --->  Engineering Hydrology  (0.93)
+[CE] Environmental Engineering 2 Ce  --->  Environmental Engineering -I  (0.93)
+[CE] Humanities 1 Effective Technical Communication Ce  --->  Humanities-I (Effective Technical Communication)  (0.93)
+[CE] Environment Engineering 1  --->  Environmental Engineering  (0.92)
+[CE] Construction Engineering And Management Ce  --->  Construction Engineering & Management  (0.91)
+[CE] Engineering Economics Estimation And Costing Ce  --->  Engineering Economics, Estimation & Costing  (0.91)
+[CE] Chemistry 1 Bs Ch 101  --->  Chemistry-I  (0.91)
+[CE] Chemistry 1 Bsch201  --->  Chemistry-I  (0.91)
+[CE] Structural Analysis 1  --->  Structural Analysis - I  (0.91)
+[CE] Structural Analysis 2  --->  Structural Analysis - I  (0.91)
+[CE] Structural Analysis 3  --->  Structural Analysis - I  (0.91)
+[CE] Structural Analysis  --->  Structural Analysis - I  (0.90)
+[CE] Hydraulic Structure Ce  --->  Hydraulic Structures  (0.90)
+[CE] Mathematics 2 B Bsm202  --->  Mathematics - IB  (0.90)
+[CE] Structural Analysis 1 Ce  --->  Structural Analysis - I  (0.89)
+[CE] Structural Analysis 2 Ce  --->  Structural Analysis - I  (0.89)
+[CE] Physics 1 Bs Ph 101  --->  Physics-I  (0.89)
+[CE] Physics 1 Bs Ph 201 N  --->  Physics-I  (0.89)
+[CE] Physics 2  --->  Physics-I  (0.89)
+[CE] Soil Mechanics 1  --->  Soil Mechanics - I  (0.88)
+[CE] Soil Mechanics 2  --->  Soil Mechanics - I  (0.88)
+[CE] Soil Mechanics  --->  Soil Mechanics - I  (0.88)
+[CE] Basic Electronics Engineering V2  --->  Basic Electrical Engineering  (0.87)
+[CE] Soil Mechanics 2 Ce  --->  Soil Mechanics - I  (0.86)
+[CE] Mathematics 3  --->  Mathematics-III  (0.86)
+[CE] Mathematics 2  --->  Mathematics-III  (0.86)
+[CE] Mathematics 3  --->  Mathematics-III  (0.86)
+[CE] Advanced Transportation Engineering  --->  Transportation Engineering  (0.85)
+[CE] Engineering Geology  --->  Engineering Hydrology  (0.85)
+[CE] Engineering Geology  --->  Engineering Hydrology  (0.85)
+[CE] Mathematics  --->  Mathematics-III  (0.85)
+[CE] Advanced Transporation Engineering  --->  Transportation Engineering  (0.83)
+[CE] Advanced Foundation Engineering  --->  Foundation Engineering  (0.83)
+[CE] Mathematics V2  --->  Mathematics-III  (0.83)
+[CE] Construction Planning And Management  --->  Construction Engineering & Management  (0.82)
+[CE] Highway And Transportation Engineering  --->  Transportation Engineering  (0.81)
+[CE] Engineering Physics  --->  Engineering Mechanics  (0.80)
+[CE] Engineering Physics  --->  Engineering Mechanics  (0.80)
+[CE] Foundation Engineering Ce Pe 6018  --->  Foundation Engineering  (0.80)
+[ECE] Basic Electrical Engineering Es Ee 101  --->  Basic Electrical Engineering  (1.00)
+[ECE] English Hmhu201  --->  English  (1.00)
+[ECE] Programming For Problem Solving Escs201  --->  Programming for Problem Solving  (1.00)
+[ECE] Economics For Engineers  --->  Economics for Engineers  (1.00)
+[ECE] Analog Electronics Circuits  --->  Analog Electronic Circuits  (0.98)
+[ECE] Basic Electrical Engineering Es Ee101  --->  Basic Electrical Engineering  (0.95)
+[ECE] Microprocessor And Microcontrollers  --->  Microprocessor & Microcontrollers  (0.94)
+[ECE] Wireless Communication And Network  --->  Wireless Communication & Network  (0.94)
+[ECE] Basic Electrical Engineering Old  --->  Basic Electrical Engineering  (0.93)
+[ECE] Microelectronics And Vlsi Design  --->  Microelectronics & VLSI Designs  (0.92)
+[ECE] Chemistry 1 Bs Ch 101  --->  Chemistry-I  (0.91)
+[ECE] Chemistry 1 Bsch201  --->  Chemistry-I  (0.91)
+[ECE] Medical Electronics  --->  Bio-Medical Electronics  (0.90)
+[ECE] Mathematics 2 B Bsm202  --->  Mathematics - IB  (0.90)
+[ECE] Physics 1 Bs Ph 101  --->  Physics-I  (0.89)
+[ECE] Physics 1 Bs Ph 201 N  --->  Physics-I  (0.89)
+[ECE] Signals And Systems  --->  Signals & Systems  (0.89)
+[ECE] Basic Electronics Engineering V2  --->  Basic Electrical Engineering  (0.87)
+[ECE] Mathematics 3  --->  Mathematics-IIB  (0.86)
+[ECE] Data Structure And C  --->  Data Structure Lab  (0.84)
+[ECE] Mathematics V2  --->  Mathematics-IIB  (0.83)
+[ECE] Digital Image And Video Processing  --->  Digital Image Processing  (0.83)
+[ECE] Wireless Communication  --->  Wireless Communication & Network  (0.81)
+[ECE] Mobile Communication And Networks  --->  Optical Communication & Network  (0.81)
+[EE] Basic Electrical Engineering Es Ee 101  --->  Basic Electrical Engineering  (1.00)
+[EE] English Hmhu201  --->  English  (1.00)
+[EE] Programming For Problem Solving Escs201  --->  Programming for Problem Solving  (1.00)
+[EE] Electrical And Electronics Measurement  --->  Electrical and Electronics Measurement  (1.00)
+[EE] Economics For Engineers  --->  Economics for Engineers  (1.00)
+[EE] Economics For Engineers  --->  Economics for Engineers  (1.00)
+[EE] Hvdc Transmission  --->  HVDC transmission  (1.00)
+[EE] Utilization Of Electric Power  --->  Utilization of Electric Power  (1.00)
+[EE] Electrical And Electronic Measurement  --->  Electrical and Electronics Measurement  (0.99)
+[EE] Values And Ethics In Profession  --->  Value and Ethics in Profession  (0.98)
+[EE] Values And Ethics In Profession  --->  Value and Ethics in Profession  (0.98)
+[EE] Vlsi And Microelectronics  --->  VLSI and Micro Electronics  (0.98)
+[EE] Electrical And Electronic Measurements  --->  Electrical and Electronics Measurement  (0.97)
+[EE] Utilization Of Electrical Power  --->  Utilization of Electric Power  (0.97)
+[EE] Control Systems  --->  Control System  (0.97)
+[EE] Utilisation Of Electric Power  --->  Utilization of Electric Power  (0.97)
+[EE] Electrical And Hybrid Vehicle Pe  --->  Electrical and Hybrid Vehicle  (0.95)
+[EE] Utilization Of Electric Power Pc  --->  Utilization of Electric Power  (0.95)
+[EE] Electrical Machine 1  --->  Electrical Machine-I  (0.95)
+[EE] Electrical Machine 2  --->  Electrical Machine-I  (0.95)
+[EE] Basic Electrical Engineering Es Ee101  --->  Basic Electrical Engineering  (0.95)
+[EE] Electrical Machine  --->  Electrical Machine-I  (0.95)
+[EE] Electrical Machine Design Pe  --->  Electrical Machine Design  (0.94)
+[EE] Microprocessor And Microcontroller  --->  Microprocessor & Microcontroller  (0.94)
+[EE] Microprocessor And Microcontroller  --->  Microprocessor & Microcontroller  (0.94)
+[EE] Power Quality And Facts Pe  --->  Power Quality and Facts  (0.94)
+[EE] Electrical Drives  --->  Electric Drives  (0.94)
+[EE] Engineering Mechanics V2  --->  Engineering Mechanics  (0.93)
+[EE] Basic Electrical Engineering Old  --->  Basic Electrical Engineering  (0.93)
+[EE] Control System 1  --->  Control System  (0.93)
+[EE] Control System 2  --->  Control System  (0.93)
+[EE] Power Generation Economics  --->  Power generation and economics  (0.93)
+[EE] Power Generation Economics Pe Ee 701 C  --->  Power generation and economics  (0.93)
+[EE] Biology Of Engineers  --->  Biology for Engineers  (0.93)
+[EE] Electrical Machines 1  --->  Electrical Machine-I  (0.93)
+[EE] Electrical Machines 2  --->  Electrical Machine-I  (0.93)
+[EE] Data Structure And Algorithm  --->  Data Structure & Algorithm  (0.93)
+[EE] Microprocessor And Microcontrollers  --->  Microprocessor & Microcontroller  (0.93)
+[EE] Electrical Machines  --->  Electrical Machine-I  (0.92)
+[EE] Hvdc Transmission Pe  --->  HVDC transmission  (0.92)
+[EE] Chemistry 1 Bs Ch 101  --->  Chemistry-I  (0.91)
+[EE] Chemistry 1 Bsch201  --->  Chemistry-I  (0.91)
+[EE] Data Structure And Algorithms  --->  Data Structure & Algorithm  (0.91)
+[EE] Sensors And Transducers  --->  Sensors & Transducers  (0.91)
+[EE] Mathematics 2 B Bsm202  --->  Mathematics - IB  (0.90)
+[EE] Power Systems 1  --->  POWER SYSTEMS-II  (0.90)
+[EE] Control Systems 2  --->  Control System  (0.90)
+[EE] Power Systems 2  --->  POWER SYSTEMS-II  (0.90)
+[EE] Power Systems 3  --->  POWER SYSTEMS-II  (0.90)
+[EE] Ai And Soft Computing  --->  AI & Soft Computing  (0.90)
+[EE] Numerical Methods  --->  Numerical Methods Lab  (0.89)
+[EE] Physics 1 Bs Ph 101  --->  Physics-I  (0.89)
+[EE] Physics 1 Bs Ph 201 N  --->  Physics-I  (0.89)
+[EE] Physics 2  --->  Physics-I  (0.89)
+[EE] Sensor And Transducers  --->  Sensors & Transducers  (0.88)
+[EE] Electric Drive Pc  --->  Electric Drives  (0.88)
+[EE] Micro Processor And Micro Controller Pe  --->  Microprocessor & Microcontroller  (0.87)
+[EE] Electric Machines 2  --->  Electrical Machine-I  (0.87)
+[EE] Basic Electronics Engineering V2  --->  Basic Electrical Engineering  (0.87)
+[EE] Power System 1  --->  POWER SYSTEMS-II  (0.87)
+[EE] Power System 2  --->  POWER SYSTEMS-II  (0.87)
+[EE] Power System 3  --->  POWER SYSTEMS-II  (0.87)
+[EE] Ee 802A Communication Engineering  --->  Communication Engineering  (0.86)
+[EE] Mathematics 3  --->  Mathematics-III  (0.86)
+[EE] Power System  --->  POWER SYSTEMS-II  (0.86)
+[EE] Power System  --->  POWER SYSTEMS-II  (0.86)
+[EE] Sensors And Transducers Oe  --->  Sensors & Transducers  (0.85)
+[EE] Power System 2 Pc  --->  Power System - I  (0.85)
+[EE] Mathematics  --->  Mathematics-III  (0.85)
+[EE] Advanced High Voltage Engineering  --->  High Voltage Engineering  (0.84)
+[EE] Mathematics V2  --->  Mathematics-III  (0.83)
+[EE] Analog Electronic Circuits  --->  Analog Electronics  (0.82)
+[EE] Analog Electronic Circuits  --->  Analog Electronics  (0.82)
+[EE] Analog Electronics Circuit  --->  Analog Electronics  (0.82)
+[EE] Engineering Physics  --->  Engineering Mechanics  (0.80)
+[EE] Engineering Physics  --->  Engineering Mechanics  (0.80)
+[EE] Digital Electronic Circuits  --->  Digital Electronic  (0.80)
+[EE] Analog Electronics Circuits  --->  Analog Electronics  (0.80)
+[EE] Optimal Control Systems  --->  DIGITAL CONTROL SYSTEM  (0.80)
+[IT] Basic Electrical Engineering Es Ee 101  --->  Basic Electrical Engineering  (1.00)
+[IT] English Hmhu201  --->  English  (1.00)
+[IT] Programming For Problem Solving Escs201  --->  Programming for Problem Solving  (1.00)
+[IT] Data Warehousing And Data Mining  --->  Data Warehousing and Data Mining  (1.00)
+[IT] E Commerce  --->  E-Commerce  (1.00)
+[IT] Data Warehousing And Data Mining  --->  Data Warehousing and Data Mining  (1.00)
+[IT] E Commerce  --->  E-Commerce  (1.00)
+[IT] Datawarehousing And Data Mining  --->  Data Warehousing and Data Mining  (0.98)
+[IT] Database Management Systems  --->  Database Management System  (0.98)
+[IT] Operating System  --->  Operating Systems  (0.97)
+[IT] Control Systems  --->  Control System  (0.97)
+[IT] Computer Organization  --->  Computer Organisation  (0.95)
+[IT] Basic Electrical Engineering Es Ee101  --->  Basic Electrical Engineering  (0.95)
+[IT] Advanced Data Communication And Coding  --->  Advanced Data Communication & Coding  (0.95)
+[IT] Formal Language And Automata Theory  --->  Formal Language & Automata Theory  (0.94)
+[IT] Formal Language And Automata Theory  --->  Formal Language & Automata Theory  (0.94)
+[IT] Design And Analysis Of Algorithms  --->  Design & Analysis of Algorithms  (0.94)
+[IT] Design And Analysis Of Algorithms  --->  Design & Analysis of Algorithms  (0.94)
+[IT] Microelectronics And Vlsi Design  --->  Microelectronics & VLSI Design  (0.94)
+[IT] Basic Electrical Engineering Old  --->  Basic Electrical Engineering  (0.93)
+[IT] Economics For Engineers Humanities 2  --->  Economics for Engineers (Humanities-II)  (0.93)
+[IT] Advance Data Communication And Coding  --->  Advanced Data Communication & Coding  (0.93)
+[IT] Analog And Digital Electronics  --->  Analog & Digital Electronics  (0.93)
+[IT] Data Structure And Algorithms  --->  Data Structure & Algorithms  (0.93)
+[IT] Design And Analysis Of Algorithm  --->  Design & Analysis of Algorithms  (0.92)
+[IT] Micro Electronics And Vlsi Design  --->  Microelectronics & VLSI Design  (0.92)
+[IT] Mathematics 3 Differential Calculus  --->  Mathematics-III (Differential Calculus)  (0.92)
+[IT] Chemistry 1 Bs Ch 101  --->  Chemistry-I  (0.91)
+[IT] Chemistry 1 Bsch201  --->  Chemistry-I  (0.91)
+[IT] Data Structures And Algorithm  --->  Data Structure & Algorithms  (0.89)
+[IT] Physics 1 Bs Ph 101  --->  Physics-I  (0.89)
+[IT] Physics 1 Bs Ph 201 N  --->  Physics-I  (0.89)
+[IT] Physics 2  --->  Physics-I  (0.89)
+[IT] Computer Networking  --->  Computer Networks  (0.89)
+[IT] Object Oriented Programming And Uml  --->  Object Oriented Programming  (0.87)
+[IT] Basic Electronics Engineering V2  --->  Basic Electrical Engineering  (0.87)
+[IT] Data Structure And Algorithms Pcc  --->  Data Structure & Algorithms  (0.87)
+[IT] Mathematics 3  --->  Mathematics-IIA  (0.86)
+[IT] Mathematics  --->  Mathematics-IIA  (0.85)
+[IT] Mathematics  --->  Mathematics-IIA  (0.85)
+[IT] Mathematics 2 B Bsm202  --->  Mathematics - IA  (0.84)
+[IT] Software Engineering 2018 19  --->  Software Engineering  (0.83)
+[IT] Mathematics V2  --->  Mathematics-IIA  (0.83)
+[IT] Image Processing And Gis  --->  Image Processing  (0.80)
+[ME] Basic Electrical Engineering Es Ee 101  --->  Basic Electrical Engineering  (1.00)
+[ME] English Hmhu201  --->  English  (1.00)
+[ME] Programming For Problem Solving Escs201  --->  Programming for Problem Solving  (1.00)
+[ME] Strength Of Materials  --->  Strength of Materials  (1.00)
+[ME] Design Of Machine Elements  --->  Design of Machine Elements  (1.00)
+[ME] Design Of Machine Elements  --->  Design of Machine Elements  (1.00)
+[ME] Internal Combustion Engines And Gas Turbines  --->  Internal Combustion Engines and Gas Turbines  (1.00)
+[ME] Environmental Sciences  --->  Environmental Science  (0.98)
+[ME] Strength Of Material  --->  Strength of Materials  (0.98)
+[ME] Material Handling  --->  Materials Handling  (0.97)
+[ME] Turbomachinery  --->  Turbo Machinery  (0.97)
+[ME] Basic Electronics Engineering V2  --->  Basic Electronics Engineering  (0.95)
+[ME] Basic Electrical Engineering Es Ee101  --->  Basic Electrical Engineering  (0.95)
+[ME] Air Conditioning And Refrigeration  --->  Air Conditioning & Refrigeration  (0.94)
+[ME] Engineering Mechanics V2  --->  Engineering Mechanics  (0.93)
+[ME] Basic Electrical Engineering Old  --->  Basic Electrical Engineering  (0.93)
+[ME] Chemistry 1 Bs Ch 101  --->  Chemistry-I  (0.91)
+[ME] Chemistry 1 Bsch201  --->  Chemistry-I  (0.91)
+[ME] Mathematics 2 B Bsm202  --->  Mathematics - IB  (0.90)
+[ME] Physics 1 Bs Ph 101  --->  Physics-I  (0.89)
+[ME] Physics 1 Bs Ph 201 N  --->  Physics-I  (0.89)
+[ME] Engineering Mechanics Me Ce  --->  Engineering Mechanics  (0.88)
+[ME] Mathematics 3  --->  Mathematics III  (0.86)
+[ME] Primary Manufacturing Processes  --->  Manufacturing Processes  (0.85)
+[ME] Mathematics V2  --->  Mathematics III  (0.83)
+[ME] Applied Fluid Mechanics  --->  Advanced Fluid Mechanics  (0.81)
+[ME] Primary Manufacturing Process  --->  Manufacturing Processes  (0.81)
+[ME] Engineering Physics  --->  Engineering Mechanics  (0.80)
+[ME] Engineering Physics  --->  Engineering Mechanics  (0.80)
+
+==================================================
+UNMATCHED SUBJECTS (No close syllabus equivalent)
+==================================================
+
+--- CE ---
+- Accountancy And Economics
+- Advanced Highway And Transportation Engineering
+- Alternate Fuels And Energy Systems
+- Basic Computation And Principles Of Computer Programming
+- Basic Electrical And Electronic Engineering 1 Es 101 Part 2
+- Basic Environmental Engineering And Elementary Biology
+- Biology
+- Bridge Engineering
+- Building Materials And Construction
+- Construction Management And Technology
+- Construction Management Techniques And Departmental Procedure
+- Construction Management Technology And Departmental Procedure
+- Economics For Engineers
+- Electrical Sensors And Transducers
+- Engineering Chemistry
+- Engineering Economy And Financial Managment Aue801Hu
+- Engineering Thermodynamics And Fluid Mechanics
+- English Language And Communication Old
+- English Language And Technical Communication
+- Entrepreneurship Development Oe
+- Environment And Ecology S3
+- Environmental Pollution And Control
+- Environmental Sciences
+- Fluid Mechanics
+- Fluid Mechanics O
+- Groundwater Contamination Ce
+- Human Resource Management
+- Ict For Development Ce
+- Introduction To Computing
+- Material Handling
+- Mathematics 1B Bs M 102
+- Mathematics 2A Bsm 201N
+- Mechanical Science
+- Mechanical Science 1
+- Mechatronics Systems Dynamics
+- Non Destructive Testing Methods Pe
+- Numerical Methods
+- Operation Research
+- Pavement Materials And Design Ce
+- Physics 2 Ph 301
+- Pre Stressed Concrete
+- Prestressed Concrete
+- Principles Of Management
+- Professional Practice Law And Ethics Ce
+- Quantity Surveying Specification And Valuation
+- Remote Sensing And Gis
+- Soft Skills And Interpersonal Communication 1 Ce
+- Soft Skills And Personality Development Ce
+- Soil Stabilisation And Ground Improvement
+- Soil Stabilisation And Ground Improvement Technique
+- Soil Stabilization And Ground Improvement Technique
+- Solid Mechanics
+- Structural Design 1
+- Structural Design 2
+- Structural Design 3
+- Structural Design 4
+- Structural Dynamics And Earthquake Engineering
+- Structural Mechanics
+- Surveying
+- Surveying 1
+- Surveying 2
+- Values And Ethics In Profession
+- Water Resources Management And Planning
+
+--- CSE ---
+- Human Resource Development and Organizational Behavior
+- IT Workshop (Sci Lab 
+- Modelling and Simulation
+
+--- ECE ---
+- Advanced Communication Engineering
+- Advanced Communication Systems
+- Basic Computation And Principles Of Computer Programming
+- Basic Electrical And Electronic Engineering 1 Es 101 Part 2
+- Control System
+- Electrical Sensors And Transducers
+- Engineering Chemistry
+- Engineering Mechanics V2
+- Engineering Physics
+- Engineering Thermodynamics And Fluid Mechanics
+- English Language And Communication Old
+- English Language And Technical Communication
+- Environment And Ecology S3
+- Internet Technology
+- Introduction To Computing
+- Mathematics 1B Bs M 102
+- Mathematics 2A Bsm 201N
+- Mechanical Science
+- Mechanical Science 1
+- Mechatronics Systems Dynamics
+- Microwave Circuits And Systems
+- Mobile Computing
+- Modern Control System
+- Optical Fibre Communication
+- Physics 2 Ph 301
+- Principles Of Management
+- Remote Sensing
+- Software Engineering
+- Values And Ethics In Profession
+
+--- EE ---
+- Advanced Electric Drives Pe
+- Advanced Microprocessors
+- Analog Electronic Circuit
+- Artificial Intelligence And Neural Networks
+- Basic Computation And Principles Of Computer Programming
+- Basic Electrical And Electronic Engineering 1 Es 101 Part 2
+- Basic Environmental Engineering And Elementary Biology
+- Big Data Analysis
+- Circuit Theory And Networks
+- Cloud Computing
+- Computer Aided Power System Studies
+- Computer Communication
+- Database Management System
+- Digital Electronics And Integrated Circuits
+- Digital Electronics Circuits
+- Electrical Engineering Materials
+- Electrical Sensors And Transducers
+- Embedded Systems
+- Energy Management And Audit
+- Engineering Chemistry
+- Engineering Thermodynamics And Fluid Mechanics
+- English Language And Communication Old
+- English Language And Technical Communication
+- Environment And Ecology S3
+- Fiber Optic Communication
+- Field Theory
+- Financial Management And Accounts
+- Industrial Management
+- Introduction To Computing
+- M 802F Project Management And Operation Research
+- M802F Project Management And Operations Research
+- Mathematics 1B Bs M 102
+- Mathematics 2A Bsm 201N
+- Mechanical Science
+- Mechanical Science 1
+- Mechatronics Systems Dynamics
+- Microprocessor And Applications
+- Microwave Integrated Circuits
+- Multimedia Systems
+- Non Conventional Energy Sources
+- Non Linear Control Systems
+- Nonlinear Control Systems
+- Numerical Methods And Programming
+- Optimization Techniques
+- Power Plant Instrumentation And Control
+- Power System Dynamic And Control
+- Power System Dynamics And Control
+- Power System Protection
+- Principles Of Management
+- Project Management And Operations Research
+- Remote Control And Telemetry
+- Software Engineering
+- System Programming And Operating System
+
+--- IT ---
+- Advanced Topics In Industrial Applications
+- Analysis And Design Of Information System
+- Analysis Design Of Information System
+- Basic Computation And Principles Of Computer Programming
+- Basic Electrical And Electronic Engineering 1 Es 101 Part 2
+- Basic Environmental Engineering And Elementary Biology
+- Business Information Systems
+- Circuit Theory And Networks
+- Communication Engineering And Coding Theory
+- Computer Organization And Architecture
+- Cryptography And Network Security
+- Cyber Law And Security Policy
+- Data Communication
+- Data Communication And Networking
+- Data Compression And Cryptography
+- Digital Electronics And Logic Design
+- Digital Signal Processing
+- Distributed Computing
+- Economics For Engineers
+- Electrical Sensors And Transducers
+- Electronic System Design
+- Engineering Chemistry
+- Engineering Mechanics V2
+- Engineering Physics
+- Engineering Thermodynamics And Fluid Mechanics
+- English Language And Communication Old
+- English Language And Technical Communication
+- Environment And Ecology S3
+- Erp
+- Financial Management And Accounts
+- Human Resource Management
+- Industrial Management
+- Information Theory And Coding
+- Internetworking
+- Introduction To Computing
+- Management Information System
+- Mathematics 1B Bs M 102
+- Mathematics 2A Bsm 201N
+- Mechanical Science
+- Mechanical Science 1
+- Mechatronics Systems Dynamics
+- Microprocessor And Microcontroller
+- Microprocessors And Microcontrollers
+- Mobile Communication
+- Multimedia System
+- Multimedia Technology And Application
+- Multimedia Technology And Applications
+- Numerical Methods And Programming
+- Object Technology And Uml
+- Operation Research
+- Operation Research And Optimization Technique
+- Operation Research And Optimization Techniques
+- Operations Research
+- Operations Research And Optimization Technique
+- Operations Research And Optimization Techniques
+- Optical Networking
+- Physics 2 Ph 301
+- Principle Of Communication Engineering
+- Principles Of Communication Engg.
+- Principles Of Communication Engineering
+- Principles Of Language Translation
+- Principles Of Management
+- Programming Practices Using Cpp
+- Software Engineering And Project Management
+- Values And Ethics In Profession
+- Vlsi Design
+- Web Technology
+
+--- ME ---
+- Automation And Control
+- Automobile Engineering
+- Basic Computation And Principles Of Computer Programming
+- Basic Electrical And Electronic Engineering 1 Es 101 Part 2
+- Cad Cam
+- Dynamics Of Machines
+- Economics For Engineers
+- Electrical Sensors And Transducers
+- Energy Conservation And Management
+- Engineering Chemistry
+- Engineering Materials
+- Engineering Thermodynamics And Fluid Mechanics
+- English Language And Communication Old
+- English Language And Technical Communication
+- Environment And Ecology S3
+- Finite Element Method
+- Finite Element Method And Its Application
+- Finite Element Methods
+- Fluid Machinery
+- Fluid Mechanics And Hydraulic Machines
+- Fracture Mechanics
+- Ic Engine And Gas Turbine
+- Ic Engine And Steam Turbine
+- Ic Engines And Gas Turbines
+- Industrial Instrumentation
+- Introduction To Computing
+- Machine Design
+- Machining Principles And Machine Tools
+- Maintenance Engineering
+- Mathematics 1B Bs M 102
+- Mathematics 2A Bsm 201N
+- Mathematics 3 Differential Calculus
+- Mechanical Science
+- Mechanical Science 1
+- Mechanics Of Composite Materials
+- Mechanism
+- Mechanisms
+- Mechatronics And Modern Control
+- Mechatronics Systems Dynamics
+- Metrology And Measurement
+- Metrology And Measurements
+- Non Conventional Energy Sources
+- Numerical Methods Bs
+- Operation Research And Industrial Management
+- Physics 2 Ph 301
+- Power Plant Engineering
+- Primary Production Processes
+- Refrigeration And Air Conditioning
+- Technology Of Machining
+- Thermal Power Engineering
+- Tribology
+- Tribology And Terotechnology
