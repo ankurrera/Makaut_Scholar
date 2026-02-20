@@ -1,0 +1,62 @@
+[
+  {
+    "text": "Login",
+    "href": "https://mywbut.com/login-register"
+  },
+  {
+    "text": "Home",
+    "href": "https://mywbut.com/index"
+  },
+  {
+    "text": "Study Resources",
+    "href": "https://mywbut.com/study"
+  },
+  {
+    "text": "Ask Question",
+    "href": "https://mywbut.com/answer"
+  },
+  {
+    "text": "Workshops",
+    "href": "https://mywbut.com/training-workshop/elements-of-engineering"
+  },
+  {
+    "text": "Summer Training",
+    "href": "https://mywbut.com/training-workshop/summer-training"
+  },
+  {
+    "text": "Admission",
+    "href": "https://mywbut.com/admission/"
+  },
+  {
+    "text": "Login",
+    "href": "#login-menu"
+  },
+  {
+    "text": "Recover Password",
+    "href": "https://mywbut.com/forgotpassword"
+  },
+  {
+    "text": "Sign up",
+    "href": "https://mywbut.com/login-register.php"
+  },
+  {
+    "text": "Start It",
+    "href": "#startit"
+  },
+  {
+    "text": "About Us",
+    "href": "https://mywbut.com/about-us"
+  },
+  {
+    "text": "Campus Jobs",
+    "href": "https://mywbut.com/campusjob/"
+  },
+  {
+    "text": "WBJEE 2025",
+    "href": "https://mywbut.com/wbjee/"
+  },
+  {
+    "text": "Contact Us",
+    "href": "https://mywbut.com/contact-us"
+  }
+]

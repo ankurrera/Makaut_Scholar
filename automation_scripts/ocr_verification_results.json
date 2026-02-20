@@ -1,0 +1,782 @@
+[
+  {
+    "dept": "IT",
+    "db_subject": "Information Theory And Coding",
+    "extracted_subject": "Name : \u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_7/Information%20Theory%20And%20Coding/information-theory-and-coding-2012.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Power System",
+    "extracted_subject": "6705 (05/06)",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/SEM6/Power System/power-system-2009.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Mechanical Science 1",
+    "extracted_subject": "\u0001\u0002\u0003\u0002\u0004\u0005\u0006\u0007\u0004",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/SEM1/Mechanical Science 1/Mechanical_Science_1-2012.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Basic Electronics Engineering V2",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/SEM1/Basic Electronics Engineering V2/Basic_Electronics_Engineering_V2-2010.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Environment And Ecology S3",
+    "extracted_subject": "Name : \u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/SEM1/Environment And Ecology S3/Environment_And_Ecology_S3-2012.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Engineering Mechanics V2",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/SEM1/Engineering Mechanics V2/Engineering_Mechanics_V2-2012.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Basic Electrical And Electronic Engineering 1 Es 101 Part 2",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/SEM1/Basic Electrical And Electronic Engineering 1 Es 101 Part 2/Basic_Electrical_And_Electronic_Engineering_1_Es_101_Part_2-2010.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Computer Graphics",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_7/Computer%20Graphics/computer-graphics-2009.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Electrical Sensors And Transducers",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/SEM1/Electrical Sensors And Transducers/Electrical_Sensors_And_Transducers-2010.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "English Language And Communication Old",
+    "extracted_subject": "[ Turn over ]",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/SEM1/English Language And Communication Old/English_Language_And_Communication_Old-2010.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Mathematics V2",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/SEM1/Mathematics V2/Mathematics_V2-2009.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Mathematics 1B Bs M 102",
+    "extracted_subject": "Scanned by CamScanner",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/SEM1/Mathematics 1B Bs M 102/Mathematics_1B_Bs_M_102-2019.pdf"
+  },
+  {
+    "dept": "ME",
+    "db_subject": "Engineering Physics",
+    "extracted_subject": "Name : \u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/ME/SEM2/Engineering Physics/Engineering_Physics-2012.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Financial Management And Accounts",
+    "extracted_subject": "Name : \u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_7/Financial%20Management%20And%20Accounts/financial-management-and-accounts-2013.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Mechatronics Systems Dynamics",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/SEM1/Mechatronics Systems Dynamics/Mechatronics_Systems_Dynamics-2009.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Distributed Computing",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_7/Distributed%20Computing/distributed-computing-2010.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Image Processing And Gis",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_7/Image%20Processing%20And%20Gis/image-processing-and-gis-2009.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Engineering Physics",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/SEM1/Engineering Physics/Engineering_Physics-2009.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "English Language And Technical Communication",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/SEM1/English Language And Technical Communication/English_Language_And_Technical_Communication-2009.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Soft Computing",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_7/Soft%20Computing/soft-computing-v2-2012.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Physics 1 Bs Ph 201 N",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/SEM2/Physics 1 Bs Ph 201 N/Physics_1_Bs_Ph_201_N-2011.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Internetworking",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_7/Internetworking/internetworking-2013.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Mathematics 2A Bsm 201N",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/SEM2/Mathematics 2A Bsm 201N/Mathematics_2A_Bsm_201N-2013.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Chemistry 1 Bsch201",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/SEM2/Chemistry 1 Bsch201/Chemistry_1_Bsch201-2012.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Multimedia System",
+    "extracted_subject": "\u0001\u0002\u0003\u0004\u0005",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_7/Multimedia%20System/multimedia-system-2013.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Datawarehousing And Data Mining",
+    "extracted_subject": "8848-A/D\u00a0(25/04)",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_8/Datawarehousing%20And%20Data%20Mining/datawarehousing-and-data-mining-2009.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Advanced Topics In Industrial Applications",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_8/Advanced%20Topics%20In%20Industrial%20Applications/advanced-topics-in-industrial-applications-2010.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Mobile Communication",
+    "extracted_subject": "SS\u2013233",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_8/Mobile%20Communication/mobile-communication-v2-2011.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Engineering Thermodynamics And Fluid Mechanics",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/SEM2/Engineering Thermodynamics And Fluid Mechanics/Engineering_Thermodynamics_And_Fluid_Mechanics-2011.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Business Information Systems",
+    "extracted_subject": "8848-B/D\u00a0(25/04)",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_8/Business%20Information%20Systems/business-information-systems-2009.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Basic Computation And Principles Of Computer Programming",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/SEM2/Basic Computation And Principles Of Computer Programming/Basic_Computation_And_Principles_Of_Computer_Programming-2012.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Engineering Chemistry",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/SEM2/Engineering Chemistry/Engineering_Chemistry-2011.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Introduction To Computing",
+    "extracted_subject": "2321 ( 11/06 )",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/SEM2/Introduction To Computing/Introduction_To_Computing-2009.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Principles Of Language Translation",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_8/Principles%20Of%20Language%20Translation/principles-of-language-translation-2012.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Artificial Intelligence",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_8/Artificial%20Intelligence/artificial-intelligence-2011.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Basic Electrical Engineering Old",
+    "extracted_subject": "2201 ( 03/06 )",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/SEM2/Basic Electrical Engineering Old/Basic_Electrical_Engineering_Old-2009.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Industrial Management",
+    "extracted_subject": "8824\u00a0(21/04)",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_8/Industrial%20Management/industrial-management-2009.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Basic Electrical Engineering Es Ee101",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/SEM2/Basic Electrical Engineering Es Ee101/Basic_Electrical_Engineering_Es_Ee101-2010.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Vlsi Design",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_8/Vlsi%20Design/vlsi-design-2010.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Mechanical Science 1",
+    "extracted_subject": "\u0001\u0002\u0003\u0002\u0004\u0005\u0006\u0007\u0004",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/SEM1/Mechanical Science 1/Mechanical_Science_1-2012.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Design And Analysis Of Algorithms",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_8/Design%20And%20Analysis%20Of%20Algorithms/design-and-analysis-of-algorithms-2010.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Basic Electronics Engineering V2",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/SEM1/Basic Electronics Engineering V2/Basic_Electronics_Engineering_V2-2010.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Programming Practices Using Cpp",
+    "extracted_subject": "Name : \u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_5/Programming%20Practices%20Using%20Cpp/programming-practices-using-cpp-2012.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Design And Analysis Of Algorithm",
+    "extracted_subject": "5004",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_5/Design%20And%20Analysis%20Of%20Algorithm/design-and-analysis-of-algorithm-2012.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Microprocessor And Microcontroller",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_5/Microprocessor%20And%20Microcontroller/microprocessor-and-microcontroller-2009.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Environment And Ecology S3",
+    "extracted_subject": "Name : \u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/SEM1/Environment And Ecology S3/Environment_And_Ecology_S3-2012.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Electrical Sensors And Transducers",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/SEM1/Electrical Sensors And Transducers/Electrical_Sensors_And_Transducers-2010.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Data Compression And Cryptography",
+    "extracted_subject": "SS-436",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_8/Data%20Compression%20And%20Cryptography/data-compression-and-cryptography-v2-2012.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "English Language And Communication Old",
+    "extracted_subject": "[ Turn over ]",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/SEM1/English Language And Communication Old/English_Language_And_Communication_Old-2010.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Engineering Mechanics V2",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/SEM1/Engineering Mechanics V2/Engineering_Mechanics_V2-2010.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Database Management Systems",
+    "extracted_subject": "Name : \u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_6/Database%20Management%20Systems/database-management-systems-2013.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Basic Electrical And Electronic Engineering 1 Es 101 Part 2",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/SEM1/Basic Electrical And Electronic Engineering 1 Es 101 Part 2/Basic_Electrical_And_Electronic_Engineering_1_Es_101_Part_2-2010.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Mechatronics Systems Dynamics",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/SEM1/Mechatronics Systems Dynamics/Mechatronics_Systems_Dynamics-2009.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Engineering Physics",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/SEM1/Engineering Physics/Engineering_Physics-2009.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Management Information System",
+    "extracted_subject": "6662\u00a0(05/06)",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_6/Management%20Information%20System/management-information-system-2009.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "English Language And Technical Communication",
+    "extracted_subject": "1001",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/SEM1/English Language And Technical Communication/English_Language_And_Technical_Communication-2012.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Multimedia Technology And Applications",
+    "extracted_subject": "Name : \u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_6/Multimedia%20Technology%20And%20Applications/multimedia-technology-and-applications-2013.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Multimedia Technology And Application",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_6/Multimedia%20Technology%20And%20Application/multimedia-technology-and-application-2010.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Mathematics V2",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/SEM1/Mathematics V2/Mathematics_V2-2009.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Database Management System",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_6/Database%20Management%20System/database-management-system-2012.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Data Communication And Networking",
+    "extracted_subject": "6722\u00a0(09/06)",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_6/Data%20Communication%20And%20Networking/data-communication-and-networking-2009.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Physics 1 Bs Ph 201 N",
+    "extracted_subject": "Name : \u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/SEM2/Physics 1 Bs Ph 201 N/Physics_1_Bs_Ph_201_N-2012.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Human Resource Management",
+    "extracted_subject": "Name : \u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_6/Human%20Resource%20Management/human-resource-management-2013.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Pattern Recognition",
+    "extracted_subject": "Name : \u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_6/Pattern%20Recognition/pattern-recognition-2013.pdf"
+  },
+  {
+    "dept": "ME",
+    "db_subject": "Environment And Ecology S3",
+    "extracted_subject": "Name : \u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/ME/SEM1/Environment And Ecology S3/Environment_And_Ecology_S3-2012.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Software Engineering And Project Management",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_6/Software%20Engineering%20And%20Project%20Management/software-engineering-and-project-management-2011.pdf"
+  },
+  {
+    "dept": "ME",
+    "db_subject": "Engineering Mechanics V2",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/ME/SEM1/Engineering Mechanics V2/Engineering_Mechanics_V2-2012.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Discrete Mathematics",
+    "extracted_subject": "Name : \u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_6/Discrete%20Mathematics/discrete-mathematics-2013.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Computer Networking",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_6/Computer%20Networking/computer-networking-2013.pdf"
+  },
+  {
+    "dept": "ME",
+    "db_subject": "Basic Electrical And Electronic Engineering 1 Es 101 Part 2",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/ME/SEM1/Basic Electrical And Electronic Engineering 1 Es 101 Part 2/Basic_Electrical_And_Electronic_Engineering_1_Es_101_Part_2-2010.pdf"
+  },
+  {
+    "dept": "ME",
+    "db_subject": "Mechatronics Systems Dynamics",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/ME/SEM1/Mechatronics Systems Dynamics/Mechatronics_Systems_Dynamics-2009.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Principles Of Management",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_6/Principles%20Of%20Management/principles-of-management-2013.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Numerical Methods And Programming",
+    "extracted_subject": "Name : \u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_3/Numerical%20Methods%20And%20Programming/numerical-methods-and-programming-2013.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Mathematics 2A Bsm 201N",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/SEM2/Mathematics 2A Bsm 201N/Mathematics_2A_Bsm_201N-2012.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Physics 2",
+    "extracted_subject": "3052",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_3/Physics%202/physics-2-2013.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Mathematics 3 Differential Calculus",
+    "extracted_subject": "[ 1 x 10 = 10 ]",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_3/Mathematics%203%20Differential%20Calculus/mathematics-3-differential-calculus-bsc301-2023.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Circuit Theory And Networks",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_3/Circuit%20Theory%20And%20Networks/circuit-theory-and-networks-2009.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Chemistry 1 Bsch201",
+    "extracted_subject": "Name : \u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/SEM2/Chemistry 1 Bsch201/Chemistry_1_Bsch201-2013.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Engineering Thermodynamics And Fluid Mechanics",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/SEM2/Engineering Thermodynamics And Fluid Mechanics/Engineering_Thermodynamics_And_Fluid_Mechanics-2011.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Basic Computation And Principles Of Computer Programming",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/SEM2/Basic Computation And Principles Of Computer Programming/Basic_Computation_And_Principles_Of_Computer_Programming-2012.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Engineering Chemistry",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/SEM2/Engineering Chemistry/Engineering_Chemistry-2011.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Introduction To Computing",
+    "extracted_subject": "2321 ( 11/06 )",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/SEM2/Introduction To Computing/Introduction_To_Computing-2009.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Data Structures And Algorithm",
+    "extracted_subject": "Name : \u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_3/Data%20Structures%20And%20Algorithm/data-structures-and-algorithm-2011.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Electric Drives",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/sem_7/Electric%20Drives/electric-drives-v2-2009.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Economics For Engineers Humanities 2",
+    "extracted_subject": "[ 1 x 10 = 10 ]",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_3/Economics%20For%20Engineers%20Humanities%202/economics-for-engineers-humanities-2-hsmc301-2023.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Mathematics",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_3/Mathematics/mathematics-2009.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Analog And Digital Electronics",
+    "extracted_subject": "[ 1 x 10 = 10 ]",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_3/Analog%20And%20Digital%20Electronics/analog-and-digital-electronics-esc301-2023.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Computer Organization",
+    "extracted_subject": "Name : \u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_3/Computer%20Organization/computer-organization-2013.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Values And Ethics In Profession",
+    "extracted_subject": "3002-",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_3/Values%20And%20Ethics%20In%20Profession/values-and-ethics-in-profession-2011.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Electronic System Design",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_3/Electronic%20System%20Design/electronic-system-design-2009.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Digital Electronics And Logic Design",
+    "extracted_subject": "3201",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_3/Digital%20Electronics%20And%20Logic%20Design/digital-electronics-and-logic-design-2013.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Computer Organisation",
+    "extracted_subject": "[ 1 x 10 = 10 ]",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_3/Computer%20Organisation/computer-organisation-pcc-cs302-2023.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Data Structure And Algorithms Pcc",
+    "extracted_subject": "[ 1 x 10 = 10 ]",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_3/Data%20Structure%20And%20Algorithms%20Pcc/data-structure-and-algorithms-pcc-csbs301-2023.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Data Structure And Algorithms",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_3/Data%20Structure%20And%20Algorithms/data-structure-and-algorithms-2009.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Basic Environmental Engineering And Elementary Biology",
+    "extracted_subject": "Name : \u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_3/Basic%20Environmental%20Engineering%20And%20Elementary%20Biology/basic-environmental-engineering-and-elementary-biology-2013.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Basic Electrical Engineering Old",
+    "extracted_subject": "2201 ( 03/06 )",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/SEM2/Basic Electrical Engineering Old/Basic_Electrical_Engineering_Old-2009.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Mathematics 3",
+    "extracted_subject": "Name : \u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_4/Mathematics%203/mathematics-3-2013.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Analysis Design Of Information System",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_4/Analysis%20Design%20Of%20Information%20System/analysis-design-of-information-system-2011.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Control Systems",
+    "extracted_subject": "4642 (16/06)",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_4/Control%20Systems/control-systems-2009.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Formal Language And Automata Theory",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_4/Formal%20Language%20And%20Automata%20Theory/formal-language-and-automata-theory-2013.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Principle Of Communication Engineering",
+    "extracted_subject": "4301",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_4/Principle%20Of%20Communication%20Engineering/principle-of-communication-engineering-2013.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Principles Of Communication Engineering",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_4/Principles%20Of%20Communication%20Engineering/principles-of-communication-engineering-2010.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Object Oriented Programming And Uml",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_4/Object%20Oriented%20Programming%20And%20Uml/object-oriented-programming-and-uml-2013.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Basic Electrical Engineering Es Ee101",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/SEM2/Basic Electrical Engineering Es Ee101/Basic_Electrical_Engineering_Es_Ee101-2010.pdf"
+  },
+  {
+    "dept": "ME",
+    "db_subject": "Mechanical Science 1",
+    "extracted_subject": "SPL.-9004",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/ME/SEM1/Mechanical Science 1/Mechanical_Science_1-2009.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Principles Of Communication Engg.",
+    "extracted_subject": "4581\u00a0(12/06)",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_4/Principles%20Of%20Communication%20Engg./principles-of-communication-engg.-2009.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Numerical Methods",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_4/Numerical%20Methods/numerical-methods-2012.pdf"
+  },
+  {
+    "dept": "ME",
+    "db_subject": "Basic Electronics Engineering V2",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/ME/SEM1/Basic Electronics Engineering V2/Basic_Electronics_Engineering_V2-2009.pdf"
+  },
+  {
+    "dept": "ME",
+    "db_subject": "Electrical Sensors And Transducers",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/ME/SEM1/Electrical Sensors And Transducers/Electrical_Sensors_And_Transducers-2010.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Communication Engineering And Coding Theory",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_4/Communication%20Engineering%20And%20Coding%20Theory/communication-engineering-and-coding-theory-2012.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Analysis And Design Of Information System",
+    "extracted_subject": "4402 ( 04/06 )",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_4/Analysis%20And%20Design%20Of%20Information%20System/analysis-and-design-of-information-system-2009.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Computer Organization And Architecture",
+    "extracted_subject": "4462\u00a0(08/06)",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_4/Computer%20Organization%20And%20Architecture/computer-organization-and-architecture-2009.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Operations Research And Optimization Technique",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_5/Operations%20Research%20And%20Optimization%20Technique/operations-research-and-optimization-technique-2010.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Operation Research",
+    "extracted_subject": "Name : \u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_5/Operation%20Research/operation-research-2012.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Operation Research And Optimization Techniques",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_5/Operation%20Research%20And%20Optimization%20Techniques/operation-research-and-optimization-techniques-2009.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Digital Signal Processing",
+    "extracted_subject": "5409",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_5/Digital%20Signal%20Processing/digital-signal-processing-2013.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Operations Research And Optimization Techniques",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_5/Operations%20Research%20And%20Optimization%20Techniques/operations-research-and-optimization-techniques-2011.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Data Communication",
+    "extracted_subject": "Name : \u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/SEM5/Data Communication/data-communication-2013.pdf"
+  },
+  {
+    "dept": "IT",
+    "db_subject": "Operation Research And Optimization Technique",
+    "extracted_subject": "5303",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/IT/sem_5/Operation%20Research%20And%20Optimization%20Technique/operation-research-and-optimization-technique-2012.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Utilization Of Electrical Power",
+    "extracted_subject": "S-53023\u00a0(28/07)",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/sem_7/Utilization%20Of%20Electrical%20Power/utilization-of-electrical-power-2009.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Power Plant Instrumentation And Control",
+    "extracted_subject": "[ Turn over ]",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/sem_7/Power%20Plant%20Instrumentation%20And%20Control/power-plant-instrumentation-and-control-2010.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "High Voltage Engineering",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/sem_7/High%20Voltage%20Engineering/high-voltage-engineering-v2-2012.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Power System 3",
+    "extracted_subject": "Name : \u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/sem_7/Power%20System%203/power-system-3-2012.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Power Electronics",
+    "extracted_subject": "SS-154",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/sem_7/Power%20Electronics/power-electronics-2011.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Financial Management And Accounts",
+    "extracted_subject": "SS-301",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/sem_7/Financial%20Management%20And%20Accounts/financial-management-and-accounts-2012.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Utilization Of Electric Power",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/sem_7/Utilization%20Of%20Electric%20Power/utilization-of-electric-power-2010.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Power Generation Economics",
+    "extracted_subject": "S\u201353025 ( 28/07 )",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/sem_7/Power%20Generation%20Economics/power-generation-economics-v2-2009.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Multimedia Systems",
+    "extracted_subject": "[ Turn over ]",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/sem_7/Multimedia%20Systems/multimedia-systems-2010.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Hvdc Transmission",
+    "extracted_subject": "[ Turn over",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/sem_7/Hvdc%20Transmission/hvdc-transmission-2009.pdf"
+  },
+  {
+    "dept": "EE",
+    "db_subject": "Utilisation Of Electric Power",
+    "extracted_subject": "Name : \u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026",
+    "url": "https://nikvdsulxvinkvxstxol.supabase.co/storage/v1/object/public/pyqs_pdf/EE/sem_7/Utilisation%20Of%20Electric%20Power/utilisation-of-electric-power-v2-2012.pdf"
+  }
+]

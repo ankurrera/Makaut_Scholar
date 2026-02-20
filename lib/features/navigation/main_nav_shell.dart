@@ -144,7 +144,7 @@ class _FloatingDockState extends State<_FloatingDock> with SingleTickerProviderS
         child: ClipRRect(
           borderRadius: radius,
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+            filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
             child: Container(
               decoration: BoxDecoration(
                 // Ultra-thin glass fill — mostly transparent
