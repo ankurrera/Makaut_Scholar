@@ -4,15 +4,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAKAUT Scholar | Premium Engineering Resources</title>
+    <title>Zenith Studio | Digital Excellence & Software Solutions</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --bg: #0F1115;
             --surface: #171A21;
+            --surface-hover: #1E222B;
             --accent: #8E82FF;
+            --accent-glow: rgba(142, 130, 255, 0.2);
             --text-primary: #FFFFFF;
             --text-secondary: #A0A0A0;
             --border: #2A2E37;
@@ -34,7 +37,7 @@
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 0 24px;
         }
@@ -43,11 +46,11 @@
         nav {
             position: sticky;
             top: 0;
-            background: rgba(15, 17, 21, 0.8);
+            background: rgba(15, 17, 21, 0.85);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
             z-index: 1000;
-            padding: 16px 0;
+            padding: 20px 0;
         }
 
         nav .container {
@@ -57,11 +60,18 @@
         }
 
         .logo {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--accent);
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
             text-decoration: none;
             letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo span {
+            color: var(--accent);
         }
 
         .nav-links {
@@ -83,39 +93,107 @@
 
         /* Hero Section */
         header {
-            padding: 80px 0 60px;
+            padding: 100px 0 80px;
             text-align: center;
         }
 
         h1 {
-            font-size: 3rem;
+            font-size: 3.5rem;
             font-weight: 800;
-            margin-bottom: 12px;
-            letter-spacing: -1px;
+            margin-bottom: 16px;
+            letter-spacing: -1.5px;
+            background: linear-gradient(135deg, #FFF 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .tagline {
-            font-size: 1.1rem;
+            font-size: 1.25rem;
             color: var(--text-secondary);
-            max-width: 600px;
+            max-width: 700px;
             margin: 0 auto;
+        }
+
+        /* Products Section */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 40px;
+        }
+
+        .product-card {
+            background-color: var(--surface);
+            padding: 40px;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent);
+            box-shadow: 0 12px 40px var(--accent-glow);
+        }
+
+        .product-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .product-price {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .product-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 24px;
+        }
+
+        .btn {
+            display: inline-block;
+            background: var(--accent);
+            color: var(--bg);
+            padding: 14px 28px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            text-align: center;
+            transition: opacity 0.2s ease;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
         }
 
         /* Content Sections */
         section {
-            padding: 60px 0;
+            padding: 80px 0;
             border-bottom: 1px solid var(--border);
         }
 
-        section:last-of-type {
-            border-bottom: none;
+        h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 32px;
+            color: var(--text-primary);
+            text-align: center;
         }
 
-        h2 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 24px;
+        .section-title-left {
+            text-align: left;
             color: var(--accent);
+            font-size: 1.5rem;
+            margin-bottom: 24px;
         }
 
         p,
@@ -138,52 +216,57 @@
             margin-left: -1em;
         }
 
-        /* Card styles for contrast */
-        .contact-card {
-            background-color: var(--surface);
-            padding: 32px;
-            border-radius: 16px;
-            border: 1px solid var(--border);
+        /* Contact Section Styles */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
             margin-top: 24px;
         }
 
+        .contact-card {
+            background-color: var(--surface);
+            padding: 32px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
         .contact-item {
-            margin-bottom: 12px;
-            display: flex;
-            flex-direction: column;
+            margin-bottom: 20px;
         }
 
         .contact-label {
             font-weight: 600;
             color: var(--text-primary);
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 4px;
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
+            display: block;
         }
 
         footer {
-            padding: 40px 0;
+            padding: 60px 0;
             text-align: center;
+            background: var(--surface);
             border-top: 1px solid var(--border);
-            margin-top: 40px;
         }
 
         footer p {
-            font-size: 0.85rem;
+            font-size: 0.9rem;
         }
 
-        @media (max-width: 640px) {
+        @media (max-width: 768px) {
             h1 {
-                font-size: 2.25rem;
+                font-size: 2.5rem;
             }
 
             .nav-links {
                 display: none;
             }
 
-            header {
-                padding: 60px 0 40px;
+            .contact-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -193,8 +276,9 @@
 
     <nav>
         <div class="container">
-            <a href="#" class="logo">MAKAUT Scholar</a>
+            <a href="#" class="logo">Zenith<span>Studio</span></a>
             <div class="nav-links">
+                <a href="#products">Products</a>
                 <a href="#privacy">Privacy</a>
                 <a href="#terms">Terms</a>
                 <a href="#refund">Refunds</a>
@@ -204,83 +288,133 @@
     </nav>
 
     <header class="container">
-        <h1>MAKAUT Scholar</h1>
-        <p class="tagline">Premium Engineering Resources. Mobile App Launching Soon.</p>
+        <h1>Building the Future of Digital Experiences.</h1>
+        <p class="tagline">Zenith Studio specializes in premium software solutions, UI kits, and custom automation for
+            ambitious developers and businesses.</p>
     </header>
 
-    <main class="container">
-        <!-- Privacy Policy -->
-        <section id="privacy">
-            <h2>Privacy Policy</h2>
-            <p>Your privacy is important to us. It is MAKAUT Scholar's policy to respect your privacy regarding any
-                information we may collect while operating our application.</p>
-            <ul>
-                <li>We only ask for personal information when we truly need it to provide a service to you.</li>
-                <li>We do not store sensitive payment information like Card numbers or UPI PINs on our servers.</li>
-                <li>All transactions are processed through secure, RBI-approved payment gateways (PhonePe).</li>
-                <li>We don't share any personally identifying information publicly or with third-parties, except when
-                    required by law.</li>
-            </ul>
-            <p>Your continued use of our app will be regarded as acceptance of our practices around privacy and personal
-                information.</p>
-        </section>
-
-        <!-- Terms & Conditions -->
-        <section id="terms">
-            <h2>Terms & Conditions</h2>
-            <p>By accessing MAKAUT Scholar, you are agreeing to be bound by these terms of service, all applicable laws
-                and regulations.</p>
-            <ul>
-                <li>The content provided within the app is for personal, non-commercial study and educational purposes
-                    only.</li>
-                <li>Users are prohibited from redistributing, selling, or modifying the digital resources (PDFs, notes)
-                    provided.</li>
-                <li>We reserve the right to terminate access for users found violating intellectual property rights or
-                    engaging in fraudulent activities.</li>
-            </ul>
-        </section>
-
-        <!-- Refund & Cancellation Policy -->
-        <section id="refund">
-            <h2>Refund & Cancellation Policy</h2>
-            <p>At MAKAUT Scholar, we strive to provide high-quality educational content. Please read our refund policy
-                carefully:</p>
-            <ul>
-                <li><strong>No Refunds:</strong> Since the services provided are instantly consumed digital goods (PDFs,
-                    premium notes, and engineering resources), we do not offer refunds once a purchase is successfully
-                    completed.</li>
-                <li><strong>Cancellation:</strong> Subscription or one-time purchases cannot be cancelled once the
-                    digital content has been unlocked for the user.</li>
-                <li><strong>Payment Failures:</strong> In case of a payment failure where the amount is deducted but the
-                    content is not unlocked, please contact us with your transaction ID for a manual resolution within
-                    48 hours.</li>
-            </ul>
-        </section>
-
-        <!-- Contact Section -->
-        <section id="contact">
-            <h2>Contact Us</h2>
-            <p>If you have any questions about these policies or our services, please get in touch with our team.</p>
-            <div class="contact-card">
-                <div class="contact-item">
-                    <span class="contact-label">Email</span>
-                    <p>ankurr.era@gmail.com</p>
-                </div>
-                <div class="contact-item">
-                    <span class="contact-label">Phone</span>
-                    <p>+91-9002278760</p>
-                </div>
-                <div class="contact-item">
-                    <span class="contact-label">Operating Address</span>
-                    <p>Shimultala Krishnanagar Nadia. Landmark : Near Friends Club. PIN: 741101, West Bengal.</p>
+    <main>
+        <!-- Digital Products Section -->
+        <section id="products" style="background: linear-gradient(to bottom, var(--bg), #121419);">
+            <div class="container">
+                <h2>Our Digital Products & Services</h2>
+                <div class="products-grid">
+                    <!-- Product 1 -->
+                    <div class="product-card">
+                        <div>
+                            <div class="product-name">MAKAUT Scholar Premium</div>
+                            <div class="product-price">₹499<span>/year</span></div>
+                            <p class="product-desc">Full access to premium engineering resources, solved PYQs, and
+                                organized academic notes for MAKAUT students.</p>
+                        </div>
+                        <a href="#" class="btn">Get Access</a>
+                    </div>
+                    <!-- Product 2 -->
+                    <div class="product-card">
+                        <div>
+                            <div class="product-name">Zenith Medical Dashboard UI Kit</div>
+                            <div class="product-price">₹999</div>
+                            <p class="product-desc">A professional Flutter & Figma UI kit designed for healthcare apps.
+                                Includes 40+ screens and dark mode support.</p>
+                        </div>
+                        <a href="#" class="btn">Buy Now</a>
+                    </div>
+                    <!-- Product 3 -->
+                    <div class="product-card">
+                        <div>
+                            <div class="product-name">Custom Telegram Bot Development</div>
+                            <div class="product-price">₹2,499</div>
+                            <p class="product-desc">Custom end-to-end Telegram bot development for automation, scraping,
+                                or customer engagement services.</p>
+                        </div>
+                        <a href="#" class="btn">Enquire Now</a>
+                    </div>
                 </div>
             </div>
         </section>
+
+        <div class="container">
+            <!-- Privacy Policy -->
+            <section id="privacy">
+                <h3 class="section-title-left">Privacy Policy</h3>
+                <p>Your privacy is important to us. It is Zenith Studio's policy to respect your privacy regarding any
+                    information we may collect while operating our application and website.</p>
+                <ul>
+                    <li>We only ask for personal information when we truly need it to provide a service to you.</li>
+                    <li>We do not store sensitive payment information like Card numbers or UPI PINs on our servers.</li>
+                    <li>All transactions are processed through secure, RBI-approved payment gateways (PhonePe).</li>
+                    <li>We don't share any personally identifying information publicly or with third-parties, except
+                        when required by law.</li>
+                </ul>
+            </section>
+
+            <!-- Terms & Conditions -->
+            <section id="terms">
+                <h3 class="section-title-left">Terms & Conditions</h3>
+                <p>By accessing Zenith Studio products, you are agreeing to be bound by these terms of service, all
+                    applicable laws and regulations.</p>
+                <ul>
+                    <li>Digital products provided by Zenith Studio are for personal or specified commercial use based on
+                        the license purchased.</li>
+                    <li>Users are prohibited from redistributing, selling, or modifying the core digital resources
+                        without explicit permission.</li>
+                    <li>We reserve the right to terminate access for users found violating intellectual property rights
+                        or engaging in fraudulent activities.</li>
+                </ul>
+            </section>
+
+            <!-- Refund & Cancellation Policy -->
+            <section id="refund">
+                <h3 class="section-title-left">Refund & Cancellation Policy</h3>
+                <p>At Zenith Studio, we strive to provide high-quality digital assets. Please read our refund policy
+                    carefully:</p>
+                <ul>
+                    <li><strong>No Refunds:</strong> Since our services and products are instantly consumed or
+                        downloaded digital goods (PDFs, UI Kits, Source Code), we do not offer refunds once a purchase
+                        is successfully completed.</li>
+                    <li><strong>Cancellation:</strong> Digital downloads or subscription unlocks cannot be cancelled
+                        once the transaction is complete and access is granted.</li>
+                    <li><strong>Support:</strong> For any technical issues with your purchase, contact us within 48
+                        hours for resolution.</li>
+                </ul>
+            </section>
+
+            <!-- Contact Section -->
+            <section id="contact">
+                <h3 class="section-title-left">Contact Us</h3>
+                <div class="contact-grid">
+                    <div>
+                        <p>Have questions about our products or need custom development? Reach out to our specialist
+                            team.</p>
+                        <div class="contact-card">
+                            <div class="contact-item">
+                                <span class="contact-label">Email Support</span>
+                                <p>ankurr.era@gmail.com</p>
+                            </div>
+                            <div class="contact-item">
+                                <span class="contact-label">Business Phone</span>
+                                <p>+91-9002278760</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <p>Our Registered Office:</p>
+                        <div class="contact-card">
+                            <div class="contact-item">
+                                <span class="contact-label">Operating Address</span>
+                                <p>Shimultala Krishnanagar Nadia. Landmark : Near Friends Club. PIN: 741101, West
+                                    Bengal.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
     </main>
 
     <footer>
         <div class="container">
-            <p>&copy; 2026 MAKAUT Scholar. All rights reserved.</p>
+            <p>&copy; 2026 Zenith Studio. Crafting Digital Excellence.</p>
         </div>
     </footer>
 
