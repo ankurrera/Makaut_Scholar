@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zenith Studio | Digital Excellence & Software Solutions</title>
+    <title>Zenith Studio | Professional Software & Digital Solutions</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
@@ -37,7 +37,7 @@
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 0 auto;
             padding: 0 24px;
         }
@@ -50,7 +50,7 @@
             backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
             z-index: 1000;
-            padding: 20px 0;
+            padding: 24px 0;
         }
 
         nav .container {
@@ -60,14 +60,14 @@
         }
 
         .logo {
-            font-size: 1.5rem;
+            font-size: 1.75rem;
             font-weight: 800;
             color: var(--text-primary);
             text-decoration: none;
-            letter-spacing: -0.5px;
+            letter-spacing: -1px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
         .logo span {
@@ -76,13 +76,13 @@
 
         .nav-links {
             display: flex;
-            gap: 24px;
+            gap: 32px;
         }
 
         .nav-links a {
             color: var(--text-secondary);
             text-decoration: none;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             font-weight: 500;
             transition: color 0.2s ease;
         }
@@ -93,16 +93,17 @@
 
         /* Hero Section */
         header {
-            padding: 100px 0 80px;
+            padding: 120px 0 100px;
             text-align: center;
         }
 
         h1 {
-            font-size: 3.5rem;
+            font-size: 4rem;
             font-weight: 800;
-            margin-bottom: 16px;
-            letter-spacing: -1.5px;
-            background: linear-gradient(135deg, #FFF 0%, var(--accent) 100%);
+            margin-bottom: 20px;
+            letter-spacing: -2px;
+            line-height: 1.1;
+            background: linear-gradient(to right, #ffffff, var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -110,81 +111,110 @@
         .tagline {
             font-size: 1.25rem;
             color: var(--text-secondary);
-            max-width: 700px;
+            max-width: 800px;
             margin: 0 auto;
         }
 
-        /* Products Section */
-        .products-grid {
+        /* Services Grid */
+        .services-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 24px;
-            margin-top: 40px;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 32px;
+            margin-top: 60px;
         }
 
-        .product-card {
+        .service-card {
             background-color: var(--surface);
-            padding: 40px;
-            border-radius: 24px;
+            padding: 48px;
+            border-radius: 28px;
             border: 1px solid var(--border);
-            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            position: relative;
+            overflow: hidden;
         }
 
-        .product-card:hover {
-            transform: translateY(-8px);
+        .service-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--accent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .service-card:hover {
+            transform: translateY(-12px);
             border-color: var(--accent);
-            box-shadow: 0 12px 40px var(--accent-glow);
+            background-color: var(--surface-hover);
+            box-shadow: 0 20px 60px var(--accent-glow);
         }
 
-        .product-name {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-bottom: 12px;
+        .service-card:hover::before {
+            opacity: 1;
+        }
+
+        .service-name {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 16px;
             color: var(--text-primary);
         }
 
-        .product-price {
-            font-size: 2rem;
+        .service-price {
+            font-size: 2.25rem;
             font-weight: 800;
             color: var(--accent);
-            margin-bottom: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
         }
 
-        .product-desc {
+        .service-price span {
+            font-size: 1rem;
             color: var(--text-secondary);
-            font-size: 0.95rem;
-            margin-bottom: 24px;
+            font-weight: 500;
+        }
+
+        .service-desc {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            margin-bottom: 32px;
         }
 
         .btn {
             display: inline-block;
             background: var(--accent);
             color: var(--bg);
-            padding: 14px 28px;
-            border-radius: 12px;
+            padding: 16px 32px;
+            border-radius: 14px;
             text-decoration: none;
             font-weight: 700;
             text-align: center;
-            transition: opacity 0.2s ease;
+            transition: transform 0.2s ease, filter 0.2s ease;
         }
 
         .btn:hover {
-            opacity: 0.9;
+            filter: brightness(1.1);
+            transform: scale(1.02);
         }
 
         /* Content Sections */
         section {
-            padding: 80px 0;
+            padding: 100px 0;
             border-bottom: 1px solid var(--border);
         }
 
         h2 {
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: 800;
-            margin-bottom: 32px;
+            margin-bottom: 40px;
             color: var(--text-primary);
             text-align: center;
         }
@@ -192,15 +222,16 @@
         .section-title-left {
             text-align: left;
             color: var(--accent);
-            font-size: 1.5rem;
-            margin-bottom: 24px;
+            font-size: 1.75rem;
+            margin-bottom: 30px;
+            font-weight: 800;
         }
 
         p,
         li {
             color: var(--text-secondary);
-            margin-bottom: 16px;
-            font-size: 1rem;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
         }
 
         ul {
@@ -209,64 +240,104 @@
         }
 
         ul li::before {
-            content: "•";
+            content: "→";
             color: var(--accent);
             display: inline-block;
-            width: 1em;
-            margin-left: -1em;
+            width: 1.5em;
+            margin-left: 0;
         }
 
-        /* Contact Section Styles */
-        .contact-grid {
+        /* Contact Details Section */
+        .contact-container {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            margin-top: 24px;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 60px;
+            align-items: start;
         }
 
-        .contact-card {
-            background-color: var(--surface);
-            padding: 32px;
+        .contact-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        .contact-box {
+            background: var(--surface);
+            padding: 24px;
             border-radius: 20px;
             border: 1px solid var(--border);
         }
 
-        .contact-item {
-            margin-bottom: 20px;
-        }
-
         .contact-label {
-            font-weight: 600;
-            color: var(--text-primary);
-            font-size: 0.8rem;
+            font-weight: 700;
+            font-size: 0.85rem;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-bottom: 8px;
+            color: var(--text-primary);
+            letter-spacing: 2px;
+            margin-bottom: 10px;
             display: block;
         }
 
+        .contact-value {
+            font-size: 1.1rem;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* Footer */
         footer {
-            padding: 60px 0;
-            text-align: center;
-            background: var(--surface);
+            padding: 80px 0 40px;
+            background: #0B0D11;
             border-top: 1px solid var(--border);
         }
 
-        footer p {
+        .footer-address {
+            margin-bottom: 40px;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
             font-size: 0.9rem;
+            transition: color 0.2s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent);
+        }
+
+        .copyright {
+            font-size: 0.85rem;
+            color: #4A4A4A;
         }
 
         @media (max-width: 768px) {
             h1 {
-                font-size: 2.5rem;
+                font-size: 2.75rem;
             }
 
             .nav-links {
                 display: none;
             }
 
-            .contact-grid {
+            .contact-container {
                 grid-template-columns: 1fr;
+            }
+
+            header {
+                padding: 80px 0 60px;
             }
         }
     </style>
@@ -278,143 +349,136 @@
         <div class="container">
             <a href="#" class="logo">Zenith<span>Studio</span></a>
             <div class="nav-links">
-                <a href="#products">Products</a>
+                <a href="#services">Services</a>
                 <a href="#privacy">Privacy</a>
                 <a href="#terms">Terms</a>
-                <a href="#refund">Refunds</a>
                 <a href="#contact">Contact</a>
             </div>
         </div>
     </nav>
 
     <header class="container">
-        <h1>Building the Future of Digital Experiences.</h1>
-        <p class="tagline">Zenith Studio specializes in premium software solutions, UI kits, and custom automation for
-            ambitious developers and businesses.</p>
+        <h1>Official Storefront</h1>
+        <p class="tagline">Zenith Studio delivers high-performance digital products and bespoke software engineering.
+            Elevating ideas through precision and design.</p>
     </header>
 
     <main>
-        <!-- Digital Products Section -->
-        <section id="products" style="background: linear-gradient(to bottom, var(--bg), #121419);">
+        <!-- Professional Services Section -->
+        <section id="services">
             <div class="container">
-                <h2>Our Digital Products & Services</h2>
-                <div class="products-grid">
-                    <!-- Product 1 -->
-                    <div class="product-card">
+                <h2>Professional Services</h2>
+                <div class="services-grid">
+                    <!-- MAKAUT Scholar Pro -->
+                    <div class="service-card">
                         <div>
-                            <div class="product-name">MAKAUT Scholar Premium</div>
-                            <div class="product-price">₹499<span>/year</span></div>
-                            <p class="product-desc">Full access to premium engineering resources, solved PYQs, and
-                                organized academic notes for MAKAUT students.</p>
+                            <div class="service-name">MAKAUT Scholar Pro</div>
+                            <div class="service-price">₹499</div>
+                            <p class="service-desc">Premium academic notes and PYQs. Unlock all semesters and subjects
+                                with high-quality solved materials.</p>
                         </div>
-                        <a href="#" class="btn">Get Access</a>
+                        <a href="mailto:ankurr.era@gmail.com?subject=Inquiry for MAKAUT Scholar Pro" class="btn">Get
+                            Lifetime Access</a>
                     </div>
-                    <!-- Product 2 -->
-                    <div class="product-card">
+                    <!-- Custom Flutter Development -->
+                    <div class="service-card">
                         <div>
-                            <div class="product-name">Zenith Medical Dashboard UI Kit</div>
-                            <div class="product-price">₹999</div>
-                            <p class="product-desc">A professional Flutter & Figma UI kit designed for healthcare apps.
-                                Includes 40+ screens and dark mode support.</p>
+                            <div class="service-name">Custom Flutter Development</div>
+                            <div class="service-price">₹2,999<span>/start</span></div>
+                            <p class="service-desc">Professional mobile app solutions for iOS and Android. Modern UI/UX,
+                                fast performance, and cross-platform excellence.</p>
                         </div>
-                        <a href="#" class="btn">Buy Now</a>
+                        <a href="https://wa.me/919002278769?text=Hi Zenith Studio, I am interested in your development services."
+                            class="btn">Get a Quote</a>
                     </div>
-                    <!-- Product 3 -->
-                    <div class="product-card">
+                    <!-- Zenith Medical Dashboard -->
+                    <div class="service-card">
                         <div>
-                            <div class="product-name">Custom Telegram Bot Development</div>
-                            <div class="product-price">₹2,499</div>
-                            <p class="product-desc">Custom end-to-end Telegram bot development for automation, scraping,
-                                or customer engagement services.</p>
+                            <div class="service-name">Zenith Medical Dashboard</div>
+                            <div class="service-price">₹1,499</div>
+                            <p class="service-desc">Digital clinic management tool. Streamline prescriptions, patient
+                                records, and appointments with ease.</p>
                         </div>
-                        <a href="#" class="btn">Enquire Now</a>
+                        <a href="https://wa.me/919002278769?text=Hi Zenith Studio, I am interested in your development services."
+                            class="btn">Purchase License</a>
                     </div>
                 </div>
             </div>
         </section>
 
+        <!-- Compliance & Info -->
         <div class="container">
-            <!-- Privacy Policy -->
-            <section id="privacy">
-                <h3 class="section-title-left">Privacy Policy</h3>
-                <p>Your privacy is important to us. It is Zenith Studio's policy to respect your privacy regarding any
-                    information we may collect while operating our application and website.</p>
-                <ul>
-                    <li>We only ask for personal information when we truly need it to provide a service to you.</li>
-                    <li>We do not store sensitive payment information like Card numbers or UPI PINs on our servers.</li>
-                    <li>All transactions are processed through secure, RBI-approved payment gateways (PhonePe).</li>
-                    <li>We don't share any personally identifying information publicly or with third-parties, except
-                        when required by law.</li>
-                </ul>
-            </section>
-
-            <!-- Terms & Conditions -->
-            <section id="terms">
-                <h3 class="section-title-left">Terms & Conditions</h3>
-                <p>By accessing Zenith Studio products, you are agreeing to be bound by these terms of service, all
-                    applicable laws and regulations.</p>
-                <ul>
-                    <li>Digital products provided by Zenith Studio are for personal or specified commercial use based on
-                        the license purchased.</li>
-                    <li>Users are prohibited from redistributing, selling, or modifying the core digital resources
-                        without explicit permission.</li>
-                    <li>We reserve the right to terminate access for users found violating intellectual property rights
-                        or engaging in fraudulent activities.</li>
-                </ul>
-            </section>
-
-            <!-- Refund & Cancellation Policy -->
-            <section id="refund">
-                <h3 class="section-title-left">Refund & Cancellation Policy</h3>
-                <p>At Zenith Studio, we strive to provide high-quality digital assets. Please read our refund policy
-                    carefully:</p>
-                <ul>
-                    <li><strong>No Refunds:</strong> Since our services and products are instantly consumed or
-                        downloaded digital goods (PDFs, UI Kits, Source Code), we do not offer refunds once a purchase
-                        is successfully completed.</li>
-                    <li><strong>Cancellation:</strong> Digital downloads or subscription unlocks cannot be cancelled
-                        once the transaction is complete and access is granted.</li>
-                    <li><strong>Support:</strong> For any technical issues with your purchase, contact us within 48
-                        hours for resolution.</li>
-                </ul>
-            </section>
-
-            <!-- Contact Section -->
+            <!-- Contact & Help Section -->
             <section id="contact">
-                <h3 class="section-title-left">Contact Us</h3>
-                <div class="contact-grid">
+                <div class="contact-container">
                     <div>
-                        <p>Have questions about our products or need custom development? Reach out to our specialist
-                            team.</p>
-                        <div class="contact-card">
-                            <div class="contact-item">
-                                <span class="contact-label">Email Support</span>
-                                <p>ankurr.era@gmail.com</p>
+                        <h3 class="section-title-left">Get in Touch</h3>
+                        <p>Our dedicated support team is available to assist you with any product queries, licensing, or
+                            technical assistance.</p>
+                        <div class="contact-details-grid">
+                            <div class="contact-box">
+                                <span class="contact-label">Email Address</span>
+                                <div class="contact-value">ankurr.era@gmail.com</div>
                             </div>
-                            <div class="contact-item">
-                                <span class="contact-label">Business Phone</span>
-                                <p>+91-9002278760</p>
+                            <div class="contact-box">
+                                <span class="contact-label">Mobile Number</span>
+                                <div class="contact-value">+91-9002278769</div>
                             </div>
                         </div>
                     </div>
                     <div>
-                        <p>Our Registered Office:</p>
-                        <div class="contact-card">
-                            <div class="contact-item">
-                                <span class="contact-label">Operating Address</span>
-                                <p>Shimultala Krishnanagar Nadia. Landmark : Near Friends Club. PIN: 741101, West
-                                    Bengal.</p>
-                            </div>
-                        </div>
+                        <h3 class="section-title-left">Documentation</h3>
+                        <ul>
+                            <li><a href="#privacy" style="color:var(--text-secondary); text-decoration:none;">Privacy
+                                    Policy</a></li>
+                            <li><a href="#terms" style="color:var(--text-secondary); text-decoration:none;">Terms of
+                                    Service</a></li>
+                            <li><a href="#refund" style="color:var(--text-secondary); text-decoration:none;">Refund &
+                                    Cancellation</a></li>
+                        </ul>
                     </div>
                 </div>
+            </section>
+
+            <!-- Legal Detailed Sections for KYC -->
+            <section id="privacy">
+                <h3 class="section-title-left">Privacy Policy</h3>
+                <p>Zenith Studio is committed to protecting your personal data. We do not store sensitive payment
+                    details such as Card numbers or UPI PINs. All payments are processed through RBI-authorized secure
+                    gateways provided by PhonePe.</p>
+                <p>We collect minimal information required to deliver our digital services and never share data with
+                    unauthorized third parties.</p>
+            </section>
+
+            <section id="terms">
+                <h3 class="section-title-left">Terms & Conditions</h3>
+                <p>By purchasing services from Zenith Studio, you agree to comply with our usage policies. Digital
+                    materials are for personal or internal business use. Redistribution of source code or premium
+                    resources without written consent is strictly prohibited.</p>
+            </section>
+
+            <section id="refund">
+                <h3 class="section-title-left">Refund & Cancellation</h3>
+                <p>Due to the nature of digital goods and instant consumption of premium resources, all sales are final.
+                    No refunds or cancellations will be processed once the product or service has been delivered
+                    digitally.</p>
+                <p>For service-based projects, cancellation terms will be governed by the specific project contract.</p>
             </section>
         </div>
     </main>
 
     <footer>
         <div class="container">
-            <p>&copy; 2026 Zenith Studio. Crafting Digital Excellence.</p>
+            <div class="footer-address">
+                <span class="contact-label" style="text-align: center; margin-bottom: 12px;">Headquarters</span>
+                Registered Office: Simultala, Near Friends Club, Krishnanagar, Nadia, West Bengal - 741101
+            </div>
+            <div class="footer-links">
+                <a href="#privacy">Privacy</a>
+                <a href="#terms">Terms</a>
+                <a href="#refund">Refund Policy</a>
+            </div>
+            <p class="copyright">&copy; 2026 Zenith Studio. All rights reserved.</p>
         </div>
     </footer>
 
