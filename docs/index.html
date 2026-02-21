@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAKAUT Scholar | Premium Engineering Resources</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0F1115;
+            --surface: #171A21;
+            --accent: #8E82FF;
+            --text-primary: #FFFFFF;
+            --text-secondary: #A0A0A0;
+            --border: #2A2E37;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Navigation */
+        nav {
+            position: sticky;
+            top: 0;
+            background: rgba(15, 17, 21, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            padding: 16px 0;
+        }
+
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+        }
+
+        /* Hero Section */
+        header {
+            padding: 80px 0 60px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            letter-spacing: -1px;
+        }
+
+        .tagline {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Content Sections */
+        section {
+            padding: 60px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        section:last-of-type {
+            border-bottom: none;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--accent);
+        }
+
+        p,
+        li {
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            font-size: 1rem;
+        }
+
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        ul li::before {
+            content: "•";
+            color: var(--accent);
+            display: inline-block;
+            width: 1em;
+            margin-left: -1em;
+        }
+
+        /* Card styles for contrast */
+        .contact-card {
+            background-color: var(--surface);
+            padding: 32px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            margin-top: 24px;
+        }
+
+        .contact-item {
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .contact-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        footer {
+            padding: 40px 0;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            margin-top: 40px;
+        }
+
+        footer p {
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 640px) {
+            h1 {
+                font-size: 2.25rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            header {
+                padding: 60px 0 40px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <div class="container">
+            <a href="#" class="logo">MAKAUT Scholar</a>
+            <div class="nav-links">
+                <a href="#privacy">Privacy</a>
+                <a href="#terms">Terms</a>
+                <a href="#refund">Refunds</a>
+                <a href="#contact">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="container">
+        <h1>MAKAUT Scholar</h1>
+        <p class="tagline">Premium Engineering Resources. Mobile App Launching Soon.</p>
+    </header>
+
+    <main class="container">
+        <!-- Privacy Policy -->
+        <section id="privacy">
+            <h2>Privacy Policy</h2>
+            <p>Your privacy is important to us. It is MAKAUT Scholar's policy to respect your privacy regarding any
+                information we may collect while operating our application.</p>
+            <ul>
+                <li>We only ask for personal information when we truly need it to provide a service to you.</li>
+                <li>We do not store sensitive payment information like Card numbers or UPI PINs on our servers.</li>
+                <li>All transactions are processed through secure, RBI-approved payment gateways (PhonePe).</li>
+                <li>We don't share any personally identifying information publicly or with third-parties, except when
+                    required by law.</li>
+            </ul>
+            <p>Your continued use of our app will be regarded as acceptance of our practices around privacy and personal
+                information.</p>
+        </section>
+
+        <!-- Terms & Conditions -->
+        <section id="terms">
+            <h2>Terms & Conditions</h2>
+            <p>By accessing MAKAUT Scholar, you are agreeing to be bound by these terms of service, all applicable laws
+                and regulations.</p>
+            <ul>
+                <li>The content provided within the app is for personal, non-commercial study and educational purposes
+                    only.</li>
+                <li>Users are prohibited from redistributing, selling, or modifying the digital resources (PDFs, notes)
+                    provided.</li>
+                <li>We reserve the right to terminate access for users found violating intellectual property rights or
+                    engaging in fraudulent activities.</li>
+            </ul>
+        </section>
+
+        <!-- Refund & Cancellation Policy -->
+        <section id="refund">
+            <h2>Refund & Cancellation Policy</h2>
+            <p>At MAKAUT Scholar, we strive to provide high-quality educational content. Please read our refund policy
+                carefully:</p>
+            <ul>
+                <li><strong>No Refunds:</strong> Since the services provided are instantly consumed digital goods (PDFs,
+                    premium notes, and engineering resources), we do not offer refunds once a purchase is successfully
+                    completed.</li>
+                <li><strong>Cancellation:</strong> Subscription or one-time purchases cannot be cancelled once the
+                    digital content has been unlocked for the user.</li>
+                <li><strong>Payment Failures:</strong> In case of a payment failure where the amount is deducted but the
+                    content is not unlocked, please contact us with your transaction ID for a manual resolution within
+                    48 hours.</li>
+            </ul>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact">
+            <h2>Contact Us</h2>
+            <p>If you have any questions about these policies or our services, please get in touch with our team.</p>
+            <div class="contact-card">
+                <div class="contact-item">
+                    <span class="contact-label">Email</span>
+                    <p>ankurr.era@gmail.com</p>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-label">Phone</span>
+                    <p>+91-9002278760</p>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-label">Operating Address</span>
+                    <p>Shimultala Krishnanagar Nadia. Landmark : Near Friends Club. PIN: 741101, West Bengal.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 MAKAUT Scholar. All rights reserved.</p>
+        </div>
+    </footer>
+
+</body>
+
+</html>
