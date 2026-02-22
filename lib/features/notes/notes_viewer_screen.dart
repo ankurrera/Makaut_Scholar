@@ -4,6 +4,7 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../services/auth_service.dart';
 import '../../services/offline_service.dart';
 import 'pdf_viewer_screen.dart';
+import '../premium/premium_checkout_screen.dart';
 
 class NotesViewerScreen extends StatefulWidget {
   final String department;
@@ -22,6 +23,7 @@ class NotesViewerScreen extends StatefulWidget {
 
 class _NotesViewerScreenState extends State<NotesViewerScreen> {
   List<Map<String, dynamic>> _notes = [];
+  List<String> _purchasedItemIds = [];
   bool _isLoading = true;
   String? _error;
 
@@ -50,8 +52,18 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
     setState(() { _isLoading = true; _error = null; });
     try {
       final auth = Provider.of<AuthService>(context, listen: false);
-      final notes = await auth.fetchNotes(widget.department, widget.semester, widget.subject);
-      if (mounted) setState(() { _notes = notes; _isLoading = false; });
+      final results = await Future.wait([
+        auth.fetchNotes(widget.department, widget.semester, widget.subject),
+        auth.fetchUserPurchases('notes'),
+      ]);
+      
+      if (mounted) {
+        setState(() { 
+          _notes = results[0] as List<Map<String, dynamic>>;
+          _purchasedItemIds = results[1] as List<String>;
+          _isLoading = false; 
+        });
+      }
     } catch (e) {
       if (mounted) setState(() { _error = e.toString(); _isLoading = false; });
     }
@@ -64,6 +76,20 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
         builder: (_) => PdfViewerScreen(url: url, filePath: filePath, title: title),
       ),
     );
+  }
+
+  void _openCheckout(Map<String, dynamic> note) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PremiumCheckoutScreen(
+          itemId: note['id'].toString(),
+          itemType: 'notes',
+          itemName: note['title'] ?? 'Academic Note',
+          price: (note['price'] as num?)?.toDouble() ?? 0.0,
+        ),
+      ),
+    ).then((_) => _loadNotes()); // Reload to catch new purchase
   }
 
   /// Group notes by unit number
@@ -160,20 +186,28 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
     final isDownloaded = OfflineService().isDownloaded(id);
     final title = note['title'] ?? 'Untitled';
     final url = note['file_url'];
+    final isPremium = note['is_premium'] == true;
+    final isPurchased = _purchasedItemIds.contains(id);
+    final isLocked = isPremium && !isPurchased;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: _card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _border(isDark).withValues(alpha: 0.4)),
+        border: Border.all(
+          color: isLocked ? Colors.orange.withValues(alpha: 0.3) : _border(isDark).withValues(alpha: 0.4),
+          width: isLocked ? 1.5 : 1,
+        ),
       ),
       child: Row(
         children: [
           Expanded(
             child: InkWell(
               onTap: () {
-                if (isDownloaded) {
+                if (isLocked) {
+                  _openCheckout(note);
+                } else if (isDownloaded) {
                   final resource = OfflineService().getResource(id);
                   _openPdf(filePath: resource!.localPath, title: title);
                 } else {
@@ -186,25 +220,57 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
                     width: 42,
                     height: 42,
                     decoration: BoxDecoration(
-                      color: accent.withValues(alpha: isDark ? 0.12 : 0.08),
+                      color: isLocked 
+                          ? Colors.orange.withValues(alpha: 0.1)
+                          : accent.withValues(alpha: isDark ? 0.12 : 0.08),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(Iconsax.document_text, color: accent, size: 20),
+                    child: Icon(
+                      isLocked ? Iconsax.lock : Iconsax.document_text, 
+                      color: isLocked ? Colors.orange : accent, 
+                      size: 20
+                    ),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          title,
-                          style: TextStyle(color: _cardTextP, fontSize: 14, fontWeight: FontWeight.w500),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                title,
+                                style: TextStyle(color: _cardTextP, fontSize: 14, fontWeight: FontWeight.w500),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (isPremium)
+                              Container(
+                                margin: const EdgeInsets.only(left: 8),
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.orange.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  isPurchased ? 'UNLOCKED' : 'PREMIUM',
+                                  style: const TextStyle(color: Colors.orange, fontSize: 9, fontWeight: FontWeight.w700),
+                                ),
+                              ),
+                          ],
                         ),
                         const SizedBox(height: 3),
-                        Text(isDownloaded ? 'Offline Access Enabled' : 'PDF · Tap to open',
-                            style: TextStyle(color: isDownloaded ? Colors.green : _cardTextS, fontSize: 11)),
+                        Text(
+                          isLocked 
+                              ? 'Premium Content · ₹${note['price']}' 
+                              : (isDownloaded ? 'Offline Access Enabled' : 'PDF · Tap to open'),
+                          style: TextStyle(
+                            color: isLocked ? Colors.orange : (isDownloaded ? Colors.green : _cardTextS), 
+                            fontSize: 11
+                          )
+                        ),
                       ],
                     ),
                   ),
@@ -212,28 +278,35 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
               ),
             ),
           ),
-          IconButton(
-            icon: Icon(
-              isDownloaded ? Iconsax.tick_circle : Iconsax.document_download,
-              color: isDownloaded ? Colors.green : _cardTextS,
-              size: 20,
+          if (!isLocked)
+            IconButton(
+              icon: Icon(
+                isDownloaded ? Iconsax.tick_circle : Iconsax.document_download,
+                color: isDownloaded ? Colors.green : _cardTextS,
+                size: 20,
+              ),
+              onPressed: isDownloaded ? null : () async {
+                try {
+                  await OfflineService().downloadResource(
+                    id: id,
+                    title: title,
+                    url: url,
+                    category: ResourceCategory.NOTES,
+                  );
+                  if (mounted) setState(() {});
+                } catch (e) {
+                  if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                }
+              },
             ),
-            onPressed: isDownloaded ? null : () async {
-              try {
-                await OfflineService().downloadResource(
-                  id: id,
-                  title: title,
-                  url: url,
-                  category: ResourceCategory.NOTES,
-                );
-                if (mounted) setState(() {});
-              } catch (e) {
-                if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
-              }
-            },
-          ),
-          const SizedBox(width: 4),
-          Icon(Iconsax.export_1, color: _cardTextS, size: 18),
+          if (!isLocked) ...[
+            const SizedBox(width: 4),
+            Icon(Iconsax.export_1, color: _cardTextS, size: 18),
+          ] else
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              child: Icon(Iconsax.shopping_cart, color: Colors.orange, size: 18),
+            ),
         ],
       ),
     );

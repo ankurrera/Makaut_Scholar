@@ -12,8 +12,6 @@ CREATE TABLE IF NOT EXISTS public.notes (
   unit INTEGER NOT NULL CHECK (unit >= 1 AND unit <= 6),
   title TEXT NOT NULL,
   file_url TEXT NOT NULL,
-  is_premium BOOLEAN DEFAULT FALSE,
-  price DECIMAL(10, 2) DEFAULT 0.00,
   uploaded_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -26,21 +24,18 @@ ALTER TABLE public.notes ENABLE ROW LEVEL SECURITY;
 
 -- 4. RLS Policies
 -- Anyone can read notes
-DROP POLICY IF EXISTS "Anyone can view notes" ON public.notes;
 CREATE POLICY "Anyone can view notes"
 ON public.notes FOR SELECT
 TO public
 USING (true);
 
 -- Anon + authenticated users can insert notes (admin use)
-DROP POLICY IF EXISTS "Anon and authenticated can insert notes" ON public.notes;
 CREATE POLICY "Anon and authenticated can insert notes"
 ON public.notes FOR INSERT
 TO anon, authenticated
 WITH CHECK (true);
 
 -- Anon + authenticated users can delete notes (admin use)
-DROP POLICY IF EXISTS "Anon and authenticated can delete notes" ON public.notes;
 CREATE POLICY "Anon and authenticated can delete notes"
 ON public.notes FOR DELETE
 TO anon, authenticated
@@ -61,33 +56,19 @@ ON CONFLICT (id) DO NOTHING;
 
 -- 6. Storage RLS Policies
 
--- Anyone can read PDFs (Updated to check for premium access)
-DROP POLICY IF EXISTS "Anyone can view note PDFs" ON storage.objects;
+-- Anyone can read PDFs
 CREATE POLICY "Anyone can view note PDFs"
 ON storage.objects FOR SELECT
 TO public
-USING (
-  bucket_id = 'notes_pdf' 
-  AND (
-    (SELECT is_premium FROM public.notes WHERE file_url LIKE '%' || name) = FALSE
-    OR 
-    EXISTS (
-      SELECT 1 FROM public.user_purchases 
-      WHERE user_id = auth.uid() 
-      AND item_id = (SELECT id::text FROM public.notes WHERE file_url LIKE '%' || name)
-    )
-  )
-);
+USING (bucket_id = 'notes_pdf');
 
 -- Anon + authenticated users can upload PDFs
-DROP POLICY IF EXISTS "Anon and authenticated can upload note PDFs" ON storage.objects;
 CREATE POLICY "Anon and authenticated can upload note PDFs"
 ON storage.objects FOR INSERT
 TO anon, authenticated
 WITH CHECK (bucket_id = 'notes_pdf');
 
 -- Anon + authenticated users can delete PDFs
-DROP POLICY IF EXISTS "Anon and authenticated can delete note PDFs" ON storage.objects;
 CREATE POLICY "Anon and authenticated can delete note PDFs"
 ON storage.objects FOR DELETE
 TO anon, authenticated

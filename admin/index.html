@@ -722,6 +722,18 @@
                     <label>Note Title</label>
                     <input type="text" id="noteTitle" placeholder="e.g. Arrays & Linked Lists" />
                 </div>
+                <div class="form-group">
+                    <label>Premium Content</label>
+                    <div style="display: flex; align-items: center; gap: 10px; padding: 11px 0;">
+                        <input type="checkbox" id="noteIsPremium" style="width: 20px; height: 20px; cursor: pointer;"
+                            onchange="document.getElementById('notePriceGroup').style.display = this.checked ? 'flex' : 'none'" />
+                        <span style="font-size: 14px; color: var(--text2);">Mark as Premium</span>
+                    </div>
+                </div>
+                <div class="form-group" id="notePriceGroup" style="display: none;">
+                    <label>Price (INR)</label>
+                    <input type="number" id="notePrice" placeholder="e.g. 49" value="0" />
+                </div>
                 <div class="form-group full">
                     <label>PDF File</label>
                     <div class="file-drop" id="noteFileDrop">
@@ -1000,15 +1012,32 @@
     <!-- ═══════════════════════════ EDIT MODAL ═══════════════════════════ -->
     <div class="modal-overlay" id="editModal">
         <div class="modal">
-            <h3>✏️ Edit Syllabus</h3>
+            <h3 id="editModalTitle">✏️ Edit Syllabus</h3>
             <input type="hidden" id="editId" />
-            <div class="form-group">
-                <label>Subject Name</label>
-                <input type="text" id="editSubject" placeholder="Subject name" />
+            <input type="hidden" id="editType" />
+            <div id="syllabusFields">
+                <div class="form-group">
+                    <label>Subject Name</label>
+                    <input type="text" id="editSubject" placeholder="Subject name" />
+                </div>
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="editTitle" placeholder="Display title" />
+                </div>
             </div>
-            <div class="form-group">
-                <label>Title</label>
-                <input type="text" id="editTitle" placeholder="Display title" />
+            <div id="premiumFields" style="display: none;">
+                <div class="form-group">
+                    <label>Premium Content</label>
+                    <div style="display: flex; align-items: center; gap: 10px; padding: 11px 0;">
+                        <input type="checkbox" id="editIsPremium" style="width: 20px; height: 20px; cursor: pointer;"
+                            onchange="document.getElementById('editPriceGroup').style.display = this.checked ? 'block' : 'none'" />
+                        <span style="font-size: 14px; color: var(--text2);">Mark as Premium</span>
+                    </div>
+                </div>
+                <div class="form-group" id="editPriceGroup" style="display: none;">
+                    <label>Price (INR)</label>
+                    <input type="number" id="editPrice" placeholder="e.g. 49" />
+                </div>
             </div>
             <div class="modal-actions">
                 <button class="cancel-btn" onclick="closeEditModal()">Cancel</button>
@@ -1174,6 +1203,8 @@
                 const { error: insertErr } = await sb.from('notes').insert({
                     department: dept, semester: parseInt(sem), subject: subj,
                     unit: parseInt(unit), title: title, file_url: urlData.publicUrl,
+                    is_premium: document.getElementById('noteIsPremium').checked,
+                    price: parseFloat(document.getElementById('notePrice').value) || 0,
                 });
                 if (insertErr) throw insertErr;
 
@@ -1181,6 +1212,9 @@
                 document.getElementById('noteTitle').value = '';
                 document.getElementById('noteFileInput').value = '';
                 document.getElementById('noteFileName').textContent = '';
+                document.getElementById('noteIsPremium').checked = false;
+                document.getElementById('notePrice').value = '0';
+                document.getElementById('notePriceGroup').style.display = 'none';
                 toast('Note uploaded successfully!', 'success');
                 loadNotes();
             } catch (e) {
@@ -1205,13 +1239,16 @@
                 container.innerHTML = data.map(n => `
                     <div class="item-card" id="note-${n.id}">
                         <div class="item-info">
-                            <div class="item-title">${esc(n.title)}</div>
+                            <div class="item-title">${esc(n.title)} ${n.is_premium ? '<span style="color:var(--orange); font-size:12px;">★</span>' : ''}</div>
                             <div class="item-meta">${esc(n.department)} · Sem ${n.semester} · ${esc(n.subject)} · Unit ${n.unit}</div>
                         </div>
                         <div class="item-badges">
+                            ${n.is_premium ? `<span class="badge orange">₹${n.price}</span>` : ''}
                             <span class="badge accent">Unit ${n.unit}</span>
                         </div>
                         <div class="item-actions">
+                            <button class="action-btn open" onclick="window.open('${esc(n.file_url)}','_blank')" title="View PDF">📄</button>
+                            <button class="action-btn" onclick="openNoteEditModal('${n.id}', ${n.is_premium}, ${n.price})" title="Edit">✏️</button>
                             <button class="action-btn danger" onclick="deleteNote('${n.id}','${esc(n.file_url)}')" title="Delete">✕</button>
                         </div>
                     </div>
@@ -1329,7 +1366,7 @@
                         </div>
                         <div class="item-actions">
                             <button class="action-btn open" onclick="window.open('${esc(s.file_url)}','_blank')" title="View PDF">📄</button>
-                            <button class="action-btn" onclick="openEditModal('${s.id}',${JSON.stringify(esc(s.subject)).replace(/'/g, "\\'")},${JSON.stringify(esc(s.title)).replace(/'/g, "\\'")})" title="Edit">✏️</button>
+                            <button class="action-btn" onclick="openSyllabusEditModal('${s.id}',${JSON.stringify(esc(s.subject)).replace(/'/g, "\\'")},${JSON.stringify(esc(s.title)).replace(/'/g, "\\'")})" title="Edit">✏️</button>
                             <button class="action-btn danger" onclick="deleteSyllabus('${s.id}','${esc(s.file_url)}')" title="Delete">✕</button>
                         </div>
                     </div>
@@ -1600,12 +1637,28 @@
         }
 
         // ══════════════════════════════════════════
-        //  SYLLABUS – Edit Modal
+        //  EDIT MODALS
         // ══════════════════════════════════════════
-        function openEditModal(id, subject, title) {
+        function openSyllabusEditModal(id, subject, title) {
+            document.getElementById('editModalTitle').textContent = '✏️ Edit Syllabus';
             document.getElementById('editId').value = id;
+            document.getElementById('editType').value = 'syllabus';
             document.getElementById('editSubject').value = subject;
             document.getElementById('editTitle').value = title;
+            document.getElementById('syllabusFields').style.display = 'block';
+            document.getElementById('premiumFields').style.display = 'none';
+            document.getElementById('editModal').classList.add('show');
+        }
+
+        function openNoteEditModal(id, isPremium, price) {
+            document.getElementById('editModalTitle').textContent = '✏️ Edit Note Access';
+            document.getElementById('editId').value = id;
+            document.getElementById('editType').value = 'note';
+            document.getElementById('editIsPremium').checked = isPremium;
+            document.getElementById('editPrice').value = price;
+            document.getElementById('editPriceGroup').style.display = isPremium ? 'block' : 'none';
+            document.getElementById('syllabusFields').style.display = 'none';
+            document.getElementById('premiumFields').style.display = 'block';
             document.getElementById('editModal').classList.add('show');
         }
 
@@ -1615,17 +1668,26 @@
 
         async function saveEdit() {
             const id = document.getElementById('editId').value;
-            const subject = document.getElementById('editSubject').value.trim();
-            const title = document.getElementById('editTitle').value.trim();
-
-            if (!subject || !title) { toast('Subject and title are required', 'error'); return; }
+            const type = document.getElementById('editType').value;
 
             try {
-                const { error } = await sb.from('syllabus').update({ subject, title }).eq('id', id);
-                if (error) throw error;
+                if (type === 'syllabus') {
+                    const subject = document.getElementById('editSubject').value.trim();
+                    const title = document.getElementById('editTitle').value.trim();
+                    if (!subject || !title) throw new Error('Subject and title are required');
+                    const { error } = await sb.from('syllabus').update({ subject, title }).eq('id', id);
+                    if (error) throw error;
+                } else if (type === 'note') {
+                    const is_premium = document.getElementById('editIsPremium').checked;
+                    const price = parseFloat(document.getElementById('editPrice').value) || 0;
+                    const { error } = await sb.from('notes').update({ is_premium, price }).eq('id', id);
+                    if (error) throw error;
+                }
+
                 closeEditModal();
-                toast('Syllabus updated!', 'success');
-                loadSyllabus();
+                toast('Update successful!', 'success');
+                if (type === 'syllabus') loadSyllabus();
+                else if (type === 'note') loadNotes();
             } catch (e) {
                 toast('Update failed: ' + e.message, 'error');
             }

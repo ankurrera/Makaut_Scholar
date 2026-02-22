@@ -43,3 +43,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Sensitive Keys
+makaut-scholar-c9472cd83b46.json
+.env

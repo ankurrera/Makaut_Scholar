@@ -230,6 +230,35 @@ class AuthService extends ChangeNotifier {
     return List<Map<String, dynamic>>.from(data);
   }
 
+  /// Checks if the current user has premium access to a specific item
+  Future<bool> checkPremiumAccess(String itemType, String itemId) async {
+    final user = _client.auth.currentUser;
+    if (user == null) return false;
+
+    final response = await _client.rpc('has_premium_access', params: {
+      'target_user_id': user.id,
+      'target_item_type': itemType,
+      'target_item_id': itemId,
+    });
+    return response as bool;
+  }
+
+  /// Fetches all purchases for the current user of a specific type
+  Future<List<String>> fetchUserPurchases(String itemType) async {
+    final user = _client.auth.currentUser;
+    if (user == null) return [];
+
+    final data = await _client
+        .from('user_purchases')
+        .select('item_id')
+        .eq('user_id', user.id)
+        .eq('item_type', itemType);
+    
+    return (data as List).map((row) => row['item_id'] as String).toList();
+  }
+
+  /// Fetches PYQ papers for a department + semester + subject, ordered by year desc
+
   /// Fetches distinct semesters that have PYQs for a department
   Future<List<int>> fetchPyqSemesters(String department) async {
     final data = await _client

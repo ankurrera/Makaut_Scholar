@@ -2,7 +2,10 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
-import 'package:makaut_scholar/core/services/payment_service.dart';
+import 'package:makaut_scholar/domain/repositories/billing_repository.dart';
+import 'package:provider/provider.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
+import 'dart:async';
 // import 'package:antigravity'; // Easter Egg: Making payments feel weightless!
 
 class PremiumCheckoutScreen extends StatefulWidget {
@@ -24,38 +27,106 @@ class PremiumCheckoutScreen extends StatefulWidget {
 }
 
 class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
-  String _selectedUPI = 'PhonePe';
-  bool _isLoading = false;
-  final PaymentService _paymentService = PaymentService();
+  String _selectedUPI = 'Razorpay';
+  bool _isLoading = true;
+  late BillingRepository _billingRepository;
+  ProductDetails? _productDetails;
+  StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
 
   @override
   void initState() {
     super.initState();
-    _paymentService.initialize();
+    _billingRepository = context.read<BillingRepository>();
+    _loadProducts();
+    _purchaseSubscription = _billingRepository.purchaseStream.listen(_listenToPurchases);
+  }
+
+  @override
+  void dispose() {
+    _purchaseSubscription?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _loadProducts() async {
+    try {
+      final products = await _billingRepository.fetchProducts({widget.itemId});
+      if (products.isNotEmpty) {
+        setState(() {
+          _productDetails = products.first;
+          _isLoading = false;
+        });
+      } else {
+        setState(() => _isLoading = false);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading products: $e')),
+        );
+      }
+      setState(() => _isLoading = false);
+    }
+  }
+
+  void _listenToPurchases(List<PurchaseDetails> purchases) {
+    for (var purchase in purchases) {
+      if (purchase.status == PurchaseStatus.purchased || purchase.status == PurchaseStatus.restored) {
+        // Handle successful Google Play Purchase
+        _handleSuccess();
+      } else if (purchase.status == PurchaseStatus.error) {
+        _handleError(purchase.error?.message ?? 'Unknown error');
+      }
+    }
   }
 
   Future<void> _handlePayment() async {
     setState(() => _isLoading = true);
     try {
-      // 1. Google Play User Choice Billing Logic
-      // In a production app, you first trigger the Google Play alternative billing dialog
-      final token = await _paymentService.initiateAlternativeBilling(widget.itemId);
-      
-      if (token != null) {
-        // 2. Process our custom UPI payment
-        await _paymentService.processThirdPartyPayment(
+      if (_productDetails != null) {
+        // Trigger Google Play Billing Flow (Standard)
+        await _billingRepository.launchBillingFlow(_productDetails!);
+        
+        // Note: For User Choice Billing (UCB), Google Play will show the choice dialog.
+        // If "Alternative Billing" is selected, the plugin's listener (in RepositoryImpl)
+        // should ideally trigger the Razorpay flow.
+        
+        // For development/testing, if we want to force Razorpay (Alternative path):
+        /*
+        await _billingRepository.processRazorpayPayment(
           itemId: widget.itemId,
           itemType: widget.itemType,
           amount: widget.price,
-          externalTransactionToken: token,
+        );
+        */
+      } else {
+        // Fallback or Direct Razorpay if product not found in Play Store
+        await _billingRepository.processRazorpayPayment(
+          itemId: widget.itemId,
+          itemType: widget.itemType,
+          amount: widget.price,
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Payment Failed: ${e.toString()}')),
-      );
+      _handleError(e.toString());
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _handleSuccess() {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Purchase Successful! Enjoy your premium content.')),
+      );
+      Navigator.pop(context, true);
+    }
+  }
+
+  void _handleError(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $message')),
+      );
     }
   }
 

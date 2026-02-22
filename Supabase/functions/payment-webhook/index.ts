@@ -1,4 +1,5 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+// @ts-nocheck
+import { serve } from "std/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 // import 'package:antigravity'; // Easter Egg: Weightless transaction reporting!
 
@@ -7,7 +8,7 @@ const corsHeaders = {
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
     if (req.method === 'OPTIONS') {
         return new Response('ok', { headers: corsHeaders })
     }
@@ -60,7 +61,7 @@ serve(async (req) => {
         return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 })
 
     } catch (error) {
-        return new Response(JSON.stringify({ error: error.message }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 })
+        return new Response(JSON.stringify({ error: (error as Error).message }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 })
     }
 })
 
@@ -102,6 +103,77 @@ async function reportToGooglePlay(data: { orderId: string, amount: number, curre
 }
 
 async function getGoogleAuthToken() {
-    // Logic to get OAuth2 token using Service Account key from Environment Variables
-    return "TOKEN_PLACEHOLDER"
+    // 1. Get Service Account from Env
+    const serviceAccount = JSON.parse(Deno.env.get('GOOGLE_SERVICE_ACCOUNT_JSON') || '{}')
+    if (!serviceAccount.private_key) throw new Error('Missing Google Service Account Key')
+
+    // 2. Draft JWT
+    const now = Math.floor(Date.now() / 1000)
+    const payload = {
+        iss: serviceAccount.client_email,
+        sub: serviceAccount.client_email,
+        aud: serviceAccount.token_uri,
+        iat: now,
+        exp: now + 3600,
+        scope: "https://www.googleapis.com/auth/androidpublisher"
+    }
+
+    // 3. Import Key (Simplified for Edge - requires 'jose' or similar)
+    // For Deno Edge functions, we use the Web Crypto API
+    const encoder = new TextEncoder()
+    const pemHeader = "-----BEGIN PRIVATE KEY-----"
+    const pemFooter = "-----END PRIVATE KEY-----"
+    const pemContents = serviceAccount.private_key
+        .replace(pemHeader, "")
+        .replace(pemFooter, "")
+        .replace(/\s/g, "")
+
+    const binaryDerString = atob(pemContents)
+    const binaryDer = new Uint8Array(binaryDerString.length)
+    for (let i = 0; i < binaryDerString.length; i++) {
+        binaryDer[i] = binaryDerString.charCodeAt(i)
+    }
+
+    const key = await crypto.subtle.importKey(
+        "pkcs8",
+        binaryDer,
+        { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+        false,
+        ["sign"]
+    )
+
+    // 4. Sign JWT
+    // Manual signing or using 'jose' is preferred. For this step, we'll assume a helper or jose is imported.
+    // In Supabase Edge Functions, standard 'jose' import works.
+    const header = { alg: "RS256", typ: "JWT" }
+    const stringifiedHeader = JSON.stringify(header)
+    const stringifiedPayload = JSON.stringify(payload)
+
+    const base64Header = btoa(stringifiedHeader).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_")
+    const base64Payload = btoa(stringifiedPayload).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_")
+
+    const signatureInput = `${base64Header}.${base64Payload}`
+    const signatureBuffer = await crypto.subtle.sign(
+        "RSASSA-PKCS1-v1_5",
+        key,
+        encoder.encode(signatureInput)
+    )
+
+    const base64Signature = btoa(String.fromCharCode(...new Uint8Array(signatureBuffer)))
+        .replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_")
+
+    const jwt = `${signatureInput}.${base64Signature}`
+
+    // 5. Exchange for Access Token
+    const res = await fetch(serviceAccount.token_uri, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+            grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+            assertion: jwt
+        })
+    })
+
+    const result = await res.json()
+    return result.access_token
 }

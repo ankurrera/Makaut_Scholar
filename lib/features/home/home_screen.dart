@@ -223,13 +223,6 @@ class _HomeScreenState extends State<HomeScreen>
               child: _buildFeatureGrid(isDark),
             ),
 
-            const SizedBox(height: 24),
-
-            // 5. Progress/Analytics
-            StaggeredSlideFade(
-              delayMs: _baseDelay * 4,
-              child: _buildAnalyticsSection(isDark),
-            ),
           ],
         ),
       ),
@@ -558,109 +551,7 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildAnalyticsSection(bool isDark) {
-    return SoftCard(
-      onTap: () {},
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("Study Day 6",
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: _textPrimary)),
-                  const SizedBox(height: 4),
-                  Text("October 2025",
-                      style: TextStyle(fontSize: 12, color: _textSecondary)),
-                ],
-              ),
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: _primary500,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(Iconsax.chart_2, color: Colors.white, size: 20),
-              )
-            ],
-          ),
-          const SizedBox(height: 24),
-          // Simulated Chart
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                _buildChartBar("Sun", 0.4, false, isDark),
-                const SizedBox(width: 14),
-                _buildChartBar("Mon", 0.3, false, isDark),
-                const SizedBox(width: 14),
-                _buildChartBar("Tue", 0.6, false, isDark),
-                const SizedBox(width: 14),
-                _buildChartBar("Wed", 0.8, false, isDark),
-                const SizedBox(width: 14),
-                _buildChartBar("Thu", 0.5, false, isDark),
-                const SizedBox(width: 14),
-                _buildChartBar("Sat", 0.9, true, isDark), // Active
-              ],
-            ),
-          )
-        ],
-      ),
-    );
-  }
 
-  Widget _buildChartBar(
-      String label, double heightPct, bool isActive, bool isDark) {
-    return Column(
-      children: [
-        isActive
-            ? Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                margin: const EdgeInsets.only(bottom: 8),
-                decoration: BoxDecoration(
-                    color: _textPrimary,
-                    borderRadius: BorderRadius.circular(12)),
-                child: Text(label,
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold)),
-              )
-            : const SizedBox(),
-        Container(
-          width: 40,
-          height: 120 * heightPct,
-          decoration: BoxDecoration(
-            color: isActive ? _primary500 : Colors.transparent,
-            borderRadius: BorderRadius.circular(20),
-            border: isActive
-                ? null
-                : Border.all(color: _borderSubtle, style: BorderStyle.none),
-          ),
-          child:
-              isActive ? null : CustomPaint(painter: DottedBackgroundPainter()),
-        ),
-        if (!isActive)
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Text(label,
-                style: TextStyle(color: _textSecondary, fontSize: 12)),
-          ),
-      ],
-    );
-  }
-
-  // Helper Color Getter (kept for backwards compat)
-  Color get _accentDarkPurple => _primary500;
 }
 
 // --- Reusable Widgets ---
@@ -816,24 +707,6 @@ class _ScaleButtonState extends State<ScaleButton>
   }
 }
 
-class DottedBackgroundPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    var paint = Paint()
-      ..color = Colors.grey.withValues(alpha: 0.2)
-      ..strokeWidth = 1
-      ..style = PaintingStyle.stroke;
-
-    // Draw simple pattern
-    final double spacing = 4;
-    for (double i = 0; i < size.width + size.height; i += spacing) {
-      canvas.drawLine(Offset(0, i), Offset(i, 0), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
-}
 
 // Keep the animation widget
 class StaggeredSlideFade extends StatefulWidget {

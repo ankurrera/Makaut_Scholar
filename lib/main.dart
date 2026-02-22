@@ -12,6 +12,8 @@ import 'features/profile/create_profile_screen.dart';
 import 'features/profile/profile_screen.dart';
 import 'features/navigation/main_nav_shell.dart';
 import 'features/splash/splash_screen.dart';
+import 'domain/repositories/billing_repository.dart';
+import 'data/repositories/billing_repository_impl.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +32,10 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthService()),
+        Provider<BillingRepository>(
+          create: (_) => BillingRepositoryImpl(),
+          dispose: (_, repo) => repo.dispose(),
+        ),
       ],
       child: const MakautScholarApp(),
     ),
