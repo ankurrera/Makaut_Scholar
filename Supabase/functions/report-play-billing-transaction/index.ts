@@ -13,95 +13,92 @@ serve(async (req: Request) => {
     }
 
     try {
-        const supabaseClient = createClient(
-            Deno.env.get('SUPABASE_URL') ?? '',
-            Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-        )
+        const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+        const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
-        const authHeader = req.headers.get('Authorization')
-        if (!authHeader) throw new Error('Missing Authorization header')
-        const { data: { user }, error: authError } = await supabaseClient.auth.getUser(authHeader.replace('Bearer ', ''))
-        if (authError || !user) throw new Error('Unauthorized')
+        const authHeader = req.headers.get('Authorization');
+        if (!authHeader) throw new Error('Missing Authorization header');
 
-        const { orderId, razorpayPaymentId, razorpaySignature, externalTransactionToken } = await req.json()
+        const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
 
-        // 1. Fetch the order to get details
-        const { data: order, error: fetchError } = await supabaseClient
-            .from('orders')
-            .from('orders')
-            .select('*')
-            .eq('id', orderId)
-            .single()
+        // Verify identity
+        const { data: { user }, error: authError } = await supabaseClient.auth.getUser(authHeader.replace('Bearer ', ''));
 
-        if (fetchError || !order) throw new Error('Order not found')
-
-        // 2. REPORT TO GOOGLE PLAY (ABS Compliance)
-        // This is a CRITICAL step for Google Play compliance.
-        // In production, follow these steps:
-        // a. Authenticate with Google using Service Account JSON (Deno.env.get('GOOGLE_PLAY_SERVICE_ACCOUNT_JSON'))
-        // b. Get Access Token for scope 'https://www.googleapis.com/auth/androidpublisher'
-        // c. POST to https://androidpublisher.googleapis.com/androidpublisher/v3/applications/{packageName}/externalTransactions:create
-
-        /* EXAMPLE PAYLOAD:
-        {
-          "transactionId": order.id,
-          "transactionTime": new Date().toISOString(),
-          "transactionProgram": "USER_CHOICE_BILLING",
-          "userTaxAddress": { "regionCode": "IN" },
-          "lineItems": [{
-            "productId": order.item_id,
-            "price": {
-              "priceMicros": (order.amount * 1000000).toString(),
-              "currencyCode": "INR"
-            },
-            "quantity": 1
-          }]
+        if (authError || !user) {
+            return new Response(
+                JSON.stringify({ error: 'Unauthorized' }),
+                { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+            );
         }
-        */
 
-        console.log(`[ABS] Reporting transaction ${razorpayPaymentId} for order ${orderId} to Google Play.`);
+        const { orderId, razorpayPaymentId, razorpaySignature, externalTransactionToken } = await req.json();
 
-        // 3. Update order as completed
+        // 1. Fetch the order - USE EXPLICIT COLUMNS TO AVOID SCHEMA CACHE ISSUES
+        let orderData = null;
+
+        const { data: uuidOrder } = await supabaseClient
+            .from('orders')
+            .select('id, user_id, amount, item_id, item_type, gateway_order_id')
+            .eq('id', orderId)
+            .maybeSingle();
+
+        if (uuidOrder) {
+            orderData = uuidOrder;
+        } else {
+            const { data: gatewayOrder } = await supabaseClient
+                .from('orders')
+                .select('id, user_id, amount, item_id, item_type, gateway_order_id')
+                .eq('gateway_order_id', orderId)
+                .maybeSingle();
+
+            if (gatewayOrder) {
+                orderData = gatewayOrder;
+            }
+        }
+
+        if (!orderData) throw new Error(`Order not found for ID: ${orderId}`);
+
+        // 2. Report to Google Play (ABS) - Placeholder logic
+        console.log(`[ABS] Reporting transaction ${razorpayPaymentId} for order ${orderData.id}`);
+
+        // 3. Update order status
         const { error: updateError } = await supabaseClient
             .from('orders')
             .update({
                 status: 'completed',
-                notes: {
-                    ...order.notes,
-                    razorpay_payment_id: razorpayPaymentId,
-                    razorpay_signature: razorpaySignature,
-                    google_play_reported: true,
-                    external_token: externalTransactionToken
-                }
+                google_transaction_id: razorpayPaymentId
             })
-            .eq('id', orderId)
+            .eq('id', orderData.id);
 
-        if (updateError) throw updateError
+        if (updateError) throw updateError;
 
-        // 4. Delivery logic: Unlock content
-        // Check if it's a 'premium_note' or 'all_access'
-        if (order.item_type === 'note') {
-            await supabaseClient.from('unlocked_notes').insert({
+        // 4. Delivery (Insert into user_purchases)
+        console.log(`[ABS] Unlocking content for user ${user.id}, item ${orderData.item_id}, type ${orderData.item_type}`);
+
+        const { error: deliveryError } = await supabaseClient
+            .from('user_purchases')
+            .upsert({
                 user_id: user.id,
-                note_id: order.item_id
-            })
-        } else if (order.item_type === 'premium_subscription') {
-            await supabaseClient.from('profiles').update({
-                is_premium: true,
-                premium_expiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days
-            }).eq('id', user.id)
+                item_type: orderData.item_type,
+                item_id: orderData.item_id,
+                order_id: orderData.id
+            }, { onConflict: 'user_id,item_type,item_id' });
+
+        if (deliveryError) {
+            console.error('Delivery Error:', deliveryError);
+            throw deliveryError;
         }
 
         return new Response(
-            JSON.stringify({ success: true, message: 'Transaction reported and content unlocked' }),
+            JSON.stringify({ success: true, message: 'Content unlocked successfully' }),
             { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
-        )
+        );
 
     } catch (error) {
-        console.error(error)
+        console.error(error);
         return new Response(
             JSON.stringify({ error: (error as Error).message }),
             { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
-        )
+        );
     }
 })

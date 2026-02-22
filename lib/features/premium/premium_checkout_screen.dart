@@ -171,25 +171,11 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
                 ),
                 const SizedBox(height: 16),
                 _buildUPIOption(
-                  id: 'PhonePe',
-                  name: 'PhonePe',
-                  subtitle: 'Direct UPI Intent',
-                  icon: FontAwesomeIcons.p,
-                  color: Colors.deepPurple,
-                ),
-                _buildUPIOption(
-                  id: 'GPay',
-                  name: 'Google Pay',
-                  subtitle: 'Fast and Secure',
-                  icon: FontAwesomeIcons.google,
+                  id: 'Razorpay',
+                  name: 'Razorpay / UPI / Cards',
+                  subtitle: 'Fast and Secure checkout',
+                  icon: Iconsax.card_copy,
                   color: Colors.blue,
-                ),
-                _buildUPIOption(
-                  id: 'Paytm',
-                  name: 'Paytm UPI',
-                  subtitle: 'Scan and Pay',
-                  icon: FontAwesomeIcons.paypal, // Using closest icon
-                  color: Colors.lightBlue,
                 ),
               ],
             ),
@@ -256,7 +242,7 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
                     style: const TextStyle(color: Colors.white70, fontSize: 16),
                   ),
                   Text(
-                    "₹${widget.price}",
+                    "₹${widget.price.toStringAsFixed(2)}",
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -266,7 +252,7 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
                 ],
               ),
               const Divider(color: Colors.white10, height: 32),
-              const Row(
+              Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
@@ -274,7 +260,7 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
                     style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    "₹149.00", // Example Total
+                    "₹${widget.price.toStringAsFixed(2)}",
                     style: TextStyle(
                       color: Colors.blue,
                       fontSize: 22,

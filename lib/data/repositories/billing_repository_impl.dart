@@ -13,6 +13,7 @@ class BillingRepositoryImpl implements BillingRepository {
   
   // To keep track of the current alternative billing token if provided by Google
   String? _pendingExternalToken;
+  String? _activeSupabaseOrderId;
 
   BillingRepositoryImpl() {
     _razorpay = Razorpay();
@@ -85,6 +86,7 @@ class BillingRepositoryImpl implements BillingRepository {
       final data = response.data;
       final String razorpayOrderId = data['razorpayOrderId'];
       final String keyId = data['keyId'];
+      _activeSupabaseOrderId = data['orderId']; // Store the UUID
 
       // 2. Open Razorpay Checkout
       var options = {
@@ -114,7 +116,7 @@ class BillingRepositoryImpl implements BillingRepository {
       await _supabase.functions.invoke(
         'report-play-billing-transaction',
         body: {
-          'orderId': response.orderId,
+          'orderId': _activeSupabaseOrderId ?? response.orderId,
           'razorpayPaymentId': response.paymentId,
           'razorpaySignature': response.signature,
           'externalTransactionToken': _pendingExternalToken
