@@ -11,6 +11,7 @@ class PremiumCheckoutScreen extends StatefulWidget {
   final String itemId;
   final String itemType;
   final String itemName;
+  final String? itemUrl;
   final double price;
 
   const PremiumCheckoutScreen({
@@ -18,6 +19,7 @@ class PremiumCheckoutScreen extends StatefulWidget {
     required this.itemId,
     required this.itemType,
     required this.itemName,
+    this.itemUrl,
     required this.price,
   });
 
@@ -92,13 +94,73 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
     }
   }
 
-  void _handleSuccess() {
+  Future<void> _handleSuccess() async {
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Purchase Successful! Enjoy your premium content.')),
-      );
-      Navigator.pop(context, true);
+      await _showSuccessDialog();
+      if (mounted) {
+        Navigator.pop(context, {
+          'success': true,
+          'itemUrl': widget.itemUrl,
+          'itemName': widget.itemName,
+        });
+      }
     }
+  }
+
+  Future<void> _showSuccessDialog() async {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? const Color(0xFF1A1D21).withOpacity(0.9)
+                  : Colors.white.withOpacity(0.9),
+              borderRadius: BorderRadius.circular(32),
+              border: Border.all(color: const Color(0xFF8E82FF).withOpacity(0.3)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF8E82FF).withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Iconsax.tick_circle_copy, color: Color(0xFF8E82FF), size: 48),
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  "Unlock Successful! ✨",
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: -0.5),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  "Your premium content is ready. We are preparing it for you now...",
+                  style: TextStyle(color: Colors.grey, fontSize: 14, fontWeight: FontWeight.w500),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                const SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: CircularProgressIndicator(strokeWidth: 3, color: Color(0xFF8E82FF)),
+                ),
+                const SizedBox(height: 24),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   void _handleError(String message) {

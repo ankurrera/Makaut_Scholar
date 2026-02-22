@@ -86,10 +86,22 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
           itemId: note['id'].toString(),
           itemType: 'notes',
           itemName: note['title'] ?? 'Academic Note',
+          itemUrl: note['file_url'],
           price: (note['price'] as num?)?.toDouble() ?? 0.0,
         ),
       ),
-    ).then((_) => _loadNotes()); // Reload to catch new purchase
+    ).then((result) {
+      _loadNotes(); // Reload to catch new purchase
+      
+      // Auto-open PDF if purchase was successful
+      if (result != null && result is Map && result['success'] == true) {
+        final String? itemUrl = result['itemUrl'];
+        final String itemName = result['itemName'] ?? 'Academic Note';
+        if (itemUrl != null) {
+          _openPdf(url: itemUrl, title: itemName);
+        }
+      }
+    }); 
   }
 
   /// Group notes by unit number
