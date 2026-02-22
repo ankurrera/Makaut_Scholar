@@ -15,6 +15,9 @@ class BillingRepositoryImpl implements BillingRepository {
   String? _pendingExternalToken;
   String? _activeSupabaseOrderId;
 
+  // Manual stream for alternative billing success notifications
+  final StreamController<Map<String, dynamic>> _alternativePurchaseController = StreamController<Map<String, dynamic>>.broadcast();
+
   BillingRepositoryImpl() {
     _razorpay = Razorpay();
     _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handleRazorpaySuccess);
@@ -26,6 +29,9 @@ class BillingRepositoryImpl implements BillingRepository {
 
   @override
   Stream<List<PurchaseDetails>> get purchaseStream => _iap.purchaseStream;
+
+  @override
+  Stream<Map<String, dynamic>> get alternativePurchaseStream => _alternativePurchaseController.stream;
 
   @override
   Future<bool> isStoreAvailable() async {
@@ -122,6 +128,13 @@ class BillingRepositoryImpl implements BillingRepository {
           'externalTransactionToken': _pendingExternalToken
         },
       );
+
+      // 4. Manually emit a success event to the alternative stream to notify the UI
+      _alternativePurchaseController.add({
+        'status': 'purchased',
+        'orderId': _activeSupabaseOrderId,
+        'paymentId': response.paymentId,
+      });
     } catch (e) {
       print("Error reporting transaction: $e");
     }

@@ -4,6 +4,9 @@ abstract class BillingRepository {
   /// Stream of purchase updates from Google Play/App Store
   Stream<List<PurchaseDetails>> get purchaseStream;
 
+  /// Stream of alternative billing successes (e.g. Razorpay)
+  Stream<Map<String, dynamic>> get alternativePurchaseStream;
+
   /// Check if the store is available
   Future<bool> isStoreAvailable();
 

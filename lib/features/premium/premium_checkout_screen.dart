@@ -33,6 +33,7 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
   late BillingRepository _billingRepository;
   ProductDetails? _productDetails;
   StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
+  StreamSubscription<Map<String, dynamic>>? _alternativePurchaseSubscription;
 
   @override
   void initState() {
@@ -40,11 +41,13 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
     _billingRepository = context.read<BillingRepository>();
     _loadProducts();
     _purchaseSubscription = _billingRepository.purchaseStream.listen(_listenToPurchases);
+    _alternativePurchaseSubscription = _billingRepository.alternativePurchaseStream.listen(_listenToAlternativePurchases);
   }
 
   @override
   void dispose() {
     _purchaseSubscription?.cancel();
+    _alternativePurchaseSubscription?.cancel();
     super.dispose();
   }
 
@@ -76,6 +79,12 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
       } else if (purchase.status == PurchaseStatus.error) {
         _handleError(purchase.error?.message ?? 'Unknown error');
       }
+    }
+  }
+
+  void _listenToAlternativePurchases(Map<String, dynamic> purchase) {
+    if (purchase['status'] == 'purchased') {
+      _handleSuccess();
     }
   }
 
