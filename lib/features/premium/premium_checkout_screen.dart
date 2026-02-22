@@ -347,11 +347,13 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            gap: 20,
             children: [
               _Badge(icon: FontAwesomeIcons.ccVisa, color: color),
+              const SizedBox(width: 20),
               _Badge(icon: FontAwesomeIcons.ccMastercard, color: color),
+              const SizedBox(width: 20),
               _Badge(icon: FontAwesomeIcons.googlePay, color: color),
+              const SizedBox(width: 20),
               _Badge(icon: FontAwesomeIcons.applePay, color: color),
             ],
           ),
