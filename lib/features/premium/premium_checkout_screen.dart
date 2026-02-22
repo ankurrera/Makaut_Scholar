@@ -30,6 +30,7 @@ class PremiumCheckoutScreen extends StatefulWidget {
 class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
   final String _selectedUPI = 'Razorpay';
   bool _isLoading = true;
+  bool _successHandled = false;
   late BillingRepository _billingRepository;
   ProductDetails? _productDetails;
   StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
@@ -104,7 +105,8 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
   }
 
   Future<void> _handleSuccess() async {
-    if (mounted) {
+    if (mounted && !_successHandled) {
+      _successHandled = true;
       await _showSuccessDialog();
       if (mounted) {
         Navigator.pop(context, {
@@ -117,6 +119,13 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
   }
 
   Future<void> _showSuccessDialog() async {
+    // Auto-close dialog after 2 seconds
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted && Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+    });
+
     return showDialog(
       context: context,
       barrierDismissible: false,

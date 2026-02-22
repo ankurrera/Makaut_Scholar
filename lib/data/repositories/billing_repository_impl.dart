@@ -117,7 +117,14 @@ class BillingRepositoryImpl implements BillingRepository {
   }
 
   void _handleRazorpaySuccess(PaymentSuccessResponse response) async {
-    // 3. Report Success to our Backend (which reports to Google Play for ABS compliance)
+    // 1. Manually emit a success event INSTANTLY to notify the UI without waiting for network
+    _alternativePurchaseController.add({
+      'status': 'purchased',
+      'orderId': _activeSupabaseOrderId,
+      'paymentId': response.paymentId,
+    });
+
+    // 2. Report Success to our Backend in the background
     try {
       await _supabase.functions.invoke(
         'report-play-billing-transaction',
@@ -128,13 +135,6 @@ class BillingRepositoryImpl implements BillingRepository {
           'externalTransactionToken': _pendingExternalToken
         },
       );
-
-      // 4. Manually emit a success event to the alternative stream to notify the UI
-      _alternativePurchaseController.add({
-        'status': 'purchased',
-        'orderId': _activeSupabaseOrderId,
-        'paymentId': response.paymentId,
-      });
     } catch (e) {
       print("Error reporting transaction: $e");
     }

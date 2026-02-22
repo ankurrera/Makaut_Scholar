@@ -91,15 +91,18 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
         ),
       ),
     ).then((result) {
-      _loadNotes(); // Reload to catch new purchase
-      
-      // Auto-open PDF if purchase was successful
       if (result != null && result is Map && result['success'] == true) {
         final String? itemUrl = result['itemUrl'];
         final String itemName = result['itemName'] ?? 'Academic Note';
         if (itemUrl != null) {
+          // Open PDF immediately for zero-friction experience
           _openPdf(url: itemUrl, title: itemName);
         }
+        // Reload notes in background after starting the PDF viewer
+        _loadNotes();
+      } else {
+        // Just reload if we returned without a specific success object
+        _loadNotes();
       }
     }); 
   }
