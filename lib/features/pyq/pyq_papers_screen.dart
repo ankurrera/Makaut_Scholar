@@ -4,6 +4,7 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../services/auth_service.dart';
 import '../../services/offline_service.dart';
 import '../notes/pdf_viewer_screen.dart';
+import '../premium/premium_checkout_screen.dart';
 
 class PyqPapersScreen extends StatefulWidget {
   final String department;
@@ -23,6 +24,7 @@ class PyqPapersScreen extends StatefulWidget {
 class _PyqPapersScreenState extends State<PyqPapersScreen>
     with SingleTickerProviderStateMixin {
   List<Map<String, dynamic>> _papers = [];
+  List<String> _purchasedItemIds = [];
   bool _isLoading = true;
   String? _error;
 
@@ -68,9 +70,17 @@ class _PyqPapersScreenState extends State<PyqPapersScreen>
     setState(() { _isLoading = true; _error = null; });
     try {
       final auth = Provider.of<AuthService>(context, listen: false);
-      final papers = await auth.fetchPyqPapers(widget.department, widget.semester, widget.subject);
+      final results = await Future.wait([
+        auth.fetchPyqPapers(widget.department, widget.semester, widget.subject),
+        auth.fetchUserPurchases('pyq'),
+      ]);
+
       if (mounted) {
-        setState(() { _papers = papers; _isLoading = false; });
+        setState(() { 
+          _papers = results[0] as List<Map<String, dynamic>>;
+          _purchasedItemIds = results[1] as List<String>;
+          _isLoading = false; 
+        });
         _staggerController.forward(from: 0);
       }
     } catch (e) {
@@ -85,6 +95,32 @@ class _PyqPapersScreenState extends State<PyqPapersScreen>
         builder: (_) => PdfViewerScreen(url: url, filePath: filePath, title: title),
       ),
     );
+  }
+
+  void _openCheckout(Map<String, dynamic> paper) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PremiumCheckoutScreen(
+          itemId: paper['id'].toString(),
+          itemType: 'pyq',
+          itemName: '${widget.subject} – ${paper['year']}',
+          itemUrl: paper['file_url'],
+          price: (paper['price'] as num?)?.toDouble() ?? 0.0,
+        ),
+      ),
+    ).then((result) {
+      if (result != null && result is Map && result['success'] == true) {
+        final String? itemUrl = result['itemUrl'];
+        final String itemName = result['itemName'] ?? 'PYQ Paper';
+        if (itemUrl != null) {
+          _openPdf(url: itemUrl, title: itemName);
+        }
+        _loadPapers();
+      } else {
+        _loadPapers();
+      }
+    });
   }
 
   @override
@@ -213,16 +249,24 @@ class _PyqPapersScreenState extends State<PyqPapersScreen>
     final id = paper['id'].toString();
     final isDownloaded = OfflineService().isDownloaded(id);
     final title = '${widget.subject} – $year';
+    final bool isPremium = paper['is_premium'] ?? false;
+    final bool isPurchased = _purchasedItemIds.contains(id);
+    final bool isLocked = isPremium && !isPurchased;
 
     return Container(
       decoration: BoxDecoration(
         color: _card(isDark),
         borderRadius: BorderRadius.circular(20),
+        border: isLocked ? Border.all(color: Colors.orange.withAlpha(40), width: 1.5) : null,
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
+            if (isLocked) {
+              _openCheckout(paper);
+              return;
+            }
             if (isDownloaded) {
               final resource = OfflineService().getResource(id);
               _openPdf(filePath: resource!.localPath, title: title);
@@ -243,12 +287,12 @@ class _PyqPapersScreenState extends State<PyqPapersScreen>
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: grad,
+                      colors: isLocked ? [const Color(0xFFF0A850), const Color(0xFFFFBE6A)] : grad,
                     ),
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Center(
-                    child: Icon(Iconsax.document_text, color: Colors.white, size: 22),
+                  child: Center(
+                    child: Icon(isLocked ? Iconsax.lock : Iconsax.document_text, color: Colors.white, size: 22),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -258,19 +302,41 @@ class _PyqPapersScreenState extends State<PyqPapersScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        year,
-                        style: TextStyle(
-                          color: _textP(isDark),
-                          fontSize: 17,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: -0.1,
-                        ),
+                      Row(
+                        children: [
+                          Text(
+                            year,
+                            style: TextStyle(
+                              color: _textP(isDark),
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.1,
+                            ),
+                          ),
+                          if (isPremium) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: isPurchased ? Colors.green.withAlpha(25) : Colors.orange.withAlpha(25),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                isPurchased ? 'UNLOCKED' : 'PREMIUM',
+                                style: TextStyle(
+                                  color: isPurchased ? Colors.green : Colors.orange,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          Icon(Iconsax.archive_book, size: 12, color: grad[0]),
+                          Icon(Iconsax.archive_book, size: 12, color: isLocked ? Colors.orange : grad[0]),
                           const SizedBox(width: 5),
                           Expanded(
                             child: Text(
@@ -289,11 +355,13 @@ class _PyqPapersScreenState extends State<PyqPapersScreen>
                 // Download Toggle
                 IconButton(
                   icon: Icon(
-                    isDownloaded ? Iconsax.tick_circle : Iconsax.document_download,
-                    color: isDownloaded ? Colors.green : grad[0],
+                    isLocked 
+                        ? Iconsax.lock 
+                        : (isDownloaded ? Iconsax.tick_circle : Iconsax.document_download),
+                    color: isLocked ? Colors.orange.withAlpha(150) : (isDownloaded ? Colors.green : grad[0]),
                     size: 20,
                   ),
-                  onPressed: isDownloaded ? null : () async {
+                  onPressed: isLocked ? () => _openCheckout(paper) : (isDownloaded ? null : () async {
                     try {
                       await OfflineService().downloadResource(
                         id: id,
@@ -305,7 +373,7 @@ class _PyqPapersScreenState extends State<PyqPapersScreen>
                     } catch (e) {
                       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
                     }
-                  },
+                  }),
                 ),
                 const SizedBox(width: 4),
 

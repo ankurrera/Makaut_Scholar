@@ -4,6 +4,7 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../services/offline_service.dart';
 import '../../services/auth_service.dart';
 import '../notes/pdf_viewer_screen.dart';
+import '../premium/premium_checkout_screen.dart';
 
 class ImportantQuestionsListScreen extends StatefulWidget {
   final String department;
@@ -24,6 +25,7 @@ class ImportantQuestionsListScreen extends StatefulWidget {
 class _ImportantQuestionsListScreenState extends State<ImportantQuestionsListScreen>
     with SingleTickerProviderStateMixin {
   List<Map<String, dynamic>> _questions = [];
+  List<String> _purchasedItemIds = [];
   bool _isLoading = true;
   String? _error;
   late AnimationController _staggerController;
@@ -59,14 +61,15 @@ class _ImportantQuestionsListScreenState extends State<ImportantQuestionsListScr
     setState(() { _isLoading = true; _error = null; });
     try {
       final auth = Provider.of<AuthService>(context, listen: false);
-      final questions = await auth.fetchImpQuestions(
-        widget.department,
-        widget.semester,
-        widget.subject,
-      );
+      final results = await Future.wait([
+        auth.fetchImpQuestions(widget.department, widget.semester, widget.subject),
+        auth.fetchUserPurchases('important_questions'),
+      ]);
+
       if (mounted) {
         setState(() {
-          _questions = questions;
+          _questions = results[0] as List<Map<String, dynamic>>;
+          _purchasedItemIds = results[1] as List<String>;
           _isLoading = false;
         });
         _staggerController.forward(from: 0);
@@ -86,6 +89,32 @@ class _ImportantQuestionsListScreenState extends State<ImportantQuestionsListScr
       context,
       MaterialPageRoute(builder: (_) => PdfViewerScreen(url: url, title: title)),
     );
+  }
+
+  void _openCheckout(Map<String, dynamic> item) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PremiumCheckoutScreen(
+          itemId: item['id'].toString(),
+          itemType: 'important_questions',
+          itemName: item['title'] ?? 'Important Questions',
+          itemUrl: item['file_url'],
+          price: (item['price'] as num?)?.toDouble() ?? 0.0,
+        ),
+      ),
+    ).then((result) {
+      if (result != null && result is Map && result['success'] == true) {
+        final String? itemUrl = result['itemUrl'];
+        final String itemName = result['itemName'] ?? 'Important Questions';
+        if (itemUrl != null) {
+          _openPdf(itemUrl, itemName);
+        }
+        _loadQuestions();
+      } else {
+        _loadQuestions();
+      }
+    });
   }
 
   @override
@@ -194,11 +223,18 @@ class _ImportantQuestionsListScreenState extends State<ImportantQuestionsListScr
     final fileUrl = item['file_url'] as String;
     final id = item['id'].toString();
     final isDownloaded = OfflineService().isDownloaded(id);
+    final bool isPremium = item['is_premium'] ?? false;
+    final bool isPurchased = _purchasedItemIds.contains(id);
+    final bool isLocked = isPremium && !isPurchased;
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
+          if (isLocked) {
+            _openCheckout(item);
+            return;
+          }
           if (isDownloaded) {
             final resource = OfflineService().getResource(id);
             Navigator.push(
@@ -223,11 +259,17 @@ class _ImportantQuestionsListScreenState extends State<ImportantQuestionsListScr
                 width: 40,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: grad[0].withValues(alpha: 0.1),
+                  color: isLocked 
+                      ? Colors.orange.withAlpha(25)
+                      : grad[0].withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Center(
-                  child: Icon(Iconsax.document_text_1, color: grad[0], size: 20),
+                  child: Icon(
+                    isLocked ? Iconsax.lock : Iconsax.document_text_1, 
+                    color: isLocked ? Colors.orange : grad[0], 
+                    size: 20
+                  ),
                 ),
               ),
               const SizedBox(width: 16),
@@ -235,15 +277,39 @@ class _ImportantQuestionsListScreenState extends State<ImportantQuestionsListScr
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        color: isDark ? Colors.white : const Color(0xFF1E1E1E),
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: TextStyle(
+                              color: isDark ? Colors.white : const Color(0xFF1E1E1E),
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (isPremium) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: isPurchased ? Colors.green.withAlpha(25) : Colors.orange.withAlpha(25),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              isPurchased ? 'UNLOCKED' : 'PREMIUM',
+                              style: TextStyle(
+                                color: isPurchased ? Colors.green : Colors.orange,
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                     const SizedBox(height: 2),
                     Text(
@@ -258,11 +324,15 @@ class _ImportantQuestionsListScreenState extends State<ImportantQuestionsListScr
               ),
               IconButton(
                 icon: Icon(
-                  isDownloaded ? Iconsax.tick_circle : Iconsax.document_download,
-                  color: isDownloaded ? Colors.green : (isDark ? const Color(0xFF3A3F4B) : const Color(0xFFE0E0E0)),
+                  isLocked 
+                      ? Iconsax.lock 
+                      : (isDownloaded ? Iconsax.tick_circle : Iconsax.document_download),
+                  color: isLocked 
+                      ? Colors.orange.withAlpha(150)
+                      : (isDownloaded ? Colors.green : (isDark ? const Color(0xFF3A3F4B) : const Color(0xFFE0E0E0))),
                   size: 20,
                 ),
-                onPressed: isDownloaded ? null : () async {
+                onPressed: isLocked ? () => _openCheckout(item) : (isDownloaded ? null : () async {
                   try {
                     await OfflineService().downloadResource(
                       id: id,
@@ -274,7 +344,7 @@ class _ImportantQuestionsListScreenState extends State<ImportantQuestionsListScr
                   } catch (e) {
                     if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
                   }
-                },
+                }),
               ),
               const SizedBox(width: 8),
               Icon(Iconsax.arrow_right_3, color: isDark ? const Color(0xFF3A3F4B) : const Color(0xFFE0E0E0), size: 16),
