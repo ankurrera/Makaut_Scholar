@@ -108,6 +108,13 @@ class _ImportantQuestionsListScreenState extends State<ImportantQuestionsListScr
         final String? itemUrl = result['itemUrl'];
         final String itemName = result['itemName'] ?? 'Important Questions';
         if (itemUrl != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Unlock Successful! ✨ Preparing your content...'),
+              backgroundColor: Color(0xFF8E82FF),
+              duration: Duration(seconds: 2),
+            ),
+          );
           _openPdf(itemUrl, itemName);
         }
         _loadQuestions();

@@ -114,6 +114,13 @@ class _PyqPapersScreenState extends State<PyqPapersScreen>
         final String? itemUrl = result['itemUrl'];
         final String itemName = result['itemName'] ?? 'PYQ Paper';
         if (itemUrl != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Unlock Successful! ✨ Preparing your content...'),
+              backgroundColor: Color(0xFF5BAAEF),
+              duration: Duration(seconds: 2),
+            ),
+          );
           _openPdf(url: itemUrl, title: itemName);
         }
         _loadPapers();

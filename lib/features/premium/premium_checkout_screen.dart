@@ -107,14 +107,12 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
   Future<void> _handleSuccess() async {
     if (mounted && !_successHandled) {
       _successHandled = true;
-      await _showSuccessDialog();
-      if (mounted) {
-        Navigator.pop(context, {
-          'success': true,
-          'itemUrl': widget.itemUrl,
-          'itemName': widget.itemName,
-        });
-      }
+      // Pop immediately to avoid visibility gap
+      Navigator.pop(context, {
+        'success': true,
+        'itemUrl': widget.itemUrl,
+        'itemName': widget.itemName,
+      });
     }
   }
 

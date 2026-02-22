@@ -95,6 +95,14 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
         final String? itemUrl = result['itemUrl'];
         final String itemName = result['itemName'] ?? 'Academic Note';
         if (itemUrl != null) {
+          // Show non-blocking success feedback
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Unlock Successful! ✨ Preparing your content...'),
+              backgroundColor: Color(0xFF8E82FF),
+              duration: Duration(seconds: 2),
+            ),
+          );
           // Open PDF immediately for zero-friction experience
           _openPdf(url: itemUrl, title: itemName);
         }
