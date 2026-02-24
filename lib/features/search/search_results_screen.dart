@@ -120,28 +120,34 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: card,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                                color: isDark
-                                    ? Colors.white.withValues(alpha: 0.05)
-                                    : Colors.black.withValues(alpha: 0.05)),
-                          ),
-                          child: TextField(
-                            controller: _searchController,
-                            onChanged: (_) => _performSearch(),
-                            autofocus: true,
-                            style: TextStyle(color: textP, fontSize: 16),
-                            decoration: InputDecoration(
-                              hintText: 'Search...',
-                              hintStyle: TextStyle(color: textS),
-                              border: InputBorder.none,
-                              prefixIcon: Icon(Iconsax.search_normal_1,
-                                  color: textS, size: 20),
-                              contentPadding:
-                                  const EdgeInsets.symmetric(vertical: 16),
+                        Hero(
+                          tag: 'search_bar_hero',
+                          child: Material(
+                            type: MaterialType.transparency,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: card,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                    color: isDark
+                                        ? Colors.white.withValues(alpha: 0.05)
+                                        : Colors.black.withValues(alpha: 0.05)),
+                              ),
+                              child: TextField(
+                                controller: _searchController,
+                                onChanged: (_) => _performSearch(),
+                                autofocus: true,
+                                style: TextStyle(color: textP, fontSize: 16),
+                                decoration: InputDecoration(
+                                  hintText: 'Search...',
+                                  hintStyle: TextStyle(color: textS),
+                                  border: InputBorder.none,
+                                  prefixIcon: Icon(Iconsax.search_normal_1,
+                                      color: textS, size: 20),
+                                  contentPadding:
+                                      const EdgeInsets.symmetric(vertical: 16),
+                                ),
+                              ),
                             ),
                           ),
                         ),

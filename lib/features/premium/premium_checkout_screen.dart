@@ -296,12 +296,15 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
   }
 
   Widget _buildOrderSummary(Color surface, Color border, Color text, Color textDim, Color accent) {
+    final bool isBundle = widget.itemType == 'semester_bundle';
+    final Color itemAccent = isBundle ? const Color(0xFFFFB347) : accent; // Orange for bundle
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
       decoration: BoxDecoration(
         color: surface,
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: border),
+        border: Border.all(color: isBundle ? itemAccent.withValues(alpha: 0.5) : border, width: isBundle ? 1.5 : 1),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(28),
@@ -312,22 +315,39 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (isBundle)
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: itemAccent.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Iconsax.star_1, size: 14, color: itemAccent),
+                        const SizedBox(width: 6),
+                        Text('RECOMMENDED UPGRADE', style: TextStyle(color: itemAccent, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
+                      ],
+                    ),
+                  ),
                 Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: accent.withOpacity(0.1),
+                        color: itemAccent.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Icon(Iconsax.document_text_copy, color: accent, size: 20),
+                      child: Icon(isBundle ? Iconsax.book_1 : Iconsax.document_text_copy, color: itemAccent, size: 20),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("Item Summary", style: TextStyle(color: textDim, fontSize: 12, fontWeight: FontWeight.bold)),
+                          Text(isBundle ? "Complete Your Semester" : "Item Summary", style: TextStyle(color: textDim, fontSize: 12, fontWeight: FontWeight.bold)),
                           Text(widget.itemName, style: TextStyle(color: text, fontSize: 16, fontWeight: FontWeight.w700)),
                         ],
                       ),
@@ -345,7 +365,7 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
                     Text(
                       "₹${widget.price.toStringAsFixed(2)}",
                       style: TextStyle(
-                        color: accent,
+                        color: itemAccent,
                         fontSize: 22,
                         fontWeight: FontWeight.w900,
                       ),

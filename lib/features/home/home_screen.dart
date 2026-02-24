@@ -202,10 +202,7 @@ class _HomeScreenState extends State<HomeScreen>
             const SizedBox(height: 24),
 
             // 2. Search Bar
-            StaggeredSlideFade(
-              delayMs: _baseDelay,
-              child: _buildSearchBar(isDark),
-            ),
+            _buildSearchBar(isDark),
 
             const SizedBox(height: 16),
 
@@ -292,36 +289,42 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Widget _buildSearchBar(bool isDark) {
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? _bgSecondaryDark : _bgSecondary,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isDark ? _borderSubtleDark : _borderSubtle),
-      ),
-      child: TextField(
-        controller: _searchController,
-        readOnly: true, // Navigate on tap to a dedicated search screen for better experience
-        onTap: () => _openSearch(),
-        style: TextStyle(
-          color: isDark ? _textPrimaryDark : _textPrimary,
-          fontSize: 15,
-        ),
-        decoration: InputDecoration(
-          hintText: 'Search notes, PYQs, syllabus...',
-          hintStyle: TextStyle(
-            color: isDark ? _textSecondaryDark : _textSecondary,
-            fontSize: 15,
+    return Hero(
+      tag: 'search_bar_hero',
+      child: Material(
+        type: MaterialType.transparency,
+        child: Container(
+          decoration: BoxDecoration(
+            color: isDark ? _bgSecondaryDark : _bgSecondary,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: isDark ? _borderSubtleDark : _borderSubtle),
           ),
-          prefixIcon: Icon(
-            Iconsax.search_normal_1,
-            color: isDark ? _textSecondaryDark : _textSecondary,
-            size: 20,
+          child: TextField(
+            controller: _searchController,
+            readOnly: true, // Navigate on tap to a dedicated search screen for better experience
+            onTap: () => _openSearch(),
+            style: TextStyle(
+              color: isDark ? _textPrimaryDark : _textPrimary,
+              fontSize: 15,
+            ),
+            decoration: InputDecoration(
+              hintText: 'Search notes, PYQs, syllabus...',
+              hintStyle: TextStyle(
+                color: isDark ? _textSecondaryDark : _textSecondary,
+                fontSize: 15,
+              ),
+              prefixIcon: Icon(
+                Iconsax.search_normal_1,
+                color: isDark ? _textSecondaryDark : _textSecondary,
+                size: 20,
+              ),
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              filled: false,
+              contentPadding: const EdgeInsets.symmetric(vertical: 16),
+            ),
           ),
-          border: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          focusedBorder: InputBorder.none,
-          filled: false,
-          contentPadding: const EdgeInsets.symmetric(vertical: 16),
         ),
       ),
     );
@@ -378,12 +381,16 @@ class _HomeScreenState extends State<HomeScreen>
   void _openSearch() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => SearchResultsScreen(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => SearchResultsScreen(
           initialQuery: _searchController.text,
           initialFilter: _selectedFilter,
           department: _profileDepartment ?? 'CSE',
         ),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 400),
       ),
     ).then((_) {
       // Clear or sync back state if needed when returning

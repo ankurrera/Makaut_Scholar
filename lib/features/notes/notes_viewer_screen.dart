@@ -5,6 +5,7 @@ import '../../services/auth_service.dart';
 import '../../services/offline_service.dart';
 import 'pdf_viewer_screen.dart';
 import '../premium/premium_checkout_screen.dart';
+import '../../services/monetization_service.dart';
 
 class NotesViewerScreen extends StatefulWidget {
   final String department;
@@ -23,7 +24,8 @@ class NotesViewerScreen extends StatefulWidget {
 
 class _NotesViewerScreenState extends State<NotesViewerScreen> {
   List<Map<String, dynamic>> _notes = [];
-  List<String> _purchasedItemIds = [];
+  bool _hasAccess = false;
+  Map<String, dynamic> _pricing = {};
   bool _isLoading = true;
   String? _error;
 
@@ -52,15 +54,19 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
     setState(() { _isLoading = true; _error = null; });
     try {
       final auth = Provider.of<AuthService>(context, listen: false);
+      final monetization = Provider.of<MonetizationService>(context, listen: false);
+      
       final results = await Future.wait([
         auth.fetchNotes(widget.department, widget.semester, widget.subject),
-        auth.fetchUserPurchases('notes'),
+        monetization.checkSubjectAccess(widget.department, widget.semester, widget.subject),
+        monetization.getPricingDetails(widget.department, widget.semester, widget.subject),
       ]);
       
       if (mounted) {
         setState(() { 
           _notes = results[0] as List<Map<String, dynamic>>;
-          _purchasedItemIds = results[1] as List<String>;
+          _hasAccess = results[1] as bool;
+          _pricing = results[2] as Map<String, dynamic>;
           _isLoading = false; 
         });
       }
@@ -69,25 +75,103 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
     }
   }
 
-  void _openPdf({String? url, String? filePath, required String title}) {
+  void _openPdf({String? url, String? filePath, required String title}) async {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => PdfViewerScreen(url: url, filePath: filePath, title: title),
       ),
     );
+    
+    // Flow 2: Behavioral Nudging
+    if (!_hasAccess) {
+      final mon = Provider.of<MonetizationService>(context, listen: false);
+      bool shouldNudge = await mon.recordInteraction();
+      if (shouldNudge && mounted) {
+        _showNudgeModal();
+      }
+    }
+  }
+
+  void _showNudgeModal() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (ctx) => Container(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Iconsax.star_1, color: Colors.orange, size: 48),
+            const SizedBox(height: 16),
+            Text("Ready to master ${widget.subject}?", 
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+            const SizedBox(height: 8),
+            const Text("You've viewed some great preview content! Unlock the full subject to continue your learning journey without limits.",
+              style: TextStyle(fontSize: 14, color: Colors.grey), textAlign: TextAlign.center),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 50),
+                backgroundColor: const Color(0xFF8E82FF),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: () {
+                Navigator.pop(ctx);
+                if (_notes.isNotEmpty) {
+                  _openCheckout(_notes.firstWhere((n) => n['is_premium'] == true, orElse: () => _notes.first));
+                }
+              },
+              child: const Text("Unlock Full Access", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _openCheckout(Map<String, dynamic> note) {
+    final double notePrice = (note['price'] as num?)?.toDouble() ?? 0.0;
+    final double subjectPrice = _pricing['subject_price'] ?? 0.0;
+    final double bundlePrice = _pricing['bundle_price'] ?? 0.0;
+    final int boughtCount = _pricing['purchased_subjects_count'] ?? 0;
+
+    // Fallback to note price if subject price is not configured
+    double finalPrice = subjectPrice > 0 ? subjectPrice : notePrice;
+    String finalItemId = subjectPrice > 0 
+        ? 'subject_${widget.department}_${widget.semester}_${widget.subject}'
+        : note['id'].toString();
+    String finalItemType = subjectPrice > 0 ? 'subject' : 'notes';
+    String finalItemName = subjectPrice > 0 ? '${widget.subject} Full Access' : (note['title'] ?? 'Academic Note');
+
+    if (boughtCount >= 3 && bundlePrice > 0 && subjectPrice > 0) {
+      final monetization = Provider.of<MonetizationService>(context, listen: false);
+      double upgradePrice = monetization.calculateBundleUpgradePrice(bundlePrice, boughtCount, subjectPrice);
+      if (upgradePrice > 0) {
+        finalPrice = upgradePrice;
+        finalItemId = 'bundle_${widget.department}_${widget.semester}';
+        finalItemType = 'semester_bundle';
+        finalItemName = 'Sem ${widget.semester} Complete Bundle';
+      }
+    }
+
+    if (finalPrice <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Pricing not configured for this item.')),
+      );
+      return;
+    }
+
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => PremiumCheckoutScreen(
-          itemId: note['id'].toString(),
-          itemType: 'notes',
-          itemName: note['title'] ?? 'Academic Note',
+          itemId: finalItemId,
+          itemType: finalItemType,
+          itemName: finalItemName,
           itemUrl: note['file_url'],
-          price: (note['price'] as num?)?.toDouble() ?? 0.0,
+          price: finalPrice,
         ),
       ),
     ).then((result) {
@@ -210,8 +294,8 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
     final title = note['title'] ?? 'Untitled';
     final url = note['file_url'];
     final isPremium = note['is_premium'] == true;
-    final isPurchased = _purchasedItemIds.contains(id);
-    final isLocked = isPremium && !isPurchased;
+    final isPreview = note['is_preview'] == true;
+    final isLocked = (isPremium && !isPreview) && !_hasAccess;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -278,7 +362,7 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
-                                  isPurchased ? 'UNLOCKED' : 'PREMIUM',
+                                  !isLocked ? 'UNLOCKED' : 'PREMIUM',
                                   style: const TextStyle(color: Colors.orange, fontSize: 9, fontWeight: FontWeight.w700),
                                 ),
                               ),

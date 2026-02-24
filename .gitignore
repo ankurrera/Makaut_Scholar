@@ -50,3 +50,9 @@ makaut-scholar-c9472cd83b46.json
 # Ignore all Google Service Account keys
 *.json
 !package.json  # Make sure you don't ignore standard config files
+
+# Local Data Folders (Stored on Supabase)
+/Academic Notes/
+/PYQ Bank/
+/PYQ questions/
+/syllabus_downloads/

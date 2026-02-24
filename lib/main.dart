@@ -12,6 +12,7 @@ import 'features/profile/create_profile_screen.dart';
 import 'features/profile/profile_screen.dart';
 import 'features/navigation/main_nav_shell.dart';
 import 'features/splash/splash_screen.dart';
+import 'services/monetization_service.dart';
 import 'domain/repositories/billing_repository.dart';
 import 'data/repositories/billing_repository_impl.dart';
 
@@ -32,6 +33,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthService()),
+        ChangeNotifierProvider(create: (_) => MonetizationService()),
         Provider<BillingRepository>(
           create: (_) => BillingRepositoryImpl(),
           dispose: (_, repo) => repo.dispose(),
