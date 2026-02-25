@@ -9,77 +9,35 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
-  late Animation<double> _scaleAnimation;
-
-
+class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    
-    // 1. Initialize Animation Controller (1.2s total duration)
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    );
-
-    // 2. Define Animations
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.6, curve: Curves.easeOut)),
-    );
-
-    _scaleAnimation = Tween<double>(begin: 0.95, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.6, curve: Curves.easeOut)),
-    );
-
-
-
-    // 3. Start Animation and Check Session
-    _controller.forward();
     _checkSession();
-    
-    // Loop the glow effect after entrance
-    _controller.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        _controller.repeat(reverse: true, period: const Duration(seconds: 2));
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 
   Future<void> _checkSession() async {
-    // Wait for animation + extra time (2s min)
-    await Future.delayed(const Duration(seconds: 2));
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final sessionCheck = authService.currentSession;
+    
+    // Very short delay to ensure the UI has time to frame once
+    final minDelay = Future.delayed(const Duration(milliseconds: 1200));
 
+    Map<String, dynamic>? profile;
+    if (sessionCheck != null) {
+      try {
+        profile = await authService.getProfile();
+      } catch (_) {}
+    }
+
+    await minDelay;
+    
     if (!mounted) return;
 
-    final authService = Provider.of<AuthService>(context, listen: false);
-    final session = authService.currentSession;
-
-    if (session != null) {
-      try {
-        // Check if profile exists and is complete
-        final profile = await authService.getProfile();
-        if (!mounted) return;
-        if (profile != null && profile['college_name'] != null && profile['college_name'].toString().isNotEmpty) {
-          Navigator.pushReplacementNamed(context, '/home');
-        } else {
-          Navigator.pushReplacementNamed(context, '/create_profile');
-        }
-      } on NetworkException catch (_) {
-        if (!mounted) return;
-        // Redirect to home if offline
-        Navigator.pushReplacementNamed(context, '/home', arguments: {'isOffline': true});
-      } catch (e) {
-        if (!mounted) return;
-        // Other errors, maybe fallback or stay on create_profile
+    if (sessionCheck != null) {
+      if (profile != null && profile['college_name'] != null && profile['college_name'].toString().isNotEmpty) {
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
         Navigator.pushReplacementNamed(context, '/create_profile');
       }
     } else {
@@ -89,86 +47,47 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    const primaryAccent = Color(0xFFCCFF00); // Lime Green
+    // Matching the logo's off-white background (#F7F5F2)
+    const bgColor = Color(0xFFF7F5F2); 
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF0F2610), // Deep Forest Green
-              Color(0xFF000000), // Black
-            ],
-          ),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Animated Logo
-              AnimatedBuilder(
-                animation: _controller,
-                builder: (context, child) {
-                  return FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: Transform.scale(
-                      scale: _scaleAnimation.value,
-                      child: Container(
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: const Color(0xFF1C1C1E),
-                        ),
-                        child: const Icon(Icons.school_rounded, size: 80, color: primaryAccent),
-                      ),
-                    ),
-                  );
-                },
-              ),
-              
-              const SizedBox(height: 32),
-              
-              // Text Fade In
-              FadeTransition(
-                opacity: _fadeAnimation,
-                child: Column(
-                  children: [
-                    const Text(
-                      "MAKAUT Scholar",
-                      style: TextStyle(
-                        fontSize: 28, 
-                        fontWeight: FontWeight.bold, 
-                        color: Colors.white,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      "Your Academic Companion",
-                      style: TextStyle(fontSize: 14, color: Colors.grey[500]),
-                    ),
-                  ],
-                ),
-              ),
+      backgroundColor: bgColor,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Static Logo Image
+            Image.asset(
+              'assets/scholar_logo.png',
+              width: 200,
+              height: 200,
+              fit: BoxFit.contain,
+            ),
 
-              const SizedBox(height: 60),
-
-              // Custom Linear Loader
-              FadeTransition(
-                opacity: _fadeAnimation,
-                child: SizedBox(
-                  width: 140,
-                  child: LinearProgressIndicator(
-                    minHeight: 2,
-                    backgroundColor: Colors.white.withValues(alpha: 0.1),
-                    valueColor: const AlwaysStoppedAnimation<Color>(primaryAccent),
-                  ),
-                ),
+            const SizedBox(height: 30),
+            
+            // Branding Text
+            const Text(
+              'MAKAUT SCHOLAR',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 2.0,
+                color: Color(0xFF1E1E1E),
+                fontFamily: 'Inter',
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 6),
+            const Text(
+              'ESTD 2026',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: Colors.black54,
+                letterSpacing: 1.5,
+              ),
+            ),
+          ],
         ),
       ),
     );

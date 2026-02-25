@@ -19,8 +19,7 @@ class SearchService {
       final data = await _client
           .from('notes')
           .select()
-          .eq('department', department)
-          .or('subject.ilike.%$query%,title.ilike.%$query%')
+          .or('paper_code.ilike.%$query%,and(department.eq.$department,or(subject.ilike.%$query%,title.ilike.%$query%))')
           .limit(10);
       results.addAll((data as List).map((e) => SearchResult.fromNotes(e)));
     }
@@ -30,8 +29,7 @@ class SearchService {
       final data = await _client
           .from('syllabus')
           .select()
-          .eq('department', department)
-          .or('subject.ilike.%$query%,title.ilike.%$query%')
+          .or('paper_code.ilike.%$query%,and(department.eq.$department,or(subject.ilike.%$query%,title.ilike.%$query%))')
           .limit(10);
       results.addAll((data as List).map((e) => SearchResult.fromSyllabus(e)));
     }
@@ -41,8 +39,7 @@ class SearchService {
       final data = await _client
           .from('pyq')
           .select()
-          .eq('department', department)
-          .ilike('subject', '%$query%')
+          .or('paper_code.ilike.%$query%,and(department.eq.$department,subject.ilike.%$query%)')
           .limit(10);
       results.addAll((data as List).map((e) => SearchResult.fromPyq(e)));
     }
@@ -52,8 +49,7 @@ class SearchService {
       final data = await _client
           .from('important_questions')
           .select()
-          .eq('department', department)
-          .or('subject.ilike.%$query%,title.ilike.%$query%')
+          .or('paper_code.ilike.%$query%,and(department.eq.$department,or(subject.ilike.%$query%,title.ilike.%$query%))')
           .limit(10);
       results.addAll((data as List).map((e) => SearchResult.fromImportant(e)));
     }

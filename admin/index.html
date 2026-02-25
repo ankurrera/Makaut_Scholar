@@ -717,6 +717,10 @@
                         </select>
                     </div>
                     <div class="field">
+                        <label>Paper Code</label>
+                        <input type="text" id="notePaperCode" placeholder="e.g. CS501">
+                    </div>
+                    <div class="field">
                         <label>Unit</label>
                         <select id="noteUnit">
                             <option value="">Select Unit</option>
@@ -821,6 +825,10 @@
                         <label>Version/Title</label>
                         <input type="text" id="sylTitle" placeholder="e.g. 2023 Revised Edition">
                     </div>
+                    <div class="field">
+                        <label>Paper Code</label>
+                        <input type="text" id="sylPaperCode" placeholder="e.g. CS501">
+                    </div>
                     <div class="field full-width">
                         <label>PDF Asset</label>
                         <div class="dropzone" id="sylDropzone"
@@ -903,6 +911,10 @@
                         </select>
                     </div>
                     <div class="field">
+                        <label>Paper Code</label>
+                        <input type="text" id="pyqPaperCode" placeholder="e.g. CS501">
+                    </div>
+                    <div class="field">
                         <label>Exam Year</label>
                         <input type="text" id="pyqYear" placeholder="e.g. 2022-2023">
                     </div>
@@ -969,6 +981,10 @@
                         <select id="impSubject">
                             <option value="">Select Dept & Sem</option>
                         </select>
+                    </div>
+                    <div class="field">
+                        <label>Paper Code</label>
+                        <input type="text" id="impPaperCode" placeholder="e.g. CS501">
                     </div>
                     <div class="field">
                         <label>Module Title</label>
@@ -1241,21 +1257,37 @@
             if (!dept || !sem) return;
             target.innerHTML = '<option>Loading...</option>';
             try {
-                const { data } = await sb.from('department_subjects').select('subject, subject_price')
+                const { data } = await sb.from('department_subjects').select('subject, subject_price, paper_code')
                     .eq('department', dept).eq('semester', parseInt(sem)).order('subject');
-                
-                // Keep raw subject names for 'value' to avoid HTML-encoding mismatches in queries
+
                 target.innerHTML = '<option value="">Select Subject</option>' +
                     data.filter(s => !s.subject.toLowerCase().includes('laboratory'))
-                        .map(s => `<option value="${s.subject}" data-price="${s.subject_price || 0}">${esc(s.subject)}</option>`).join('');
-                
-                // If it's the monetization tab, auto-load price on selection
-                if (targetId === 'priceSubject') {
-                    target.onchange = (e) => {
-                        const opt = e.target.options[e.target.selectedIndex];
-                        document.getElementById('priceAmount').value = opt.getAttribute('data-price') || 0;
+                        .map(s => `<option value="${s.subject}" data-price="${s.subject_price || 0}" data-code="${s.paper_code || ''}">${esc(s.subject)} ${s.paper_code ? '[' + s.paper_code + ']' : ''}</option>`).join('');
+
+                // Auto-fill paper code logic
+                target.onchange = (e) => {
+                    const opt = target.options[target.selectedIndex];
+                    if (!opt) return;
+                    const code = opt.getAttribute('data-code') || '';
+
+                    const codeMap = {
+                        'noteSubject': 'notePaperCode',
+                        'sylSubject': 'sylPaperCode',
+                        'pyqSubject': 'pyqPaperCode',
+                        'impSubject': 'impPaperCode',
+                        'priceSubject': 'priceAmount'
                     };
-                }
+
+                    if (codeMap[targetId]) {
+                        if (targetId === 'priceSubject') {
+                            document.getElementById('priceAmount').value = opt.getAttribute('data-price') || 0;
+                        } else {
+                            document.getElementById(codeMap[targetId]).value = code;
+                        }
+                    }
+                };
+                // Trigger auto-fill if browser remembers selection or it's pre-selected
+                if (target.value) target.onchange();
             } catch (e) { target.innerHTML = '<option>Error loading</option>'; }
         }
 
@@ -1267,13 +1299,13 @@
                 <div class="item-row">
                     <div class="item-main">
                         <div class="item-name">${esc(n.title)} ${n.is_premium ? '⭐' : ''}</div>
-                        <div class="item-sub">${esc(n.department)} · Sem ${n.semester} · ${esc(n.subject)} · Unit ${n.unit}</div>
+                        <div class="item-sub">${esc(n.department)} · Sem ${n.semester} · ${esc(n.subject)} · ${n.paper_code ? '<b>[' + esc(n.paper_code) + ']</b>' : ''}</div>
                     </div>
                     <div class="badge ${n.is_premium ? 'badge-premium' : ''}">${n.is_premium ? '₹' + n.price : 'FREE'}</div>
                     <div class="badge">U${n.unit}</div>
                     <div class="actions">
                         <button class="icon-btn" onclick="window.open('${n.file_url}')"><i class="fa-solid fa-eye"></i></button>
-                        <button class="icon-btn" onclick="openEdit('note', '${n.id}', ${n.is_premium}, ${n.price})"><i class="fa-solid fa-pen"></i></button>
+                        <button class="icon-btn" onclick="openEdit('note', '${n.id}', ${n.is_premium}, ${n.price}, null, null, '${n.paper_code || ''}')"><i class="fa-solid fa-pen"></i></button>
                         <button class="icon-btn delete" onclick="deleteItem('notes', 'notes_pdf', '${n.id}', '${n.file_url}')"><i class="fa-solid fa-trash"></i></button>
                     </div>
                 </div>
@@ -1288,14 +1320,14 @@
             document.getElementById('syllabusList').innerHTML = data.map(s => `
                 <div class="item-row">
                     <div class="item-main">
-                        <div class="item-name">${esc(s.subject)}</div>
+                        <div class="item-name">${esc(s.subject)} ${s.paper_code ? '<b>[' + esc(s.paper_code) + ']</b>' : ''}</div>
                         <div class="item-sub">${esc(s.department)} · Sem ${s.semester} · ${esc(s.title)}</div>
                     </div>
                     <div class="badge">CURRICULUM</div>
                     <div class="badge">S${s.semester}</div>
                     <div class="actions">
                         <button class="icon-btn" onclick="window.open('${s.file_url}')"><i class="fa-solid fa-eye"></i></button>
-                        <button class="icon-btn" onclick="openEdit('syllabus', '${s.id}', false, 0, '${esc(s.subject)}', '${esc(s.title)}')"><i class="fa-solid fa-pen"></i></button>
+                        <button class="icon-btn" onclick="openEdit('syllabus', '${s.id}', false, 0, '${esc(s.subject)}', '${esc(s.title)}', '${s.paper_code || ''}')"><i class="fa-solid fa-pen"></i></button>
                         <button class="icon-btn delete" onclick="deleteItem('syllabus', 'syllabus_pdf', '${s.id}', '${s.file_url}')"><i class="fa-solid fa-trash"></i></button>
                     </div>
                 </div>
@@ -1308,11 +1340,12 @@
                 <div class="item-row">
                     <div class="item-main">
                         <div class="item-name">${esc(p.subject)} (${p.year})</div>
-                        <div class="item-sub">${esc(p.department)} · Sem ${p.semester}</div>
+                        <div class="item-sub">${esc(p.department)} · Sem ${p.semester} ${p.paper_code ? '· <b>[' + esc(p.paper_code) + ']</b>' : ''}</div>
                     </div>
                     <div class="badge">${p.year}</div>
                     <div class="actions">
                         <button class="icon-btn" onclick="window.open('${p.file_url}')"><i class="fa-solid fa-eye"></i></button>
+                        <button class="icon-btn" onclick="openEdit('pyq', '${p.id}', false, 0, '${esc(p.subject)}', '${p.year}', '${p.paper_code || ''}')"><i class="fa-solid fa-pen"></i></button>
                         <button class="icon-btn delete" onclick="deleteItem('pyq', 'pyqs_pdf', '${p.id}', '${p.file_url}')"><i class="fa-solid fa-trash"></i></button>
                     </div>
                 </div>
@@ -1325,11 +1358,12 @@
                 <div class="item-row">
                     <div class="item-main">
                         <div class="item-name">${esc(p.title)}</div>
-                        <div class="item-sub">${esc(p.department)} · Sem ${p.semester} · ${esc(p.subject)}</div>
+                        <div class="item-sub">${esc(p.department)} · Sem ${p.semester} · ${esc(p.subject)} ${p.paper_code ? '· <b>[' + esc(p.paper_code) + ']</b>' : ''}</div>
                     </div>
                     <div class="badge" style="color:var(--red);">IMP</div>
                     <div class="actions">
                         <button class="icon-btn" onclick="window.open('${p.file_url}')"><i class="fa-solid fa-eye"></i></button>
+                        <button class="icon-btn" onclick="openEdit('important_questions', '${p.id}', false, 0, '${esc(p.subject)}', '${esc(p.title)}', '${p.paper_code || ''}')"><i class="fa-solid fa-pen"></i></button>
                         <button class="icon-btn delete" onclick="deleteItem('important_questions', 'important_questions_pdf', '${p.id}', '${p.file_url}')"><i class="fa-solid fa-trash"></i></button>
                     </div>
                 </div>
@@ -1342,35 +1376,69 @@
         async function uploadNote() {
             const btn = document.getElementById('noteUploadBtn');
             const file = document.getElementById('noteFileInput').files[0];
-            const meta = {
-                department: document.getElementById('noteDept').value,
-                semester: parseInt(document.getElementById('noteSem').value),
-                subject: document.getElementById('noteSubject').value,
-                unit: parseInt(document.getElementById('noteUnit').value),
-                title: document.getElementById('noteTitle').value,
-                is_premium: document.getElementById('noteIsPremium').checked,
-                is_preview: parseInt(document.getElementById('noteUnit').value) === 1 || parseInt(document.getElementById('noteUnit').value) === 2,
-                price: parseFloat(document.getElementById('notePrice').value) || 0
-            };
+            const dept = document.getElementById('noteDept').value;
+            const sem = parseInt(document.getElementById('noteSem').value);
+            const sub = document.getElementById('noteSubject').value;
+            const unit = parseInt(document.getElementById('noteUnit').value);
+            const title = document.getElementById('noteTitle').value;
+            const code = document.getElementById('notePaperCode').value;
+            const isPrem = document.getElementById('noteIsPremium').checked;
+            const price = parseFloat(document.getElementById('notePrice').value) || 0;
 
-            if (!file || !meta.subject || !meta.title) return showToast('Fill all fields', 'error');
+            if (!file || !dept || !sem || !sub || !title) return showToast('Fill all fields', 'error');
 
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
 
             try {
-                const path = `${meta.department}/Sem${meta.semester}/${meta.subject}/U${meta.unit}/${Date.now()}_${file.name}`;
+                // 1. Upload File with robust name
+                const cleanSub = sub.replace(/[^a-z0-9]/gi, '_');
+                const cleanTitle = title.replace(/[^a-z0-9]/gi, '_');
+                const path = `${dept}/Sem${sem}/${cleanSub}/U${unit}/${Date.now()}_${cleanTitle}.pdf`;
+
                 await sb.storage.from('notes_pdf').upload(path, file);
                 const { data: url } = sb.storage.from('notes_pdf').getPublicUrl(path);
-                meta.file_url = url.publicUrl;
 
-                const { error } = await sb.from('notes').insert(meta);
+                // 2. Prepare base meta
+                const baseMeta = {
+                    department: dept,
+                    semester: sem,
+                    subject: sub,
+                    unit: unit,
+                    title: title,
+                    paper_code: code,
+                    is_premium: isPrem,
+                    is_preview: unit === 1 || unit === 2,
+                    price: isPrem ? price : 0,
+                    file_url: url.publicUrl
+                };
+
+                // 3. Find siblings for multiplexing
+                let targets = [baseMeta];
+                if (code && code.trim()) {
+                    const { data: siblings } = await sb.from('department_subjects')
+                        .select('department, semester, subject')
+                        .eq('paper_code', code.trim());
+
+                    if (siblings) {
+                        const seen = new Set([`${dept}|${sem}|${sub}`]);
+                        siblings.forEach(s => {
+                            const key = `${s.department}|${s.semester}|${s.subject}`;
+                            if (!seen.has(key)) {
+                                seen.add(key);
+                                targets.push({ ...baseMeta, department: s.department, semester: s.semester, subject: s.subject });
+                            }
+                        });
+                    }
+                }
+
+                const { error } = await sb.from('notes').insert(targets);
                 if (error) throw error;
 
-                showToast('Study material published');
+                showToast(`Study material published to ${targets.length} depts`);
                 loadNotes();
-                // Clear UI
                 document.getElementById('noteTitle').value = '';
+                document.getElementById('notePaperCode').value = '';
                 document.getElementById('noteFileInput').value = '';
                 document.getElementById('noteFileName').textContent = 'Click or drop study material PDF';
             } catch (e) { showToast(e.message, 'error'); }
@@ -1380,23 +1448,37 @@
         async function uploadSyllabus() {
             const btn = document.getElementById('sylUploadBtn');
             const file = document.getElementById('sylFileInput').files[0];
-            const meta = {
-                department: document.getElementById('sylDept').value,
-                semester: parseInt(document.getElementById('sylSem').value),
-                subject: document.getElementById('sylSubject').value,
-                title: document.getElementById('sylTitle').value
-            };
-            if (!file || !meta.department || !meta.subject) return showToast('Details required', 'error');
+            const dept = document.getElementById('sylDept').value;
+            const sem = parseInt(document.getElementById('sylSem').value);
+            const sub = document.getElementById('sylSubject').value;
+            const title = document.getElementById('sylTitle').value;
+            const code = document.getElementById('sylPaperCode').value;
+
+            if (!file || !dept || !sub) return showToast('Details required', 'error');
 
             btn.disabled = true;
             try {
-                const path = `${meta.department}/Sem${meta.semester}/${meta.subject}_Syllabus_${Date.now()}.pdf`;
+                const cleanSub = sub.replace(/[^a-z0-9]/gi, '_');
+                const path = `${dept}/Sem${sem}/${cleanSub}_Syllabus_${Date.now()}.pdf`;
                 await sb.storage.from('syllabus_pdf').upload(path, file);
                 const { data: url } = sb.storage.from('syllabus_pdf').getPublicUrl(path);
-                meta.file_url = url.publicUrl;
+
+                const meta = {
+                    department: dept,
+                    semester: sem,
+                    subject: sub,
+                    title: title,
+                    paper_code: code,
+                    file_url: url.publicUrl
+                };
+
                 await sb.from('syllabus').insert(meta);
                 showToast('Curriculum updated');
                 loadSyllabus();
+                document.getElementById('sylSubject').value = '';
+                document.getElementById('sylTitle').value = '';
+                document.getElementById('sylPaperCode').value = '';
+                document.getElementById('sylFileInput').value = '';
             } catch (e) { showToast(e.message, 'error'); }
             finally { btn.disabled = false; }
         }
@@ -1404,21 +1486,59 @@
         async function uploadPYQ() {
             const btn = document.getElementById('pyqUploadBtn');
             const file = document.getElementById('pyqFileInput').files[0];
-            const meta = {
-                department: document.getElementById('pyqDept').value,
-                semester: parseInt(document.getElementById('pyqSem').value),
-                subject: document.getElementById('pyqSubject').value,
-                year: document.getElementById('pyqYear').value
-            };
-            if (!file) return;
+            const dept = document.getElementById('pyqDept').value;
+            const sem = parseInt(document.getElementById('pyqSem').value);
+            const sub = document.getElementById('pyqSubject').value;
+            const year = document.getElementById('pyqYear').value;
+            const code = document.getElementById('pyqPaperCode').value;
+
+            if (!file || !dept || !sem || !sub || !year) return showToast('Fill all fields', 'error');
             btn.disabled = true;
+
             try {
-                const path = `${meta.department}/PYQ/${meta.year}/${meta.subject}.pdf`;
+                // 1. Upload File
+                const cleanSub = sub.replace(/[^a-z0-9]/gi, '_');
+                const path = `${dept}/PYQ/${year}/${Date.now()}_${cleanSub}.pdf`;
                 await sb.storage.from('pyqs_pdf').upload(path, file);
                 const { data: url } = sb.storage.from('pyqs_pdf').getPublicUrl(path);
-                meta.file_url = url.publicUrl;
-                await sb.from('pyq').insert(meta);
-                showToast('PYQ archived'); loadPYQ();
+
+                // 2. Base meta
+                const baseMeta = {
+                    department: dept,
+                    semester: sem,
+                    subject: sub,
+                    year: year,
+                    paper_code: code,
+                    file_url: url.publicUrl
+                };
+
+                // 3. Multiplex
+                let targets = [baseMeta];
+                if (code && code.trim()) {
+                    const { data: siblings } = await sb.from('department_subjects')
+                        .select('department, semester, subject')
+                        .eq('paper_code', code.trim());
+
+                    if (siblings) {
+                        const seen = new Set([`${dept}|${sem}|${sub}`]);
+                        siblings.forEach(s => {
+                            const key = `${s.department}|${s.semester}|${s.subject}`;
+                            if (!seen.has(key)) {
+                                seen.add(key);
+                                targets.push({ ...baseMeta, department: s.department, semester: s.semester, subject: s.subject });
+                            }
+                        });
+                    }
+                }
+
+                const { error } = await sb.from('pyq').insert(targets);
+                if (error) throw error;
+
+                showToast(`PYQ archived for ${targets.length} depts`);
+                loadPYQ();
+                document.getElementById('pyqYear').value = '';
+                document.getElementById('pyqPaperCode').value = '';
+                document.getElementById('pyqFileInput').value = '';
             } catch (e) { showToast(e.message, 'error'); }
             finally { btn.disabled = false; }
         }
@@ -1426,21 +1546,71 @@
         async function uploadIMP() {
             const btn = document.getElementById('impUploadBtn');
             const file = document.getElementById('impFileInput').files[0];
-            const meta = {
-                department: document.getElementById('impDept').value,
-                semester: parseInt(document.getElementById('impSem').value),
-                subject: document.getElementById('impSubject').value,
-                title: document.getElementById('impTitle').value
-            };
-            if (!file) return;
+            const dept = document.getElementById('impDept').value;
+            const sem = parseInt(document.getElementById('impSem').value);
+            const sub = document.getElementById('impSubject').value;
+            const title = document.getElementById('impTitle').value;
+            const code = document.getElementById('impPaperCode').value;
+
+            if (!file || !dept || !sem || !sub) return showToast('Fill all fields', 'error');
             btn.disabled = true;
+
             try {
-                const path = `IMP/${meta.department}/Sem${meta.semester}/${meta.title}.pdf`;
+                // 1. Upload File with robust name
+                const cleanSub = sub.replace(/[^a-z0-9]/gi, '_');
+                const cleanTitle = title.replace(/[^a-z0-9]/gi, '_');
+                const path = `IMP/${dept}/Sem${sem}/${Date.now()}_${cleanSub}_${cleanTitle}.pdf`;
+
                 await sb.storage.from('important_questions_pdf').upload(path, file);
                 const { data: url } = sb.storage.from('important_questions_pdf').getPublicUrl(path);
-                meta.file_url = url.publicUrl;
-                await sb.from('important_questions').insert(meta);
-                showToast('Focus points published'); loadIMP();
+
+                // 2. Prepare base meta
+                const baseMeta = {
+                    department: dept,
+                    semester: sem,
+                    subject: sub,
+                    title: title,
+                    paper_code: code,
+                    file_url: url.publicUrl
+                };
+
+                // 3. Find sibling departments if paper_code exists
+                let targets = [baseMeta];
+                if (code && code.trim()) {
+                    const { data: siblings } = await sb.from('department_subjects')
+                        .select('department, semester, subject')
+                        .eq('paper_code', code.trim());
+
+                    if (siblings && siblings.length > 0) {
+                        // Create unique set of targets (avoid self-duplication if also in query)
+                        const seen = new Set([`${dept}|${sem}|${sub}`]);
+                        siblings.forEach(s => {
+                            const key = `${s.department}|${s.semester}|${s.subject}`;
+                            if (!seen.has(key)) {
+                                seen.add(key);
+                                targets.push({
+                                    ...baseMeta,
+                                    department: s.department,
+                                    semester: s.semester,
+                                    subject: s.subject
+                                });
+                            }
+                        });
+                    }
+                }
+
+                // 4. Batch insert
+                const { error } = await sb.from('important_questions').insert(targets);
+                if (error) throw error;
+
+                showToast(`Focus points published to ${targets.length} departments`);
+                loadIMP();
+
+                // Clear UI
+                document.getElementById('impTitle').value = '';
+                document.getElementById('impPaperCode').value = '';
+                document.getElementById('impFileInput').value = '';
+                document.getElementById('impFileName').textContent = 'Upload IMP PDF';
             } catch (e) { showToast(e.message, 'error'); }
             finally { btn.disabled = false; }
         }
@@ -1455,7 +1625,7 @@
                 const { count, error } = await sb.from('department_subjects')
                     .update({ subject_price: price }, { count: 'exact' })
                     .eq('department', dept).eq('semester', sem).eq('subject', sub);
-                
+
                 if (error) throw error;
                 if (count === 0) {
                     showToast('Subject not found in sync table', 'error');
@@ -1521,19 +1691,59 @@
             document.getElementById('editId').value = id;
             document.getElementById('editType').value = type;
 
-            if (type === 'note') {
-                document.getElementById('modalTitle').textContent = 'Edit Note Access';
+            if (type === 'note' || type === 'pyq' || type === 'important_questions') {
+                const titleMap = { 'note': 'Edit Note Access', 'pyq': 'Edit PYQ Paper', 'important_questions': 'Edit Exam Focus' };
+                document.getElementById('modalTitle').textContent = titleMap[type] || 'Edit Entry';
+
                 document.getElementById('syllabusFields').style.display = 'none';
                 document.getElementById('premiumFields').style.display = 'block';
-                document.getElementById('editIsPremium').checked = isPrem;
-                document.getElementById('editPrice').value = price;
-                document.getElementById('editPriceGroup').style.display = isPrem ? 'flex' : 'none';
+
+                // Note specific
+                if (type === 'note') {
+                    document.querySelector('#premiumFields .field:first-child').style.display = 'block'; // Access Control
+                    document.getElementById('editIsPremium').checked = isPrem;
+                    document.getElementById('editPrice').value = price;
+                    document.getElementById('editPriceGroup').style.display = isPrem ? 'flex' : 'none';
+                } else {
+                    document.querySelector('#premiumFields .field:first-child').style.display = 'none'; // Hide Access Control
+                    document.getElementById('editPriceGroup').style.display = 'none';
+                }
+
+                // Add paper code to modal
+                if (!document.getElementById('editPaperCodeField')) {
+                    const div = document.createElement('div');
+                    div.id = 'editPaperCodeField';
+                    div.className = 'field';
+                    div.style.marginBottom = '16px';
+                    div.innerHTML = '<label>Paper Code</label><input type="text" id="editPaperCode">';
+                    document.getElementById('premiumFields').appendChild(div);
+                }
+                document.getElementById('editPaperCode').value = arguments[6] || '';
+
+                // For PYQ/IMP, we might also want to edit subject/title
+                if (type === 'pyq' || type === 'important_questions') {
+                    document.getElementById('syllabusFields').style.display = 'block';
+                    document.getElementById('editSubject').value = sub;
+                    document.getElementById('editTitle').value = title;
+                    document.querySelector('#syllabusFields label:last-of-type').textContent = type === 'pyq' ? 'Year' : 'Title';
+                }
             } else {
                 document.getElementById('modalTitle').textContent = 'Edit Syllabus';
                 document.getElementById('syllabusFields').style.display = 'block';
                 document.getElementById('premiumFields').style.display = 'none';
                 document.getElementById('editSubject').value = sub;
                 document.getElementById('editTitle').value = title;
+
+                // Add paper code to modal
+                if (!document.getElementById('editSylPaperCodeField')) {
+                    const div = document.createElement('div');
+                    div.id = 'editSylPaperCodeField';
+                    div.className = 'field';
+                    div.style.marginBottom = '16px';
+                    div.innerHTML = '<label>Paper Code</label><input type="text" id="editSylPaperCode">';
+                    document.getElementById('syllabusFields').appendChild(div);
+                }
+                document.getElementById('editSylPaperCode').value = arguments[6] || '';
             }
             document.getElementById('editModal').classList.add('show');
         }
@@ -1547,13 +1757,33 @@
 
             if (type === 'note') {
                 const is_premium = document.getElementById('editIsPremium').checked;
-                payload = { is_premium, price: is_premium ? parseFloat(document.getElementById('editPrice').value) : 0 };
+                payload = {
+                    is_premium,
+                    price: is_premium ? parseFloat(document.getElementById('editPrice').value) : 0,
+                    paper_code: document.getElementById('editPaperCode').value
+                };
+            } else if (type === 'pyq') {
+                payload = {
+                    subject: document.getElementById('editSubject').value,
+                    year: document.getElementById('editTitle').value,
+                    paper_code: document.getElementById('editPaperCode').value
+                };
+            } else if (type === 'important_questions') {
+                payload = {
+                    subject: document.getElementById('editSubject').value,
+                    title: document.getElementById('editTitle').value,
+                    paper_code: document.getElementById('editPaperCode').value
+                };
             } else {
-                payload = { subject: document.getElementById('editSubject').value, title: document.getElementById('editTitle').value };
+                payload = {
+                    subject: document.getElementById('editSubject').value,
+                    title: document.getElementById('editTitle').value,
+                    paper_code: document.getElementById('editSylPaperCode').value
+                };
             }
 
             try {
-                await sb.from(type === 'note' ? 'notes' : 'syllabus').update(payload).eq('id', id);
+                await sb.from(type === 'note' ? 'notes' : (type === 'important_questions' ? 'important_questions' : type)).update(payload).eq('id', id);
                 showToast('Entry updated');
                 closeModal();
                 loadAll();

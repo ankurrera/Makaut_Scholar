@@ -105,23 +105,26 @@ class AuthService extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Fetches all subjects from the Syllabus table (as source of truth), excluding laboratories
-  Future<List<String>> fetchDepartmentSubjects(String department, int semester) async {
+  Future<List<Map<String, dynamic>>> fetchDepartmentSubjects(String department, int semester) async {
     final data = await _client
-        .from('syllabus')
-        .select('subject')
+        .from('department_subjects')
+        .select('subject, paper_code')
         .eq('department', department)
         .eq('semester', semester);
     
     final subjects = (data as List)
-        .map((row) => row['subject'] as String)
-        .where((subject) {
-          final s = subject.toLowerCase();
-          return !s.contains('laboratory') && !RegExp(r'\blab\b').hasMatch(s);
+        .map((row) => {
+          'subject': row['subject'] as String,
+          'paper_code': row['paper_code'] as String?,
         })
-        .toSet()
-        .toList()
-      ..sort();
+        .where((item) {
+          final s = item['subject'] as String;
+          final low = s.toLowerCase();
+          return !low.contains('laboratory') && !RegExp(r'\blab\b').hasMatch(low);
+        })
+        .toList();
+    
+    subjects.sort((a, b) => (a['subject'] as String).compareTo(b['subject'] as String));
     return subjects;
   }
 
@@ -176,9 +179,8 @@ class AuthService extends ChangeNotifier {
 
   /// Fetches notes for a department + semester + subject, ordered by unit
   Future<List<Map<String, dynamic>>> fetchNotes(
-      String department, int semester, String subject) async {
-    final data = await _client
-        .from('notes')
+      String department, int semester, String subject, {String? paperCode}) async {
+    final data = await _client.from('notes')
         .select()
         .eq('department', department)
         .eq('semester', semester)
@@ -203,25 +205,28 @@ class AuthService extends ChangeNotifier {
   }
 
   /// Fetches distinct subjects that have syllabus for a department + semester
-  Future<List<String>> fetchSyllabusSubjects(String department, int semester) async {
+  Future<List<Map<String, dynamic>>> fetchSyllabusSubjects(String department, int semester) async {
     final data = await _client
-        .from('syllabus')
-        .select('subject')
+        .from('department_subjects')
+        .select('subject, paper_code')
         .eq('department', department)
         .eq('semester', semester);
+    
     final subjects = (data as List)
-        .map((row) => row['subject'] as String)
-        .toSet()
-        .toList()
-      ..sort();
+        .map((row) => {
+          'subject': row['subject'] as String,
+          'paper_code': row['paper_code'] as String?,
+        })
+        .toList();
+    
+    subjects.sort((a, b) => (a['subject'] as String).compareTo(b['subject'] as String));
     return subjects;
   }
 
   /// Fetches syllabus entries for a department + semester + subject
   Future<List<Map<String, dynamic>>> fetchSyllabus(
-      String department, int semester, String subject) async {
-    final data = await _client
-        .from('syllabus')
+      String department, int semester, String subject, {String? paperCode}) async {
+    final data = await _client.from('syllabus')
         .select()
         .eq('department', department)
         .eq('semester', semester)
@@ -231,7 +236,7 @@ class AuthService extends ChangeNotifier {
   }
 
   /// Checks if the current user has premium access to a specific item
-  Future<bool> checkPremiumAccess(String itemType, String itemId) async {
+  Future<bool> checkPremiumAccess(String itemType, String itemId, {String? department}) async {
     final user = _client.auth.currentUser;
     if (user == null) return false;
 
@@ -239,6 +244,7 @@ class AuthService extends ChangeNotifier {
       'target_user_id': user.id,
       'target_item_type': itemType,
       'target_item_id': itemId,
+      'target_department': department,
     });
     return response as bool;
   }
@@ -324,9 +330,8 @@ class AuthService extends ChangeNotifier {
 
   /// Fetches Important Questions for a department + semester + subject
   Future<List<Map<String, dynamic>>> fetchImpQuestions(
-      String department, int semester, String subject) async {
-    final data = await _client
-        .from('important_questions')
+      String department, int semester, String subject, {String? paperCode}) async {
+    final data = await _client.from('important_questions')
         .select()
         .eq('department', department)
         .eq('semester', semester)
@@ -337,9 +342,8 @@ class AuthService extends ChangeNotifier {
 
   /// Fetches PYQ papers for a department + semester + subject, ordered by year desc
   Future<List<Map<String, dynamic>>> fetchPyqPapers(
-      String department, int semester, String subject) async {
-    final data = await _client
-        .from('pyq')
+      String department, int semester, String subject, {String? paperCode}) async {
+    final data = await _client.from('pyq')
         .select()
         .eq('department', department)
         .eq('semester', semester)

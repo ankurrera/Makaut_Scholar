@@ -31,6 +31,8 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.4
 
 flutter:
   uses-material-design: true
@@ -38,3 +40,20 @@ flutter:
   # CRITICAL: This allows Flutter to read your .env file
   assets:
     - .env
+    - assets/logo.png
+    - assets/scholar_logo.png
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/scholar_logo.png"
+  adaptive_icon_background: "#F7F5F2"
+  adaptive_icon_foreground: "assets/scholar_logo.png"
+
+flutter_native_splash:
+  color: "#F7F5F2"
+  image: "assets/scholar_logo.png"
+  android_12:
+    color: "#F7F5F2"
+    image: "assets/scholar_logo.png"
+  fullscreen: true

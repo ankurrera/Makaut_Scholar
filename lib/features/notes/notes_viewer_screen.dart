@@ -11,11 +11,13 @@ class NotesViewerScreen extends StatefulWidget {
   final String department;
   final int semester;
   final String subject;
+  final String? paperCode;
   const NotesViewerScreen({
     super.key,
     required this.department,
     required this.semester,
     required this.subject,
+    this.paperCode,
   });
 
   @override
@@ -34,15 +36,15 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
   static const _accentDark = Color(0xFF8E82FF);
 
   Color _bg(bool d) => d ? const Color(0xFF0F1115) : const Color(0xFFF4F5F7);
-  static const _card = Colors.white;
+  Color _card(bool d) => d ? const Color(0xFF181B22) : Colors.white;
   Color _textP(bool d) => d ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E);
   Color _textS(bool d) => d ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
   Color _border(bool d) => d ? const Color(0xFF2A2F3A) : const Color(0xFFE6E8EC);
   Color _accent(bool d) => d ? _accentDark : _accentLight;
 
-  // Fixed dark text for white cards
-  static const _cardTextP = Color(0xFF1E1E1E);
-  static const _cardTextS = Color(0xFF8E8E93);
+  // ── Luxury Palette ──
+  static const _goldGradient = [Color(0xFFFDB931), Color(0xFFFDC958)];
+  static const _premiumGold = Color(0xFFFDB931);
 
   @override
   void initState() {
@@ -57,7 +59,7 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
       final monetization = Provider.of<MonetizationService>(context, listen: false);
       
       final results = await Future.wait([
-        auth.fetchNotes(widget.department, widget.semester, widget.subject),
+        auth.fetchNotes(widget.department, widget.semester, widget.subject, paperCode: widget.paperCode),
         monetization.checkSubjectAccess(widget.department, widget.semester, widget.subject),
         monetization.getPricingDetails(widget.department, widget.semester, widget.subject),
       ]);
@@ -297,124 +299,184 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
     final isPreview = note['is_preview'] == true;
     final isLocked = (isPremium && !isPreview) && !_hasAccess;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: _card,
-        borderRadius: BorderRadius.circular(16),
+        color: _card(isDark),
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: isLocked ? Colors.orange.withValues(alpha: 0.3) : _border(isDark).withValues(alpha: 0.4),
+          color: isLocked 
+              ? _premiumGold.withValues(alpha: 0.3) 
+              : _border(isDark).withValues(alpha: 0.08),
           width: isLocked ? 1.5 : 1,
         ),
+        boxShadow: isLocked ? [
+          BoxShadow(
+            color: _premiumGold.withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          )
+        ] : [],
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: InkWell(
-              onTap: () {
-                if (isLocked) {
-                  _openCheckout(note);
-                } else if (isDownloaded) {
-                  final resource = OfflineService().getResource(id);
-                  _openPdf(filePath: resource!.localPath, title: title);
-                } else {
-                  _openPdf(url: url, title: title);
-                }
-              },
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              if (isLocked) {
+                _openCheckout(note);
+              } else if (isDownloaded) {
+                final resource = OfflineService().getResource(id);
+                _openPdf(filePath: resource!.localPath, title: title);
+              } else {
+                _openPdf(url: url, title: title);
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  Container(
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(
-                      color: isLocked 
-                          ? Colors.orange.withValues(alpha: 0.1)
-                          : accent.withValues(alpha: isDark ? 0.12 : 0.08),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      isLocked ? Iconsax.lock : Iconsax.document_text, 
-                      color: isLocked ? Colors.orange : accent, 
-                      size: 20
-                    ),
+                  // ── Icon Container ──
+                  Stack(
+                    children: [
+                      Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          color: isLocked 
+                              ? _premiumGold.withValues(alpha: 0.1)
+                              : accent.withValues(alpha: isDark ? 0.1 : 0.05),
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: Icon(
+                          isLocked ? Iconsax.lock_1_copy : Iconsax.document_text_1, 
+                          color: isLocked ? _premiumGold : accent, 
+                          size: 24
+                        ),
+                      ),
+                      if (isLocked)
+                        Positioned(
+                          right: -2,
+                          top: -2,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: _premiumGold,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Iconsax.star_1, size: 8, color: Colors.white),
+                          ),
+                        ),
+                    ],
                   ),
-                  const SizedBox(width: 14),
+                  const SizedBox(width: 16),
+                  
+                  // ── Info & Action Column ──
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Expanded(
                               child: Text(
                                 title,
-                                style: TextStyle(color: _cardTextP, fontSize: 14, fontWeight: FontWeight.w500),
-                                maxLines: 2,
+                                style: TextStyle(
+                                  color: _textP(isDark), 
+                                  fontSize: 15, 
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: -0.2,
+                                  height: 1.2,
+                                ),
+                                maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            if (isPremium)
+                            if (isPremium) ...[
+                              const SizedBox(width: 8),
                               Container(
-                                margin: const EdgeInsets.only(left: 8),
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                alignment: Alignment.center,
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: Colors.orange.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(6),
+                                  gradient: LinearGradient(colors: _goldGradient),
+                                  borderRadius: BorderRadius.circular(100), // pill shape looks better
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: _premiumGold.withValues(alpha: 0.2),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    )
+                                  ]
                                 ),
                                 child: Text(
-                                  !isLocked ? 'UNLOCKED' : 'PREMIUM',
-                                  style: const TextStyle(color: Colors.orange, fontSize: 9, fontWeight: FontWeight.w700),
+                                  isLocked ? 'PRO' : 'UNLOCKED',
+                                  style: const TextStyle(
+                                    color: Colors.white, 
+                                    fontSize: 9, 
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 0.5,
+                                    height: 1.1,
+                                  ),
                                 ),
                               ),
+                            ],
                           ],
                         ),
-                        const SizedBox(height: 3),
-                        Text(
-                          isLocked 
-                              ? 'Premium Content · ₹${note['price']}' 
-                              : (isDownloaded ? 'Offline Access Enabled' : 'PDF · Tap to open'),
-                          style: TextStyle(
-                            color: isLocked ? Colors.orange : (isDownloaded ? Colors.green : _cardTextS), 
-                            fontSize: 11
-                          )
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Icon(
+                              isLocked ? Iconsax.flash_1 : (isDownloaded ? Iconsax.cloud_drizzle : Iconsax.document_text),
+                              size: 12,
+                              color: isLocked ? _premiumGold : (isDownloaded ? Colors.green : _textS(isDark)),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              isLocked 
+                                  ? 'Unlock Full Quality · ₹${note['price'] ?? '--'}' 
+                                  : (isDownloaded ? 'Available Offline' : 'Ready to Read · PDF'),
+                              style: TextStyle(
+                                color: isLocked ? _premiumGold.withValues(alpha: 0.8) : _textS(isDark), 
+                                fontSize: 12,
+                                fontWeight: isLocked ? FontWeight.w500 : FontWeight.normal,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ),
+                  
+                  // ── Download Action (only for unlocked) ──
+                  if (!isLocked)
+                    IconButton(
+                      icon: Icon(
+                        isDownloaded ? Iconsax.tick_circle : Iconsax.document_download,
+                        color: isDownloaded ? Colors.green : _textS(isDark),
+                        size: 22,
+                      ),
+                      onPressed: isDownloaded ? null : () async {
+                        try {
+                          await OfflineService().downloadResource(
+                            id: id,
+                            title: title,
+                            url: url,
+                            category: ResourceCategory.NOTES,
+                          );
+                          if (mounted) setState(() {});
+                        } catch (e) {
+                          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                        }
+                      },
+                    ),
                 ],
               ),
             ),
           ),
-          if (!isLocked)
-            IconButton(
-              icon: Icon(
-                isDownloaded ? Iconsax.tick_circle : Iconsax.document_download,
-                color: isDownloaded ? Colors.green : _cardTextS,
-                size: 20,
-              ),
-              onPressed: isDownloaded ? null : () async {
-                try {
-                  await OfflineService().downloadResource(
-                    id: id,
-                    title: title,
-                    url: url,
-                    category: ResourceCategory.NOTES,
-                  );
-                  if (mounted) setState(() {});
-                } catch (e) {
-                  if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
-                }
-              },
-            ),
-          if (!isLocked) ...[
-            const SizedBox(width: 4),
-            Icon(Iconsax.export_1, color: _cardTextS, size: 18),
-          ] else
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 12),
-              child: Icon(Iconsax.shopping_cart, color: Colors.orange, size: 18),
-            ),
-        ],
+        ),
       ),
     );
   }

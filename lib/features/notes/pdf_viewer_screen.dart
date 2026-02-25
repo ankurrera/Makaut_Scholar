@@ -155,6 +155,8 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
                   if (mounted) setState(() => _currentPage = details.newPageNumber);
                 },
                 onDocumentLoadFailed: (details) {
+                  debugPrint('PDF Load Failed: ${details.error}');
+                  debugPrint('Raw URL: ${widget.url}');
                   if (mounted) setState(() => _hasError = true);
                 },
               ),

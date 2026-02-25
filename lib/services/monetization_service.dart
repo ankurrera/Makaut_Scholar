@@ -143,11 +143,13 @@ class MonetizationService extends ChangeNotifier {
     if (user == null) return false;
 
     // Check Subject purchase
+    // The subjectId already includes the department, which naturally locks it.
     final subjectId = 'subject_${department}_${semester}_$subject';
     final subRes = await _client.rpc('has_premium_access', params: {
       'target_user_id': user.id,
       'target_item_type': 'subject',
       'target_item_id': subjectId,
+      'target_department': department, // New parameter for even stricter locking
     });
     if (subRes == true) return true;
 
@@ -157,6 +159,7 @@ class MonetizationService extends ChangeNotifier {
       'target_user_id': user.id,
       'target_item_type': 'semester_bundle',
       'target_item_id': bundleIdStr,
+      'target_department': department,
     });
     return bunRes == true;
   }
@@ -185,6 +188,7 @@ class MonetizationService extends ChangeNotifier {
           'target_user_id': user.id,
           'target_item_type': 'semester_bundle',
           'target_item_id': bundleIdStr,
+          'target_department': department,
         });
         hasAccess = bunRes == true;
       }

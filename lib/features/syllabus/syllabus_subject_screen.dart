@@ -67,8 +67,10 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
       // Fetch all subjects, then for each get syllabus entries
       final subjects = await auth.fetchSyllabusSubjects(widget.department, widget.semester);
       List<Map<String, dynamic>> allEntries = [];
-      for (final subject in subjects) {
-        final entries = await auth.fetchSyllabus(widget.department, widget.semester, subject);
+      for (final subjectData in subjects) {
+        final subject = subjectData['subject'] as String;
+        final paperCode = subjectData['paper_code'] as String?;
+        final entries = await auth.fetchSyllabus(widget.department, widget.semester, subject, paperCode: paperCode);
         allEntries.addAll(entries);
       }
       if (mounted) {

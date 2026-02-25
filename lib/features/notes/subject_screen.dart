@@ -17,7 +17,7 @@ class SubjectScreen extends StatefulWidget {
 }
 
 class _SubjectScreenState extends State<SubjectScreen> with TickerProviderStateMixin {
-  List<String> _subjects = [];
+  List<Map<String, dynamic>> _subjects = []; // Changed from List<String> to support paper_code
   Map<String, int> _unitCounts = {};
   Map<String, dynamic> _bundleInfo = {'bundle_price': 0.0, 'has_access': false};
   bool _isLoading = true;
@@ -80,7 +80,7 @@ class _SubjectScreenState extends State<SubjectScreen> with TickerProviderStateM
 
       if (mounted) {
         setState(() { 
-          _subjects = results[0] as List<String>;
+          _subjects = results[0] as List<Map<String, dynamic>>;
           _unitCounts = results[1] as Map<String, int>;
           _bundleInfo = results[2] as Map<String, dynamic>;
           _isLoading = false; 
@@ -225,7 +225,9 @@ class _SubjectScreenState extends State<SubjectScreen> with TickerProviderStateM
     );
   }
 
-  Widget _subjectTile(String subject, int index, bool isDark, Color accent) {
+  Widget _subjectTile(Map<String, dynamic> subjectData, int index, bool isDark, Color accent) {
+    final String subject = subjectData['subject'];
+    final String? paperCode = subjectData['paper_code'];
     final grad = _gradients[index % _gradients.length];
 
     return Material(
@@ -238,6 +240,7 @@ class _SubjectScreenState extends State<SubjectScreen> with TickerProviderStateM
               department: widget.department,
               semester: widget.semester,
               subject: subject,
+              paperCode: paperCode,
             ),
           ),
         ),

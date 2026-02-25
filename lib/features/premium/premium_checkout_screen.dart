@@ -28,7 +28,7 @@ class PremiumCheckoutScreen extends StatefulWidget {
 }
 
 class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
-  final String _selectedUPI = 'Razorpay';
+  String _selectedMethod = 'GooglePlay'; // Default to official method
   bool _isLoading = true;
   bool _successHandled = false;
   late BillingRepository _billingRepository;
@@ -75,7 +75,11 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
 
   void _listenToPurchases(List<PurchaseDetails> purchases) {
     for (var purchase in purchases) {
+      // Standard IAP or UCB Google Play choice
       if (purchase.status == PurchaseStatus.purchased || purchase.status == PurchaseStatus.restored) {
+        if (purchase.pendingCompletePurchase) {
+          InAppPurchase.instance.completePurchase(purchase);
+        }
         _handleSuccess();
       } else if (purchase.status == PurchaseStatus.error) {
         _handleError(purchase.error?.message ?? 'Unknown error');
@@ -90,13 +94,25 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
   }
 
   Future<void> _handlePayment() async {
+    if (_productDetails == null && _selectedMethod == 'GooglePlay') {
+      _handleError("Product not found in Google Play Console.");
+      return;
+    }
+
     setState(() => _isLoading = true);
     try {
-      await _billingRepository.processRazorpayPayment(
-        itemId: widget.itemId,
-        itemType: widget.itemType,
-        amount: widget.price,
-      );
+      if (_selectedMethod == 'GooglePlay') {
+        // Launches the standard Google Play flow
+        // Google Play itself will present the choice on Android if UCB is configured
+        await _billingRepository.launchBillingFlow(_productDetails!);
+      } else {
+        // Launches Razorpay flow directly
+        await _billingRepository.processRazorpayPayment(
+          itemId: widget.itemId,
+          itemType: widget.itemType,
+          amount: widget.price,
+        );
+      }
     } catch (e) {
       _handleError(e.toString());
     } finally {
@@ -238,13 +254,28 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                _buildUPIOption(
+                _buildMethodOption(
+                  id: 'GooglePlay',
+                  name: 'Google Play Billing',
+                  subtitle: 'Recommended • Fast & Secure',
+                  icon: FontAwesomeIcons.googlePlay,
+                  color: const Color(0xFF34A853),
+                  isSelected: _selectedMethod == 'GooglePlay',
+                  onTap: () => setState(() => _selectedMethod = 'GooglePlay'),
+                  surfaceColor: surfaceColor,
+                  borderColor: borderColor,
+                  textColor: textColor,
+                  textDimColor: textDimColor,
+                ),
+                const SizedBox(height: 16),
+                _buildMethodOption(
                   id: 'Razorpay',
-                  name: 'Razorpay Checkout',
-                  subtitle: 'Cards, Netbanking, UPI & Wallets',
+                  name: 'Other UPI / Razorpay',
+                  subtitle: 'Alternative Choice Billing',
                   icon: Iconsax.shield_tick_copy,
                   color: accentColor,
-                  isSelected: true,
+                  isSelected: _selectedMethod == 'Razorpay',
+                  onTap: () => setState(() => _selectedMethod = 'Razorpay'),
                   surfaceColor: surfaceColor,
                   borderColor: borderColor,
                   textColor: textColor,
@@ -380,51 +411,55 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
     );
   }
 
-  Widget _buildUPIOption({
+  Widget _buildMethodOption({
     required String id,
     required String name,
     required String subtitle,
     required IconData icon,
     required Color color,
     required bool isSelected,
+    required VoidCallback onTap,
     required Color surfaceColor,
     required Color borderColor,
     required Color textColor,
     required Color textDimColor,
   }) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: isSelected ? color.withOpacity(0.08) : surfaceColor,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: isSelected ? color.withOpacity(0.5) : borderColor,
-          width: isSelected ? 2 : 1,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 24),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: isSelected ? color.withOpacity(0.08) : surfaceColor,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: isSelected ? color.withOpacity(0.5) : borderColor,
+            width: isSelected ? 2 : 1,
+          ),
         ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.15),
-              shape: BoxShape.circle,
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color, size: 20),
             ),
-            child: Icon(icon, color: color, size: 22),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(name, style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w800)),
-                Text(subtitle, style: TextStyle(color: textDimColor, fontSize: 12, fontWeight: FontWeight.w500)),
-              ],
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(name, style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w800)),
+                  Text(subtitle, style: TextStyle(color: textDimColor, fontSize: 12, fontWeight: FontWeight.w500)),
+                ],
+              ),
             ),
-          ),
-          Icon(Iconsax.tick_circle_copy, color: isSelected ? color : Colors.transparent, size: 24),
-        ],
+            Icon(Iconsax.tick_circle_copy, color: isSelected ? color : Colors.transparent, size: 24),
+          ],
+        ),
       ),
     );
   }

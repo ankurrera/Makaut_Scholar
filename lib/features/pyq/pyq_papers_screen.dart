@@ -10,11 +10,13 @@ class PyqPapersScreen extends StatefulWidget {
   final String department;
   final int semester;
   final String subject;
+  final String? paperCode;
   const PyqPapersScreen({
     super.key,
     required this.department,
     required this.semester,
     required this.subject,
+    this.paperCode,
   });
 
   @override
@@ -71,7 +73,7 @@ class _PyqPapersScreenState extends State<PyqPapersScreen>
     try {
       final auth = Provider.of<AuthService>(context, listen: false);
       final results = await Future.wait([
-        auth.fetchPyqPapers(widget.department, widget.semester, widget.subject),
+        auth.fetchPyqPapers(widget.department, widget.semester, widget.subject, paperCode: widget.paperCode),
         auth.fetchUserPurchases('pyq'),
       ]);
 

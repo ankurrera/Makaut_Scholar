@@ -21,7 +21,7 @@ class ImportantQuestionsSubjectScreen extends StatefulWidget {
 
 class _ImportantQuestionsSubjectScreenState extends State<ImportantQuestionsSubjectScreen>
     with SingleTickerProviderStateMixin {
-  List<String> _subjects = [];
+  List<Map<String, dynamic>> _subjects = []; // Changed from List<String>
   Map<String, int> _impCounts = {};
   bool _isLoading = true;
   String? _error;
@@ -64,7 +64,7 @@ class _ImportantQuestionsSubjectScreenState extends State<ImportantQuestionsSubj
 
       if (mounted) {
         setState(() {
-          _subjects = results[0] as List<String>;
+          _subjects = results[0] as List<Map<String, dynamic>>;
           _impCounts = results[1] as Map<String, int>;
           _isLoading = false;
         });
@@ -180,7 +180,9 @@ class _ImportantQuestionsSubjectScreenState extends State<ImportantQuestionsSubj
     );
   }
 
-  Widget _subjectTile(String subject, int index, bool isDark) {
+  Widget _subjectTile(Map<String, dynamic> subjectData, int index, bool isDark) {
+    final String subject = subjectData['subject'];
+    final String? paperCode = subjectData['paper_code'];
     final color = _folderColors[index % _folderColors.length];
     final count = _impCounts[subject] ?? 0;
 
@@ -196,6 +198,7 @@ class _ImportantQuestionsSubjectScreenState extends State<ImportantQuestionsSubj
                 department: widget.department,
                 semester: widget.semester,
                 subject: subject,
+                paperCode: paperCode,
               ),
             ),
           ),

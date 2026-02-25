@@ -10,12 +10,13 @@ class ImportantQuestionsListScreen extends StatefulWidget {
   final String department;
   final int semester;
   final String subject;
-
+  final String? paperCode;
   const ImportantQuestionsListScreen({
     super.key,
     required this.department,
     required this.semester,
     required this.subject,
+    this.paperCode,
   });
 
   @override
@@ -62,7 +63,7 @@ class _ImportantQuestionsListScreenState extends State<ImportantQuestionsListScr
     try {
       final auth = Provider.of<AuthService>(context, listen: false);
       final results = await Future.wait([
-        auth.fetchImpQuestions(widget.department, widget.semester, widget.subject),
+        auth.fetchImpQuestions(widget.department, widget.semester, widget.subject, paperCode: widget.paperCode),
         auth.fetchUserPurchases('important_questions'),
       ]);
 

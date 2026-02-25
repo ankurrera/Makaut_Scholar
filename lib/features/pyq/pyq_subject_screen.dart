@@ -16,7 +16,7 @@ class PyqSubjectScreen extends StatefulWidget {
 
 class _PyqSubjectScreenState extends State<PyqSubjectScreen>
     with SingleTickerProviderStateMixin {
-  List<String> _subjects = [];
+  List<Map<String, dynamic>> _subjects = []; // Changed from List<String> to support paper_code
   Map<String, int> _paperCounts = {};
   bool _isLoading = true;
   String? _error;
@@ -74,7 +74,7 @@ class _PyqSubjectScreenState extends State<PyqSubjectScreen>
 
       if (mounted) {
         setState(() { 
-          _subjects = results[0] as List<String>;
+          _subjects = results[0] as List<Map<String, dynamic>>;
           _paperCounts = results[1] as Map<String, int>;
           _isLoading = false; 
         });
@@ -205,7 +205,9 @@ class _PyqSubjectScreenState extends State<PyqSubjectScreen>
     );
   }
 
-  Widget _subjectTile(String subject, int index, bool isDark) {
+  Widget _subjectTile(Map<String, dynamic> subjectData, int index, bool isDark) {
+    final String subject = subjectData['subject'];
+    final String? paperCode = subjectData['paper_code'];
     final grad = _gradients[index % _gradients.length];
 
     return ModernFolder(
@@ -217,6 +219,7 @@ class _PyqSubjectScreenState extends State<PyqSubjectScreen>
             department: widget.department,
             semester: widget.semester,
             subject: subject,
+            paperCode: paperCode,
           ),
         ),
       ),
