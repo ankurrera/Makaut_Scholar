@@ -105,6 +105,27 @@ class AuthService extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Delete Account (Permanent)
+  Future<void> deleteAccount() async {
+    try {
+      final response = await _client.functions.invoke(
+        'delete-user-account',
+        headers: {
+          'Authorization': 'Bearer ${_client.auth.currentSession?.accessToken}',
+        },
+      );
+      
+      if (response.status != 200) {
+        throw Exception(response.data['error'] ?? 'Deletion failed');
+      }
+      
+      // Local clean up
+      await signOut();
+    } catch (e) {
+      throw Exception('Failed to delete account: $e');
+    }
+  }
+
   Future<List<Map<String, dynamic>>> fetchDepartmentSubjects(String department, int semester) async {
     final data = await _client
         .from('department_subjects')

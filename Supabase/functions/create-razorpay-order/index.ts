@@ -30,11 +30,13 @@ serve(async (req: Request) => {
             );
         }
 
-        const { itemId, itemType, amount } = await req.json();
+        const { itemId, itemType, amount, gateway } = await req.json();
 
         if (!itemId || !itemType || !amount) {
             throw new Error('Missing required fields');
         }
+
+        const isGooglePlay = gateway === 'google_play';
 
         // 1. Create a pending order - USE EXPLICIT COLUMNS
         const { data: order, error: orderError } = await supabaseClient
@@ -54,7 +56,18 @@ serve(async (req: Request) => {
             throw orderError;
         }
 
-        // 2. Call Razorpay API
+        // For Google Play, no Razorpay order needed — just return our internal orderId
+        if (isGooglePlay) {
+            return new Response(
+                JSON.stringify({
+                    orderId: order.id,
+                    gateway: 'google_play',
+                }),
+                { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+            );
+        }
+
+        // 2. Call Razorpay API (only for Razorpay gateway)
         const razorpayKey = Deno.env.get('RAZORPAY_KEY_ID');
         const razorpaySecret = Deno.env.get('RAZORPAY_KEY_SECRET');
 

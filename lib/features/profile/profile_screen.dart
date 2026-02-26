@@ -143,6 +143,30 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     }
   }
 
+  Future<void> _deleteAccount() async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => _DeleteAccountDialog(isDark: isDark),
+    );
+    
+    if (confirmed == true && mounted) {
+      setState(() => _isLoading = true);
+      try {
+        await Provider.of<AuthService>(context, listen: false).deleteAccount();
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/login');
+          _showSnack('Account deleted successfully. We\'re sorry to see you go.', isSuccess: true);
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() => _isLoading = false);
+          _showSnack('Deletion failed: $e');
+        }
+      }
+    }
+  }
+
   void _showSnack(String msg, {bool isSuccess = false}) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(msg, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
@@ -240,6 +264,8 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                           _buildSettingsSection(isDark, accent),
                           const SizedBox(height: 24),
                           _buildSignOutButton(isDark),
+                          const SizedBox(height: 16),
+                          _buildDeleteAccountButton(isDark),
                           const SizedBox(height: 40),
                         ],
                       ),
@@ -584,34 +610,49 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           _settingsTile(Iconsax.notification, 'Notifications', 'Enabled', isDark, accent),
           _divider(isDark),
           _settingsTile(Iconsax.info_circle, 'About', 'v1.0.0', isDark, accent),
+          _divider(isDark),
+          _settingsTile(
+            Iconsax.shield_tick,
+            'Privacy Policy',
+            'View',
+            isDark,
+            accent,
+            onTap: () {
+              // TODO: Open Privacy Policy URL
+              _showSnack('Opening Privacy Policy...');
+            },
+          ),
           const SizedBox(height: 6),
         ],
       ),
     );
   }
 
-  Widget _settingsTile(IconData icon, String title, String subtitle, bool isDark, Color accent) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-      child: Row(
-        children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: accent.withValues(alpha: isDark ? 0.12 : 0.08),
-              borderRadius: BorderRadius.circular(11),
+  Widget _settingsTile(IconData icon, String title, String subtitle, bool isDark, Color accent, {VoidCallback? onTap}) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        child: Row(
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: accent.withValues(alpha: isDark ? 0.12 : 0.08),
+                borderRadius: BorderRadius.circular(11),
+              ),
+              child: Icon(icon, color: accent, size: 18),
             ),
-            child: Icon(icon, color: accent, size: 18),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Text(title, style: TextStyle(fontSize: 15, color: _textP(isDark), fontWeight: FontWeight.w500)),
-          ),
-          Text(subtitle, style: TextStyle(fontSize: 13, color: _textS(isDark))),
-          const SizedBox(width: 4),
-          Icon(Iconsax.arrow_right_3, size: 16, color: _textS(isDark)),
-        ],
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(title, style: TextStyle(fontSize: 15, color: _textP(isDark), fontWeight: FontWeight.w500)),
+            ),
+            Text(subtitle, style: TextStyle(fontSize: 13, color: _textS(isDark))),
+            const SizedBox(width: 4),
+            Icon(Iconsax.arrow_right_3, size: 16, color: _textS(isDark)),
+          ],
+        ),
       ),
     );
   }
@@ -631,6 +672,29 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
         style: OutlinedButton.styleFrom(
           side: BorderSide(color: Colors.redAccent.withValues(alpha: 0.25)),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        ),
+      ),
+    );
+  }
+
+  // ──────────────────────────── DELETE ACCOUNT ────────────────────────────
+  Widget _buildDeleteAccountButton(bool isDark) {
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: TextButton(
+        onPressed: _deleteAccount,
+        style: TextButton.styleFrom(
+          foregroundColor: Colors.redAccent.withValues(alpha: 0.7),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        ),
+        child: const Text(
+          'Delete My Account permanently',
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            decoration: TextDecoration.underline,
+          ),
         ),
       ),
     );
@@ -755,6 +819,70 @@ class _SignOutDialog extends StatelessWidget {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
           child: const Text('Sign Out', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600)),
+        ),
+      ],
+    );
+  }
+}
+
+// ────────────────────────── DELETE ACCOUNT DIALOG ──────────────────────────
+class _DeleteAccountDialog extends StatelessWidget {
+  final bool isDark;
+
+  const _DeleteAccountDialog({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final textColor = isDark ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E);
+
+    return AlertDialog(
+      backgroundColor: isDark ? const Color(0xFF1C2028) : Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+      title: Row(
+        children: [
+          const Icon(Iconsax.danger, color: Colors.redAccent, size: 24),
+          const SizedBox(width: 12),
+          Text('Delete Account?',
+              style: TextStyle(color: textColor, fontWeight: FontWeight.w700)),
+        ],
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'This action is permanent and cannot be undone.',
+            style: TextStyle(color: textColor, fontWeight: FontWeight.w600, fontSize: 14),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            '• All your personal data will be erased.\n'
+            '• You will lose access to all premium content.\n'
+            '• Your purchase history will be deleted.',
+            style: TextStyle(
+              color: isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93),
+              fontSize: 13,
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: Text('Keep Account',
+              style: TextStyle(color: isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93))),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, true),
+          style: TextButton.styleFrom(
+            backgroundColor: Colors.redAccent,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+          ),
+          child: const Text('Delete permanently',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
         ),
       ],
     );

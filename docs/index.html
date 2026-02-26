@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zenith Studio | Professional Software & Digital Solutions</title>
+    <title>MAKAUT Scholar – Smart Study App for MAKAUT Students</title>
+    <meta name="description"
+        content="MAKAUT Scholar is the ultimate academic companion for MAKAUT B.Tech students. Access notes, PYQs, syllabus, and exam focus materials for all departments.">
     <meta name="google-site-verification" content="h35BtctUmj6B1-cTy3kILD3vSNwnWHcCwvo2KyW7b5s" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,6 +19,7 @@
             --surface-hover: #1E222B;
             --accent: #8E82FF;
             --accent-glow: rgba(142, 130, 255, 0.2);
+            --gold: #F5C842;
             --text-primary: #FFFFFF;
             --text-secondary: #A0A0A0;
             --border: #2A2E37;
@@ -51,7 +54,7 @@
             backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
             z-index: 1000;
-            padding: 24px 0;
+            padding: 20px 0;
         }
 
         nav .container {
@@ -61,11 +64,11 @@
         }
 
         .logo {
-            font-size: 1.75rem;
+            font-size: 1.5rem;
             font-weight: 800;
             color: var(--text-primary);
             text-decoration: none;
-            letter-spacing: -1px;
+            letter-spacing: -0.5px;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -77,7 +80,7 @@
 
         .nav-links {
             display: flex;
-            gap: 32px;
+            gap: 28px;
         }
 
         .nav-links a {
@@ -85,235 +88,283 @@
             text-decoration: none;
             font-size: 0.95rem;
             font-weight: 500;
-            transition: color 0.2s ease;
+            transition: color 0.2s;
         }
 
         .nav-links a:hover {
             color: var(--text-primary);
         }
 
-        /* Hero Section */
+        /* Hero */
         header {
-            padding: 120px 0 100px;
+            padding: 100px 0 80px;
             text-align: center;
         }
 
+        .badge {
+            display: inline-block;
+            background: rgba(142, 130, 255, 0.12);
+            border: 1px solid rgba(142, 130, 255, 0.3);
+            color: var(--accent);
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            letter-spacing: 0.5px;
+        }
+
         h1 {
-            font-size: 4rem;
+            font-size: 3.75rem;
             font-weight: 800;
             margin-bottom: 20px;
             letter-spacing: -2px;
             line-height: 1.1;
-            background: linear-gradient(to right, #ffffff, var(--accent));
+            background: linear-gradient(135deg, #ffffff 0%, var(--accent) 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         .tagline {
-            font-size: 1.25rem;
+            font-size: 1.2rem;
             color: var(--text-secondary);
-            max-width: 800px;
-            margin: 0 auto;
+            max-width: 620px;
+            margin: 0 auto 40px;
         }
 
-        /* Services Grid */
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 32px;
-            margin-top: 60px;
-        }
-
-        .service-card {
-            background-color: var(--surface);
-            padding: 48px;
-            border-radius: 28px;
-            border: 1px solid var(--border);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        .cta-group {
             display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: relative;
-            overflow: hidden;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
-        .service-card::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             background: var(--accent);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .service-card:hover {
-            transform: translateY(-12px);
-            border-color: var(--accent);
-            background-color: var(--surface-hover);
-            box-shadow: 0 20px 60px var(--accent-glow);
-        }
-
-        .service-card:hover::before {
-            opacity: 1;
-        }
-
-        .service-name {
-            font-size: 1.5rem;
-            font-weight: 800;
-            margin-bottom: 16px;
-            color: var(--text-primary);
-        }
-
-        .service-price {
-            font-size: 2.25rem;
-            font-weight: 800;
-            color: var(--accent);
-            margin-bottom: 12px;
-            display: flex;
-            align-items: baseline;
-            gap: 4px;
-        }
-
-        .service-price span {
-            font-size: 1rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        .service-desc {
-            color: var(--text-secondary);
-            font-size: 1.05rem;
-            margin-bottom: 32px;
-        }
-
-        .btn {
-            display: inline-block;
-            background: var(--accent);
-            color: var(--bg);
-            padding: 16px 32px;
-            border-radius: 14px;
+            color: #fff;
+            padding: 14px 28px;
+            border-radius: 12px;
             text-decoration: none;
             font-weight: 700;
-            text-align: center;
-            transition: transform 0.2s ease, filter 0.2s ease;
+            transition: transform 0.2s, filter 0.2s;
         }
 
-        .btn:hover {
+        .btn-primary:hover {
             filter: brightness(1.1);
-            transform: scale(1.02);
+            transform: translateY(-2px);
         }
 
-        /* Content Sections */
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--surface);
+            color: var(--text-primary);
+            padding: 14px 28px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        /* Features grid */
         section {
-            padding: 100px 0;
+            padding: 80px 0;
             border-bottom: 1px solid var(--border);
         }
 
         h2 {
-            font-size: 2.5rem;
+            font-size: 2.25rem;
             font-weight: 800;
-            margin-bottom: 40px;
+            margin-bottom: 12px;
             color: var(--text-primary);
+            text-align: center;
+            letter-spacing: -1px;
+        }
+
+        .section-sub {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 48px;
+            font-size: 1.05rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .feature-card {
+            background: var(--surface);
+            padding: 32px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 16px;
+        }
+
+        .feature-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .feature-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Pricing */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+        }
+
+        .pricing-card {
+            background: var(--surface);
+            padding: 36px 28px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
             text-align: center;
         }
 
-        .section-title-left {
-            text-align: left;
-            color: var(--accent);
-            font-size: 1.75rem;
-            margin-bottom: 30px;
+        .pricing-card.featured {
+            border-color: var(--accent);
+            background: rgba(142, 130, 255, 0.07);
+        }
+
+        .pricing-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .pricing-price {
+            font-size: 2.5rem;
             font-weight: 800;
+            color: var(--accent);
+            margin-bottom: 4px;
+        }
+
+        .pricing-price sub {
+            font-size: 1rem;
+        }
+
+        .pricing-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .pricing-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0;
+        }
+
+        /* Legal */
+        .legal-block {
+            margin-bottom: 48px;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-bottom: 16px;
         }
 
         p,
         li {
             color: var(--text-secondary);
-            margin-bottom: 20px;
-            font-size: 1.1rem;
+            margin-bottom: 14px;
+            font-size: 1rem;
         }
 
         ul {
-            list-style: none;
-            padding-left: 0;
+            padding-left: 20px;
         }
 
-        ul li::before {
-            content: "→";
+        ul li::marker {
             color: var(--accent);
-            display: inline-block;
-            width: 1.5em;
-            margin-left: 0;
         }
 
-        /* Contact Details Section */
-        .contact-container {
-            display: grid;
-            grid-template-columns: 1.5fr 1fr;
-            gap: 60px;
-            align-items: start;
-        }
-
-        .contact-details-grid {
+        /* Contact */
+        .contact-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 24px;
-            margin-top: 32px;
+            gap: 20px;
+            margin-top: 24px;
         }
 
         .contact-box {
             background: var(--surface);
             padding: 24px;
-            border-radius: 20px;
+            border-radius: 16px;
             border: 1px solid var(--border);
         }
 
         .contact-label {
             font-weight: 700;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
             color: var(--text-primary);
-            letter-spacing: 2px;
-            margin-bottom: 10px;
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
             display: block;
         }
 
         .contact-value {
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: var(--accent);
             font-weight: 600;
         }
 
         /* Footer */
         footer {
-            padding: 80px 0 40px;
-            background: #0B0D11;
-            border-top: 1px solid var(--border);
-        }
-
-        .footer-address {
-            margin-bottom: 40px;
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-            max-width: 600px;
-            margin: 0 auto 40px;
+            padding: 60px 0 32px;
+            text-align: center;
         }
 
         .footer-links {
             display: flex;
             justify-content: center;
-            gap: 30px;
-            margin-bottom: 30px;
+            gap: 28px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
         }
 
         .footer-links a {
             color: var(--text-secondary);
             text-decoration: none;
             font-size: 0.9rem;
-            transition: color 0.2s ease;
+            transition: color 0.2s;
         }
 
         .footer-links a:hover {
@@ -321,25 +372,21 @@
         }
 
         .copyright {
-            font-size: 0.85rem;
-            color: #4A4A4A;
+            font-size: 0.8rem;
+            color: #444;
         }
 
         @media (max-width: 768px) {
             h1 {
-                font-size: 2.75rem;
+                font-size: 2.5rem;
             }
 
             .nav-links {
                 display: none;
             }
 
-            .contact-container {
-                grid-template-columns: 1fr;
-            }
-
             header {
-                padding: 80px 0 60px;
+                padding: 72px 0 56px;
             }
         }
     </style>
@@ -349,137 +396,253 @@
 
     <nav>
         <div class="container">
-            <a href="#" class="logo">Zenith<span>Studio</span></a>
+            <a href="#" class="logo">MAKAUT <span>Scholar</span></a>
             <div class="nav-links">
-                <a href="#services">Services</a>
+                <a href="#features">Features</a>
+                <a href="#pricing">Pricing</a>
                 <a href="#privacy">Privacy</a>
-                <a href="#terms">Terms</a>
                 <a href="#contact">Contact</a>
             </div>
         </div>
     </nav>
 
     <header class="container">
-        <h1>Official Storefront</h1>
-        <p class="tagline">Zenith Studio delivers high-performance digital products and bespoke software engineering.
-            Elevating ideas through precision and design.</p>
+        <div class="badge">🎓 Built for MAKAUT B.Tech Students</div>
+        <h1>Your Complete Academic Companion</h1>
+        <p class="tagline">Notes, PYQs, Syllabus, and Exam Focus — organized by department and semester. Study smarter,
+            score higher.</p>
+        <div class="cta-group">
+            <a href="https://play.google.com/store/apps/details?id=com.orbitinnovations.makaut_scholar"
+                class="btn-primary">
+                ▶ Download on Google Play
+            </a>
+            <a href="#privacy" class="btn-secondary">Privacy Policy</a>
+        </div>
     </header>
 
     <main>
-        <!-- Professional Services Section -->
-        <section id="services">
+        <!-- Features -->
+        <section id="features">
             <div class="container">
-                <h2>Professional Services</h2>
-                <div class="services-grid">
-                    <!-- MAKAUT Scholar Pro -->
-                    <div class="service-card">
-                        <div>
-                            <div class="service-name">MAKAUT Scholar Pro</div>
-                            <div class="service-price">₹499</div>
-                            <p class="service-desc">Premium academic notes and PYQs. Unlock all semesters and subjects
-                                with high-quality solved materials.</p>
-                        </div>
-                        <a href="mailto:ankurr.era@gmail.com?subject=Inquiry for MAKAUT Scholar Pro" class="btn">Get
-                            Lifetime Access</a>
+                <h2>Everything You Need to Score Better</h2>
+                <p class="section-sub">Built specifically for MAKAUT CSE, ECE, ME, CE, EE & IT — Semesters 1 to 8.</p>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">📚</div>
+                        <div class="feature-title">Academic Notes</div>
+                        <p class="feature-desc">Unit-wise, topic-organized notes curated for MAKAUT exams. Premium
+                            quality, easy to understand.</p>
                     </div>
-                    <!-- Custom Flutter Development -->
-                    <div class="service-card">
-                        <div>
-                            <div class="service-name">Custom Flutter Development</div>
-                            <div class="service-price">₹2,999<span>/start</span></div>
-                            <p class="service-desc">Professional mobile app solutions for iOS and Android. Modern UI/UX,
-                                fast performance, and cross-platform excellence.</p>
-                        </div>
-                        <a href="https://wa.me/919002278769?text=Hi Zenith Studio, I am interested in your development services."
-                            class="btn">Get a Quote</a>
+                    <div class="feature-card">
+                        <div class="feature-icon">📄</div>
+                        <div class="feature-title">Previous Year Questions</div>
+                        <p class="feature-desc">Semester-wise PYQ papers for all departments. Filter by year and subject
+                            instantly.</p>
                     </div>
-                    <!-- Zenith Medical Dashboard -->
-                    <div class="service-card">
-                        <div>
-                            <div class="service-name">Zenith Medical Dashboard</div>
-                            <div class="service-price">₹1,499</div>
-                            <p class="service-desc">Digital clinic management tool. Streamline prescriptions, patient
-                                records, and appointments with ease.</p>
-                        </div>
-                        <a href="https://wa.me/919002278769?text=Hi Zenith Studio, I am interested in your development services."
-                            class="btn">Purchase License</a>
+                    <div class="feature-card">
+                        <div class="feature-icon">📋</div>
+                        <div class="feature-title">Official Syllabus</div>
+                        <p class="feature-desc">Complete MAKAUT syllabus for all 8 semesters. Always up to date with the
+                            latest curriculum.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🎯</div>
+                        <div class="feature-title">Exam Focus</div>
+                        <p class="feature-desc">Important questions selected by toppers to help you prepare
+                            strategically before exams.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📶</div>
+                        <div class="feature-title">Offline Reading</div>
+                        <p class="feature-desc">Download notes and read without internet. Your content is always
+                            available when you need it.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🌙</div>
+                        <div class="feature-title">Dark & Light Mode</div>
+                        <p class="feature-desc">Comfortable reading experience optimized for both day and night study
+                            sessions.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Compliance & Info -->
-        <div class="container">
-            <!-- Contact & Help Section -->
-            <section id="contact">
-                <div class="contact-container">
-                    <div>
-                        <h3 class="section-title-left">Get in Touch</h3>
-                        <p>Our dedicated support team is available to assist you with any product queries, licensing, or
-                            technical assistance.</p>
-                        <div class="contact-details-grid">
-                            <div class="contact-box">
-                                <span class="contact-label">Email Address</span>
-                                <div class="contact-value">ankurr.era@gmail.com</div>
-                            </div>
-                            <div class="contact-box">
-                                <span class="contact-label">Mobile Number</span>
-                                <div class="contact-value">+91-9002278769</div>
-                            </div>
-                        </div>
+        <!-- Pricing -->
+        <section id="pricing">
+            <div class="container">
+                <h2>Flexible Pricing — Pay Only What You Need</h2>
+                <p class="section-sub">No subscriptions. Pay once, access forever.</p>
+                <div class="pricing-grid">
+                    <div class="pricing-card">
+                        <div class="pricing-label">Starter</div>
+                        <div class="pricing-price">Free</div>
+                        <div class="pricing-name">Preview Access</div>
+                        <p class="pricing-desc">Browse free notes and syllabus across all departments. No payment
+                            required.</p>
                     </div>
-                    <div>
-                        <h3 class="section-title-left">Documentation</h3>
-                        <ul>
-                            <li><a href="#privacy" style="color:var(--text-secondary); text-decoration:none;">Privacy
-                                    Policy</a></li>
-                            <li><a href="#terms" style="color:var(--text-secondary); text-decoration:none;">Terms of
-                                    Service</a></li>
-                            <li><a href="#refund" style="color:var(--text-secondary); text-decoration:none;">Refund &
-                                    Cancellation</a></li>
-                        </ul>
+                    <div class="pricing-card featured">
+                        <div class="pricing-label">Most Popular</div>
+                        <div class="pricing-price">₹49<sub>+</sub></div>
+                        <div class="pricing-name">Unit Access</div>
+                        <p class="pricing-desc">Unlock a single unit of any subject. Perfect for targeted exam prep.</p>
+                    </div>
+                    <div class="pricing-card">
+                        <div class="pricing-label">Full Subject</div>
+                        <div class="pricing-price">₹99<sub>+</sub></div>
+                        <div class="pricing-name">Subject Access</div>
+                        <p class="pricing-desc">Unlock all units of a full subject across any semester.</p>
+                    </div>
+                    <div class="pricing-card">
+                        <div class="pricing-label">Best Value</div>
+                        <div class="pricing-price">₹199<sub>+</sub></div>
+                        <div class="pricing-name">Semester Bundle</div>
+                        <p class="pricing-desc">Unlock all subjects for an entire semester at the best possible price.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Legal Section -->
+        <div class="container">
+
+            <!-- Privacy Policy -->
+            <section id="privacy">
+                <h3>Privacy Policy</h3>
+                <p><strong>Last updated: February 26, 2026</strong></p>
+                <p>MAKAUT Scholar ("the App") is developed and operated by Orbit Innovations (Ankur Bag). This policy
+                    explains how we collect, use, and protect your personal data.</p>
+
+                <div class="legal-block">
+                    <h3>Information We Collect</h3>
+                    <ul>
+                        <li><strong>Account Information:</strong> Email address and display name when you sign in via
+                            Google or email.</li>
+                        <li><strong>Device Information:</strong> Device type, OS version, and app version for crash
+                            reporting and compatibility.</li>
+                        <li><strong>Camera & Storage:</strong> Used only for profile photo upload. We do not access your
+                            camera for any other purpose.</li>
+                        <li><strong>Purchase Records:</strong> When you make an in-app purchase, we store a record of
+                            the transaction to grant content access. No card or UPI details are stored by us.</li>
+                        <li><strong>Usage Data:</strong> Anonymous analytics to understand which features are used most,
+                            helping us improve the app.</li>
+                    </ul>
+                </div>
+
+                <div class="legal-block">
+                    <h3>How We Use Your Data</h3>
+                    <ul>
+                        <li>To authenticate your account and protect it from unauthorized access.</li>
+                        <li>To grant you access to purchased content across devices.</li>
+                        <li>To send important updates about the app (no marketing spam).</li>
+                        <li>To improve app performance and fix bugs.</li>
+                    </ul>
+                </div>
+
+                <div class="legal-block">
+                    <h3>Third-Party Services</h3>
+                    <ul>
+                        <li><strong>Supabase:</strong> Secure cloud database for storing your account and purchase data.
+                        </li>
+                        <li><strong>Google Play Billing:</strong> Handles all in-app payment processing. We never
+                            receive your payment credentials.</li>
+                        <li><strong>Razorpay:</strong> Alternative payment gateway for UPI payments, compliant with RBI
+                            regulations.</li>
+                        <li><strong>Firebase / Google Analytics:</strong> Anonymous usage analytics.</li>
+                    </ul>
+                </div>
+
+                <div class="legal-block">
+                    <h3>Data Retention & Deletion</h3>
+                    <p>You may request account deletion at any time from within the app (Profile → Delete Account). Upon
+                        deletion, all your personal data including purchase records will be permanently removed from our
+                        servers within 30 days.</p>
+                </div>
+
+                <div class="legal-block">
+                    <h3>Children's Privacy</h3>
+                    <p>MAKAUT Scholar is intended for users aged 17 and above (university students). We do not knowingly
+                        collect data from children under 13.</p>
+                </div>
+
+                <div class="legal-block">
+                    <h3>Contact for Privacy Concerns</h3>
+                    <p>Email us at <a href="mailto:ankurr.era@gmail.com"
+                            style="color:var(--accent)">ankurr.era@gmail.com</a> for any privacy-related questions or
+                        data deletion requests.</p>
+                </div>
+            </section>
+
+            <!-- Terms -->
+            <section id="terms">
+                <h3>Terms & Conditions</h3>
+                <p>By downloading or using MAKAUT Scholar, you agree to the following terms:</p>
+                <ul>
+                    <li>All content within the app is for <strong>personal academic use only</strong>. Redistribution,
+                        resale, or unauthorized sharing of premium content is strictly prohibited.</li>
+                    <li>Purchased content is tied to your account and cannot be transferred to another account.</li>
+                    <li>We reserve the right to update content, pricing, or features at any time. Users will be notified
+                        of significant changes.</li>
+                    <li>Users are responsible for maintaining the security of their login credentials.</li>
+                    <li>We do not guarantee 100% accuracy of all academic materials. Always cross-reference with
+                        official MAKAUT sources.</li>
+                </ul>
+            </section>
+
+            <!-- Refund -->
+            <section id="refund">
+                <h3>Refund & Cancellation Policy</h3>
+                <p>All purchases in MAKAUT Scholar are for <strong>digital academic content</strong> and are
+                    non-refundable once the content has been accessed.</p>
+                <p>If you experience a technical issue where payment was deducted but content was not unlocked, please
+                    contact us at <a href="mailto:ankurr.era@gmail.com"
+                        style="color:var(--accent)">ankurr.era@gmail.com</a> within 7 days with your payment reference.
+                    We will resolve it promptly.</p>
+                <p>For Google Play purchases, you may also apply for a refund through Google Play's standard refund
+                    policy within 48 hours of purchase.</p>
+            </section>
+
+            <!-- Contact -->
+            <section id="contact">
+                <h2>Get in Touch</h2>
+                <p class="section-sub">Support for purchases, content issues, or general queries.</p>
+                <div class="contact-grid">
+                    <div class="contact-box">
+                        <span class="contact-label">Email</span>
+                        <div class="contact-value">ankurr.era@gmail.com</div>
+                    </div>
+                    <div class="contact-box">
+                        <span class="contact-label">WhatsApp</span>
+                        <div class="contact-value">+91-9002278769</div>
+                    </div>
+                    <div class="contact-box">
+                        <span class="contact-label">Developer</span>
+                        <div class="contact-value">Orbit Innovations</div>
+                    </div>
+                    <div class="contact-box">
+                        <span class="contact-label">Location</span>
+                        <div class="contact-value">Krishnanagar, WB, India</div>
                     </div>
                 </div>
             </section>
 
-            <!-- Legal Detailed Sections for KYC -->
-            <section id="privacy">
-                <h3 class="section-title-left">Privacy Policy</h3>
-                <p>Zenith Studio is committed to protecting your personal data. We do not store sensitive payment
-                    details such as Card numbers or UPI PINs. All payments are processed through RBI-authorized secure
-                    gateways provided by PhonePe.</p>
-                <p>We collect minimal information required to deliver our digital services and never share data with
-                    unauthorized third parties.</p>
-            </section>
-
-            <section id="terms">
-                <h3 class="section-title-left">Terms & Conditions</h3>
-                <p>By purchasing services from Zenith Studio, you agree to comply with our usage policies. Digital
-                    materials are for personal or internal business use. Redistribution of source code or premium
-                    resources without written consent is strictly prohibited.</p>
-            </section>
-
-            <section id="refund">
-                <h3 class="section-title-left">Refund & Cancellation</h3>
-                <p>Due to the nature of digital goods and instant consumption of premium resources, all sales are final.
-                    No refunds or cancellations will be processed once the product or service has been delivered
-                    digitally.</p>
-                <p>For service-based projects, cancellation terms will be governed by the specific project contract.</p>
-            </section>
         </div>
     </main>
 
     <footer>
         <div class="container">
-            <div class="footer-address" style="margin-bottom: 24px;">
-                &copy; 2026 Zenith Studio. Owned and Operated by Ankur Bag.<br>
-                Registered Address: Simultala, Near Friends Club, Krishnanagar, Nadia, West Bengal - 741101.
-            </div>
-            <div class="footer-links" style="margin-bottom: 20px;">
-                <a href="#privacy">Privacy</a>
-                <a href="#terms">Terms</a>
+            <p style="color:var(--text-secondary); margin-bottom: 20px;">
+                © 2026 MAKAUT Scholar · Developed by Orbit Innovations (Ankur Bag)<br>
+                Simultala, Near Friends Club, Krishnanagar, Nadia, West Bengal – 741101
+            </p>
+            <div class="footer-links">
+                <a href="#privacy">Privacy Policy</a>
+                <a href="#terms">Terms of Service</a>
                 <a href="#refund">Refund Policy</a>
+                <a href="#contact">Contact</a>
             </div>
+            <p class="copyright" style="margin-top: 16px;">MAKAUT Scholar is not officially affiliated with MAKAUT
+                University.</p>
         </div>
     </footer>
 

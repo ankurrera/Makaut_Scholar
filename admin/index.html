@@ -745,8 +745,16 @@
                         </div>
                     </div>
                     <div class="field" id="notePriceGroup" style="display: none;">
-                        <label>Price (INR)</label>
-                        <input type="number" id="notePrice" value="0">
+                        <label>Price Tier (INR)</label>
+                        <select id="notePrice">
+                            <option value="49">₹49</option>
+                            <option value="99">₹99</option>
+                            <option value="129">₹129</option>
+                            <option value="149">₹149</option>
+                            <option value="199">₹199</option>
+                            <option value="399">₹399</option>
+                            <option value="699">₹699</option>
+                        </select>
                     </div>
                     <div class="field full-width">
                         <label>PDF Asset</label>
@@ -1054,8 +1062,16 @@
                         </select>
                     </div>
                     <div class="field">
-                        <label>Price (INR)</label>
-                        <input type="number" id="priceAmount" placeholder="e.g. 49">
+                        <label>Price Tier (INR)</label>
+                        <select id="priceAmount">
+                            <option value="49">₹49</option>
+                            <option value="99">₹99</option>
+                            <option value="129">₹129</option>
+                            <option value="149">₹149</option>
+                            <option value="199">₹199</option>
+                            <option value="399">₹399</option>
+                            <option value="699">₹699</option>
+                        </select>
                     </div>
                     <div class="full-width" style="text-align: right;">
                         <button class="btn" style="background: var(--orange);" onclick="updateSubjectPrice()">
@@ -1066,7 +1082,73 @@
             </div>
 
             <div class="glass">
-                <h2><i class="fa-solid fa-layer-group" style="color: var(--accent);"></i> Semester Bundles (Tier 3)</h2>
+                <h2><i class="fa-solid fa-cube" style="color: var(--green);"></i> Unit Pricing (Tier 2)</h2>
+                <div class="form-grid">
+                    <div class="field">
+                        <label>Department</label>
+                        <select id="unitDept" onchange="loadSubjects('unitDept', 'unitSem', 'unitSubject')">
+                            <option value="">Select Dept</option>
+                            <option>CSE</option>
+                            <option>ECE</option>
+                            <option>ME</option>
+                            <option>CE</option>
+                            <option>EE</option>
+                            <option>IT</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Semester</label>
+                        <select id="unitSem" onchange="loadSubjects('unitDept', 'unitSem', 'unitSubject')">
+                            <option value="">Select Sem</option>
+                            <option value="1">Sem 1</option>
+                            <option value="2">Sem 2</option>
+                            <option value="3">Sem 3</option>
+                            <option value="4">Sem 4</option>
+                            <option value="5">Sem 5</option>
+                            <option value="6">Sem 6</option>
+                            <option value="7">Sem 7</option>
+                            <option value="8">Sem 8</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Subject</label>
+                        <select id="unitSubject">
+                            <option value="">Select Dept &amp; Sem</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Unit</label>
+                        <select id="unitNumber">
+                            <option value="1">Unit 1</option>
+                            <option value="2">Unit 2</option>
+                            <option value="3">Unit 3</option>
+                            <option value="4">Unit 4</option>
+                            <option value="5">Unit 5</option>
+                            <option value="6">Unit 6</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Price Tier (INR)</label>
+                        <select id="unitPrice">
+                            <option value="49">₹49</option>
+                            <option value="99">₹99</option>
+                            <option value="129">₹129</option>
+                            <option value="149">₹149</option>
+                            <option value="199">₹199</option>
+                            <option value="399">₹399</option>
+                            <option value="699">₹699</option>
+                        </select>
+                    </div>
+                    <div class="full-width" style="text-align: right;">
+                        <button class="btn" style="background: var(--green);" onclick="updateUnitPrice()">
+                            <span>Save Unit Price</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass">
+                <h2><i class="fa-solid fa-layer-group" style="color: var(--accent);"></i> Semester Bundles (Tier 4)</h2>
                 <div class="form-grid">
                     <div class="field">
                         <label>Department</label>
@@ -1095,8 +1177,16 @@
                         </select>
                     </div>
                     <div class="field">
-                        <label>Bundle Price (INR)</label>
-                        <input type="number" id="bundlePrice" placeholder="e.g. 199">
+                        <label>Bundle Price Tier (INR)</label>
+                        <select id="bundlePrice">
+                            <option value="49">₹49</option>
+                            <option value="99">₹99</option>
+                            <option value="129">₹129</option>
+                            <option value="149">₹149</option>
+                            <option value="199">₹199</option>
+                            <option value="399">₹399</option>
+                            <option value="699">₹699</option>
+                        </select>
                     </div>
                     <div class="full-width" style="text-align: right;">
                         <button class="btn" onclick="updateBundlePrice()">
@@ -1154,8 +1244,16 @@
                         </div>
                     </div>
                     <div class="field" id="editPriceGroup" style="display: none; margin-bottom: 16px;">
-                        <label>Price (INR)</label>
-                        <input type="number" id="editPrice">
+                        <label>Price Tier (INR)</label>
+                        <select id="editPrice">
+                            <option value="49">₹49</option>
+                            <option value="99">₹99</option>
+                            <option value="129">₹129</option>
+                            <option value="149">₹149</option>
+                            <option value="199">₹199</option>
+                            <option value="399">₹399</option>
+                            <option value="699">₹699</option>
+                        </select>
                     </div>
                 </div>
 
@@ -1215,7 +1313,7 @@
             document.getElementById(tab + 'Tab').classList.add('active');
         }
 
-        function loadAll() { loadNotes(); loadSyllabus(); loadPYQ(); loadIMP(); loadThreshold(); }
+        function loadAll() { loadNotes(); loadSyllabus(); loadPYQ(); loadIMP(); loadThreshold(); loadPricingTiers(); }
 
         // ══════════════════════════════════════════
         //  UI HELPERS
@@ -1245,6 +1343,40 @@
                 const text = item.textContent.toLowerCase();
                 item.style.display = text.includes(q) ? 'grid' : 'none';
             });
+        }
+
+        // ── Pricing Tiers: load from DB and populate ALL price selects ──
+        async function loadPricingTiers() {
+            try {
+                const { data: tiers, error } = await sb
+                    .from('pricing_tiers')
+                    .select('price, product_id, label')
+                    .order('sort_order');
+
+                if (error || !tiers || tiers.length === 0) return; // fall back to hardcoded HTML options
+
+                const optionsHtml = tiers
+                    .map(t => `<option value="${t.price}" data-product="${t.product_id}">${t.label}</option>`)
+                    .join('');
+
+                // All price selects across the admin panel
+                const priceSelectIds = [
+                    'notePrice',      // Notes upload
+                    'unitPrice',      // Unit Pricing card
+                    'priceAmount',    // Subject Pricing card
+                    'bundlePrice',    // Semester Bundles card
+                    'editPrice',      // Edit modal
+                ];
+
+                priceSelectIds.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.innerHTML = optionsHtml;
+                });
+
+                console.log(`Loaded ${tiers.length} pricing tiers from DB`);
+            } catch (e) {
+                console.warn('Could not load pricing tiers:', e.message);
+            }
         }
 
         // ══════════════════════════════════════════
@@ -1613,6 +1745,21 @@
                 document.getElementById('impFileName').textContent = 'Upload IMP PDF';
             } catch (e) { showToast(e.message, 'error'); }
             finally { btn.disabled = false; }
+        }
+
+        async function updateUnitPrice() {
+            const dept = document.getElementById('unitDept').value;
+            const sem = parseInt(document.getElementById('unitSem').value);
+            const sub = document.getElementById('unitSubject').value;
+            const unit = parseInt(document.getElementById('unitNumber').value);
+            const price = parseFloat(document.getElementById('unitPrice').value);
+            if (!dept || !sem || !sub || isNaN(unit) || isNaN(price)) return showToast('Fill all fields', 'error');
+            try {
+                const { error } = await sb.from('unit_prices')
+                    .upsert({ department: dept, semester: sem, subject: sub, unit, price }, { onConflict: 'department,semester,subject,unit' });
+                if (error) throw error;
+                showToast(`Unit ${unit} price set to ₹${price}`);
+            } catch (e) { showToast(e.message, 'error'); }
         }
 
         async function updateSubjectPrice() {

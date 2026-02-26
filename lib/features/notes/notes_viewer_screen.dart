@@ -26,7 +26,9 @@ class NotesViewerScreen extends StatefulWidget {
 
 class _NotesViewerScreenState extends State<NotesViewerScreen> {
   List<Map<String, dynamic>> _notes = [];
-  bool _hasAccess = false;
+  bool _hasAccess = false;              // Full subject/bundle access
+  Map<int, double> _unitPrices = {};   // unit → price (from unit_prices table)
+  Set<int> _unlockedUnits = {};        // units the user has individually purchased
   Map<String, dynamic> _pricing = {};
   bool _isLoading = true;
   String? _error;
@@ -56,19 +58,37 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
     setState(() { _isLoading = true; _error = null; });
     try {
       final auth = Provider.of<AuthService>(context, listen: false);
-      final monetization = Provider.of<MonetizationService>(context, listen: false);
+      final mon = Provider.of<MonetizationService>(context, listen: false);
       
       final results = await Future.wait([
         auth.fetchNotes(widget.department, widget.semester, widget.subject, paperCode: widget.paperCode),
-        monetization.checkSubjectAccess(widget.department, widget.semester, widget.subject),
-        monetization.getPricingDetails(widget.department, widget.semester, widget.subject),
+        mon.checkSubjectAccess(widget.department, widget.semester, widget.subject),
+        mon.getPricingDetails(widget.department, widget.semester, widget.subject),
+        mon.getUnitPrices(widget.department, widget.semester, widget.subject),
       ]);
+      
+      final notes = results[0] as List<Map<String, dynamic>>;
+      final hasFullAccess = results[1] as bool;
+      final pricing = results[2] as Map<String, dynamic>;
+      final unitPrices = results[3] as Map<int, double>;
+
+      // Fetch per-unit access for each unit that has a price set
+      final Set<int> unlockedUnits = {};
+      if (!hasFullAccess && unitPrices.isNotEmpty) {
+        await Future.wait(unitPrices.keys.map((unit) async {
+          final hasUnit = await mon.checkUnitAccess(
+            widget.department, widget.semester, widget.subject, unit);
+          if (hasUnit) unlockedUnits.add(unit);
+        }));
+      }
       
       if (mounted) {
         setState(() { 
-          _notes = results[0] as List<Map<String, dynamic>>;
-          _hasAccess = results[1] as bool;
-          _pricing = results[2] as Map<String, dynamic>;
+          _notes = notes;
+          _hasAccess = hasFullAccess;
+          _pricing = pricing;
+          _unitPrices = unitPrices;
+          _unlockedUnits = unlockedUnits;
           _isLoading = false; 
         });
       }
@@ -133,36 +153,47 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
     );
   }
 
-  void _openCheckout(Map<String, dynamic> note) {
-    final double notePrice = (note['price'] as num?)?.toDouble() ?? 0.0;
-    final double subjectPrice = _pricing['subject_price'] ?? 0.0;
-    final double bundlePrice = _pricing['bundle_price'] ?? 0.0;
-    final int boughtCount = _pricing['purchased_subjects_count'] ?? 0;
+  void _openCheckout(Map<String, dynamic> note, {int? unitOverride}) {
+    final int unit = unitOverride ?? (note['unit'] as int? ?? 1);
+    final double unitPrice = _unitPrices[unit] ?? 0.0;
+    final double subjectPrice = (_pricing['subject_price'] as num?)?.toDouble() ?? 0.0;
+    final double bundlePrice = (_pricing['bundle_price'] as num?)?.toDouble() ?? 0.0;
+    final int boughtCount = (_pricing['purchased_subjects_count'] as int?) ?? 0;
 
-    // Fallback to note price if subject price is not configured
-    double finalPrice = subjectPrice > 0 ? subjectPrice : notePrice;
-    String finalItemId = subjectPrice > 0 
-        ? 'subject_${widget.department}_${widget.semester}_${widget.subject}'
-        : note['id'].toString();
-    String finalItemType = subjectPrice > 0 ? 'subject' : 'notes';
-    String finalItemName = subjectPrice > 0 ? '${widget.subject} Full Access' : (note['title'] ?? 'Academic Note');
+    // Determine which tier to offer
+    double finalPrice;
+    String finalItemId;
+    String finalItemType;
+    String finalItemName;
 
-    if (boughtCount >= 3 && bundlePrice > 0 && subjectPrice > 0) {
-      final monetization = Provider.of<MonetizationService>(context, listen: false);
-      double upgradePrice = monetization.calculateBundleUpgradePrice(bundlePrice, boughtCount, subjectPrice);
+    if (unitPrice > 0) {
+      // Offer unit access first (cheapest option)
+      finalPrice = unitPrice;
+      finalItemId = 'unit_${widget.department}_${widget.semester}_${widget.subject}_$unit';
+      finalItemType = 'unit';
+      finalItemName = '${widget.subject} – Unit $unit';
+    } else if (subjectPrice > 0) {
+      finalPrice = subjectPrice;
+      finalItemId = 'subject_${widget.department}_${widget.semester}_${widget.subject}';
+      finalItemType = 'subject';
+      finalItemName = '${widget.subject} Full Access';
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Pricing not configured for this content.')),
+      );
+      return;
+    }
+
+    // Smart bundle upgrade: if user bought 3+ subjects, offer bundle at discounted price
+    if (boughtCount >= 3 && bundlePrice > 0 && subjectPrice > 0 && mounted) {
+      final mon = Provider.of<MonetizationService>(context, listen: false);
+      final upgradePrice = mon.calculateBundleUpgradePrice(bundlePrice, boughtCount, subjectPrice);
       if (upgradePrice > 0) {
         finalPrice = upgradePrice;
         finalItemId = 'bundle_${widget.department}_${widget.semester}';
         finalItemType = 'semester_bundle';
         finalItemName = 'Sem ${widget.semester} Complete Bundle';
       }
-    }
-
-    if (finalPrice <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pricing not configured for this item.')),
-      );
-      return;
     }
 
     Navigator.push(
@@ -258,6 +289,14 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
     final widgets = <Widget>[];
 
     for (final entry in grouped.entries) {
+      final int unit = entry.key;
+      final double? unitPrice = _unitPrices[unit];
+      // Unit is locked if it has a price set AND user doesn't have unit/subject access
+      final bool unitLocked = !_hasAccess && !_unlockedUnits.contains(unit) && unitPrice != null && unitPrice > 0;
+      // Check if this unit has ANY premium notes
+      final bool hasAnyPremiumNotes = entry.value.any((n) => n['is_premium'] == true);
+      final bool showUnitLock = unitLocked && hasAnyPremiumNotes;
+
       // Unit header
       widgets.add(Padding(
         padding: EdgeInsets.only(top: widgets.isEmpty ? 0 : 24, bottom: 12),
@@ -266,23 +305,62 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: accent.withValues(alpha: isDark ? 0.15 : 0.1),
+                color: showUnitLock 
+                    ? _premiumGold.withValues(alpha: isDark ? 0.15 : 0.1)
+                    : accent.withValues(alpha: isDark ? 0.15 : 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Text('Unit ${entry.key}',
-                  style: TextStyle(color: accent, fontSize: 12, fontWeight: FontWeight.w600)),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (showUnitLock) ...[
+                    const Icon(Iconsax.lock_1_copy, size: 11, color: _premiumGold),
+                    const SizedBox(width: 4),
+                  ],
+                  Text(
+                    'Unit $unit',
+                    style: TextStyle(
+                      color: showUnitLock ? _premiumGold : accent, 
+                      fontSize: 12, 
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(width: 10),
             Expanded(child: Divider(color: _border(isDark).withValues(alpha: 0.4))),
+            if (showUnitLock) ...[
+              const SizedBox(width: 10),
+              GestureDetector(
+                onTap: () => _openCheckout(entry.value.first, unitOverride: unit),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(colors: _goldGradient),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    'Buy Unit $unit · ₹${unitPrice.toInt()}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ));
 
-      // Note cards for this unit
+      // Note cards — lock each note using is_premium flag + unit access check
       for (final note in entry.value) {
+        final bool noteLocked = (note['is_premium'] == true) && !_hasAccess && !_unlockedUnits.contains(unit);
         widgets.add(Padding(
           padding: const EdgeInsets.only(bottom: 10),
-          child: _noteCard(note, isDark, accent),
+          child: _noteCard(note, isDark, accent, isLocked: noteLocked, unit: unit),
         ));
       }
     }
@@ -290,14 +368,13 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
     return widgets;
   }
 
-  Widget _noteCard(Map<String, dynamic> note, bool isDark, Color accent) {
+  Widget _noteCard(Map<String, dynamic> note, bool isDark, Color accent, {required bool isLocked, required int unit}) {
     final id = note['id'].toString();
     final isDownloaded = OfflineService().isDownloaded(id);
     final title = note['title'] ?? 'Untitled';
     final url = note['file_url'];
     final isPremium = note['is_premium'] == true;
-    final isPreview = note['is_preview'] == true;
-    final isLocked = (isPremium && !isPreview) && !_hasAccess;
+    // isLocked is passed from the unit section — no hardcoded preview unit logic
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
@@ -326,7 +403,7 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
           child: InkWell(
             onTap: () {
               if (isLocked) {
-                _openCheckout(note);
+                _openCheckout(note, unitOverride: unit);
               } else if (isDownloaded) {
                 final resource = OfflineService().getResource(id);
                 _openPdf(filePath: resource!.localPath, title: title);
@@ -436,7 +513,7 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
                             const SizedBox(width: 6),
                             Text(
                               isLocked 
-                                  ? 'Unlock Full Quality · ₹${note['price'] ?? '--'}' 
+                                  ? 'Unlock Unit $unit · ₹${_unitPrices[unit]?.toInt() ?? '--'}' 
                                   : (isDownloaded ? 'Available Offline' : 'Ready to Read · PDF'),
                               style: TextStyle(
                                 color: isLocked ? _premiumGold.withValues(alpha: 0.8) : _textS(isDark), 

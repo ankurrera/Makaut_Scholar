@@ -85,7 +85,7 @@ async function reportToGooglePlay(data: { orderId: string, amount: number, curre
                 userTaxAddress: { regionCode: 'IN' },
                 transactionTime: new Date().toISOString(),
                 oneTimePurchase: {
-                    sku: 'premium_notes_bundle', // Match the SKU in Google Play Console
+                    sku: `scholar_price_${Math.round(data.amount)}`, // Dynamic price-tier product ID
                     price: {
                         priceMicros: (data.amount * 1000000).toString(),
                         currency: data.currency

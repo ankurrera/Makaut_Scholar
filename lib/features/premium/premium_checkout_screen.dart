@@ -54,13 +54,16 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
 
   Future<void> _loadProducts() async {
     try {
-      final products = await _billingRepository.fetchProducts({widget.itemId});
+      // Map the item's price to a generic price-tier product ID
+      final String tierId = BillingRepository.priceTierProductId(widget.price);
+      final products = await _billingRepository.fetchProducts({tierId});
       if (products.isNotEmpty) {
         setState(() {
           _productDetails = products.first;
           _isLoading = false;
         });
       } else {
+        // Product not found — fall back to Razorpay only
         setState(() => _isLoading = false);
       }
     } catch (e) {
@@ -95,21 +98,36 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
 
   Future<void> _handlePayment() async {
     if (_productDetails == null && _selectedMethod == 'GooglePlay') {
-      _handleError("Product not found in Google Play Console.");
+      _handleError("Product not found in Google Play Console. Please try UPI instead.");
       return;
     }
 
     setState(() => _isLoading = true);
     try {
+      // 1. Create an order in Supabase FIRST (for both methods)
+      final orderData = await _billingRepository.createOrder(
+        itemId: widget.itemId,
+        itemType: widget.itemType,
+        amount: widget.price,
+        gateway: _selectedMethod == 'GooglePlay' ? 'google_play' : 'razorpay',
+      );
+
+      final String orderId = orderData['orderId'];
+
       if (_selectedMethod == 'GooglePlay') {
-        // Launches the standard Google Play flow
-        // Google Play itself will present the choice on Android if UCB is configured
-        await _billingRepository.launchBillingFlow(_productDetails!);
+        // 2a. Launch Google Play with orderId for tracking
+        await _billingRepository.launchBillingFlow(_productDetails!, orderId: orderId);
       } else {
-        // Launches Razorpay flow directly
+        // 2b. Launch Razorpay using the pre-created order data
+        final String razorpayOrderId = orderData['razorpayOrderId'] ?? '';
+        final String keyId = orderData['keyId'] ?? '';
+        if (razorpayOrderId.isEmpty || keyId.isEmpty) {
+          throw Exception('Missing Razorpay order details from server.');
+        }
         await _billingRepository.processRazorpayPayment(
-          itemId: widget.itemId,
-          itemType: widget.itemType,
+          razorpayOrderId: razorpayOrderId,
+          internalOrderId: orderId,
+          keyId: keyId,
           amount: widget.price,
         );
       }

@@ -137,7 +137,46 @@ class MonetizationService extends ChangeNotifier {
     return originalBundlePrice;
   }
 
-  /// Checks if the user has access to a specific subject (via Subject purchase or Semester Bundle purchase)
+  /// Fetches all unit prices for a subject → returns { unitNumber: price }
+  /// e.g. { 1: 49.0, 3: 49.0, 5: 99.0 }
+  Future<Map<int, double>> getUnitPrices(String department, int semester, String subject) async {
+    try {
+      final data = await _client
+          .from('unit_prices')
+          .select('unit, price')
+          .eq('department', department)
+          .eq('semester', semester)
+          .eq('subject', subject);
+
+      return {
+        for (final row in data as List)
+          (row['unit'] as int): (row['price'] as num).toDouble()
+      };
+    } catch (e) {
+      if (kDebugMode) print('Failed to fetch unit prices: $e');
+      return {};
+    }
+  }
+
+  /// Checks if the user has access to a specific unit (via Unit, Subject, or Bundle purchase)
+  Future<bool> checkUnitAccess(String department, int semester, String subject, int unit) async {
+    final user = _client.auth.currentUser;
+    if (user == null) return false;
+
+    // 1. Check unit purchase
+    final unitId = 'unit_${department}_${semester}_${subject}_$unit';
+    final unitRes = await _client.rpc('has_premium_access', params: {
+      'target_user_id': user.id,
+      'target_item_type': 'unit',
+      'target_item_id': unitId,
+    });
+    if (unitRes == true) return true;
+
+    // 2. Check subject purchase (subject access unlocks all units)
+    return checkSubjectAccess(department, semester, subject);
+  }
+
+  /// Checks if the user has Full Subject access (Subject or Bundle purchase)
   Future<bool> checkSubjectAccess(String department, int semester, String subject) async {
     final user = _client.auth.currentUser;
     if (user == null) return false;

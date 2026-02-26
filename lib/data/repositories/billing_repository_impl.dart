@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:in_app_purchase/in_app_purchase.dart';
-import 'package:in_app_purchase_android/in_app_purchase_android.dart';
+
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/repositories/billing_repository.dart';
@@ -48,54 +48,83 @@ class BillingRepositoryImpl implements BillingRepository {
   }
 
   @override
-  Future<void> launchBillingFlow(ProductDetails product) async {
-    final PurchaseParam purchaseParam = PurchaseParam(productDetails: product);
+  Future<void> launchBillingFlow(ProductDetails product, {String? orderId}) async {
+    final PurchaseParam purchaseParam = PurchaseParam(
+      productDetails: product,
+      applicationUserName: orderId, // Used to link this purchase to our Supabase order
+    );
     
-    // On Android, if UCB is enabled, Google Play will show the choice dialog.
-    // However, the standard buyNonConsumable handles both.
-    await _iap.buyNonConsumable(purchaseParam: purchaseParam);
+    _activeSupabaseOrderId = orderId;
+    // Use buyConsumable since we use generic price-tier products
+    await _iap.buyConsumable(purchaseParam: purchaseParam, autoConsume: true);
   }
 
   Future<void> _initializeUserChoiceBilling() async {
     if (Platform.isAndroid) {
-      final InAppPurchaseAndroidPlatformAddition androidAddition =
-          _iap.getPlatformAddition<InAppPurchaseAndroidPlatformAddition>();
-      
-      // Set the alternative billing listener if required by specific plugin versions
-      // In current versions, the purchaseStream handles both types of events,
-      // but specific UCB workflows might require platform-specific handling.
-      // This is initialized to ensure the platform additions are active.
+      // Listen to Google Play purchase updates and auto-report to backend
+      _iap.purchaseStream.listen((purchases) {
+        for (var purchase in purchases) {
+          if (purchase.status == PurchaseStatus.purchased || purchase.status == PurchaseStatus.restored) {
+            if (purchase.pendingCompletePurchase) {
+              _iap.completePurchase(purchase);
+            }
+            // Report to backend in background
+            _reportGooglePlayPurchase(purchase);
+          }
+        }
+      });
+    }
+  }
+
+  Future<void> _reportGooglePlayPurchase(PurchaseDetails purchase) async {
+    try {
+      await _supabase.functions.invoke(
+        'report-play-billing-transaction',
+        body: {
+          'orderId': _activeSupabaseOrderId ?? purchase.purchaseID,
+          'razorpayPaymentId': purchase.purchaseID,
+          'razorpaySignature': null,
+          'externalTransactionToken': null,
+        },
+      );
+    } catch (e) {
+      print('Error reporting Google Play purchase: $e');
     }
   }
 
   @override
-  Future<void> processRazorpayPayment({
+  Future<Map<String, dynamic>> createOrder({
     required String itemId,
     required String itemType,
+    required double amount,
+    required String gateway,
+  }) async {
+    final response = await _supabase.functions.invoke(
+      'create-razorpay-order',
+      body: {
+        'itemId': itemId,
+        'itemType': itemType,
+        'amount': amount,
+        'gateway': gateway,
+      },
+    );
+
+    if (response.status != 200) throw Exception('Failed to create order');
+    return response.data as Map<String, dynamic>;
+  }
+
+  @override
+  Future<void> processRazorpayPayment({
+    required String razorpayOrderId,
+    required String internalOrderId,
+    required String keyId,
     required double amount,
     String? externalTransactionToken,
   }) async {
     _pendingExternalToken = externalTransactionToken;
+    _activeSupabaseOrderId = internalOrderId;
     try {
-      // 1. Get Razorpay Order ID from Supabase Edge Function
-      final response = await _supabase.functions.invoke(
-        'create-razorpay-order',
-        body: {
-          'itemId': itemId,
-          'itemType': itemType,
-          'amount': amount,
-          'externalTransactionToken': externalTransactionToken, // Pass token if UCB
-        },
-      );
-
-      if (response.status != 200) throw Exception("Failed to create Razorpay order");
-
-      final data = response.data;
-      final String razorpayOrderId = data['razorpayOrderId'];
-      final String keyId = data['keyId'];
-      _activeSupabaseOrderId = data['orderId'];
-
-      // 2. Open Razorpay Checkout
+      // Open Razorpay Checkout using the already-created order
       var options = {
         'key': keyId,
         'amount': (amount * 100).toInt(),
