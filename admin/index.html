@@ -1389,7 +1389,7 @@
             if (!dept || !sem) return;
             target.innerHTML = '<option>Loading...</option>';
             try {
-                const { data } = await sb.from('department_subjects').select('subject, subject_price, paper_code')
+                const { data } = await sb.from('subjects_bundle').select('subject, subject_price, paper_code')
                     .eq('department', dept).eq('semester', parseInt(sem)).order('subject');
 
                 target.innerHTML = '<option value="">Select Subject</option>' +
@@ -1548,7 +1548,7 @@
                 // 3. Find siblings for multiplexing
                 let targets = [baseMeta];
                 if (code && code.trim()) {
-                    const { data: siblings } = await sb.from('department_subjects')
+                    const { data: siblings } = await sb.from('subjects_bundle')
                         .select('department, semester, subject')
                         .eq('paper_code', code.trim());
 
@@ -1647,7 +1647,7 @@
                 // 3. Multiplex
                 let targets = [baseMeta];
                 if (code && code.trim()) {
-                    const { data: siblings } = await sb.from('department_subjects')
+                    const { data: siblings } = await sb.from('subjects_bundle')
                         .select('department, semester, subject')
                         .eq('paper_code', code.trim());
 
@@ -1709,7 +1709,7 @@
                 // 3. Find sibling departments if paper_code exists
                 let targets = [baseMeta];
                 if (code && code.trim()) {
-                    const { data: siblings } = await sb.from('department_subjects')
+                    const { data: siblings } = await sb.from('subjects_bundle')
                         .select('department, semester, subject')
                         .eq('paper_code', code.trim());
 
@@ -1747,21 +1747,6 @@
             finally { btn.disabled = false; }
         }
 
-        async function updateUnitPrice() {
-            const dept = document.getElementById('unitDept').value;
-            const sem = parseInt(document.getElementById('unitSem').value);
-            const sub = document.getElementById('unitSubject').value;
-            const unit = parseInt(document.getElementById('unitNumber').value);
-            const price = parseFloat(document.getElementById('unitPrice').value);
-            if (!dept || !sem || !sub || isNaN(unit) || isNaN(price)) return showToast('Fill all fields', 'error');
-            try {
-                const { error } = await sb.from('unit_prices')
-                    .upsert({ department: dept, semester: sem, subject: sub, unit, price }, { onConflict: 'department,semester,subject,unit' });
-                if (error) throw error;
-                showToast(`Unit ${unit} price set to ₹${price}`);
-            } catch (e) { showToast(e.message, 'error'); }
-        }
-
         async function updateSubjectPrice() {
             const dept = document.getElementById('priceDept').value;
             const sem = parseInt(document.getElementById('priceSem').value);
@@ -1769,7 +1754,7 @@
             const price = parseFloat(document.getElementById('priceAmount').value);
             if (!dept || !sem || !sub || isNaN(price)) return showToast('Fill all fields', 'error');
             try {
-                const { count, error } = await sb.from('department_subjects')
+                const { count, error } = await sb.from('subjects_bundle')
                     .update({ subject_price: price }, { count: 'exact' })
                     .eq('department', dept).eq('semester', sem).eq('subject', sub);
 
@@ -1793,7 +1778,7 @@
                     .select();
                 if (error) throw error;
                 if (data && data.length > 0) {
-                    const { count } = await sb.from('department_subjects')
+                    const { count } = await sb.from('subjects_bundle')
                         .update({ semester_bundle_id: data[0].id }, { count: 'exact' })
                         .eq('department', dept).eq('semester', sem);
                     console.log(`Updated ${count} subjects with bundle ID`);
@@ -1904,9 +1889,10 @@
 
             if (type === 'note') {
                 const is_premium = document.getElementById('editIsPremium').checked;
+                const newPrice = is_premium ? parseFloat(document.getElementById('editPrice').value) : 0;
                 payload = {
                     is_premium,
-                    price: is_premium ? parseFloat(document.getElementById('editPrice').value) : 0,
+                    price: newPrice,
                     paper_code: document.getElementById('editPaperCode').value
                 };
             } else if (type === 'pyq') {

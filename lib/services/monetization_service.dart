@@ -54,7 +54,7 @@ class MonetizationService extends ChangeNotifier {
     try {
       // 1. Get Subject Price and Bundle ID
       final targetSub = await _client
-          .from('department_subjects')
+          .from('subjects_bundle')
           .select('subject_price, semester_bundle_id')
           .eq('department', department)
           .eq('semester', semester)
@@ -84,7 +84,7 @@ class MonetizationService extends ChangeNotifier {
       if (user != null) {
         // Find all subjects in this semester
         final allSemesterSubjectsResponse = await _client
-            .from('department_subjects')
+            .from('subjects_bundle')
             .select('subject')
             .eq('department', department)
             .eq('semester', semester);
@@ -113,7 +113,7 @@ class MonetizationService extends ChangeNotifier {
         }
       }
 
-      return {
+      return <String, dynamic>{
         'subject_price': subjectPrice,
         'bundle_price': bundlePrice,
         'purchased_subjects_count': purchasedSubjects,
@@ -121,7 +121,7 @@ class MonetizationService extends ChangeNotifier {
       };
     } catch (e) {
       if (kDebugMode) print('Failed to fetch pricing: $e');
-      return {'subject_price': 0.0};
+      return <String, dynamic>{'subject_price': 0.0};
     }
   }
 
@@ -137,70 +137,63 @@ class MonetizationService extends ChangeNotifier {
     return originalBundlePrice;
   }
 
-  /// Fetches all unit prices for a subject → returns { unitNumber: price }
-  /// e.g. { 1: 49.0, 3: 49.0, 5: 99.0 }
-  Future<Map<int, double>> getUnitPrices(String department, int semester, String subject) async {
-    try {
-      final data = await _client
-          .from('unit_prices')
-          .select('unit, price')
-          .eq('department', department)
-          .eq('semester', semester)
-          .eq('subject', subject);
-
-      return {
-        for (final row in data as List)
-          (row['unit'] as int): (row['price'] as num).toDouble()
-      };
-    } catch (e) {
-      if (kDebugMode) print('Failed to fetch unit prices: $e');
-      return {};
-    }
-  }
-
-  /// Checks if the user has access to a specific unit (via Unit, Subject, or Bundle purchase)
+  /// Checks if the user has access to a specific unit
+  /// Checks in order: unit purchase → subject purchase → bundle purchase
   Future<bool> checkUnitAccess(String department, int semester, String subject, int unit) async {
     final user = _client.auth.currentUser;
     if (user == null) return false;
 
-    // 1. Check unit purchase
-    final unitId = 'unit_${department}_${semester}_${subject}_$unit';
-    final unitRes = await _client.rpc('has_premium_access', params: {
-      'target_user_id': user.id,
-      'target_item_type': 'unit',
-      'target_item_id': unitId,
-    });
-    if (unitRes == true) return true;
+    try {
+      // 1. Check unit-level purchase
+      final unitId = 'unit_${department}_${semester}_${subject}_$unit';
+      final unitRows = await _client
+          .from('user_purchases')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('item_type', 'unit')
+          .eq('item_id', unitId)
+          .limit(1);
+      if ((unitRows as List).isNotEmpty) return true;
 
-    // 2. Check subject purchase (subject access unlocks all units)
-    return checkSubjectAccess(department, semester, subject);
+      // 2. Fall up to subject/bundle check
+      return await checkSubjectAccess(department, semester, subject);
+    } catch (e) {
+      if (kDebugMode) print('checkUnitAccess error: $e');
+      return false;
+    }
   }
 
-  /// Checks if the user has Full Subject access (Subject or Bundle purchase)
+  /// Checks if the user has full subject access (subject or semester bundle purchase)
   Future<bool> checkSubjectAccess(String department, int semester, String subject) async {
     final user = _client.auth.currentUser;
     if (user == null) return false;
 
-    // Check Subject purchase
-    // The subjectId already includes the department, which naturally locks it.
-    final subjectId = 'subject_${department}_${semester}_$subject';
-    final subRes = await _client.rpc('has_premium_access', params: {
-      'target_user_id': user.id,
-      'target_item_type': 'subject',
-      'target_item_id': subjectId,
-      'target_department': department, // New parameter for even stricter locking
-    });
-    if (subRes == true) return true;
+    try {
+      // 1. Check subject-level purchase
+      final subjectId = 'subject_${department}_${semester}_$subject';
+      final subRows = await _client
+          .from('user_purchases')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('item_type', 'subject')
+          .eq('item_id', subjectId)
+          .limit(1);
+      if ((subRows as List).isNotEmpty) return true;
 
-    // Check Semester Bundle purchase
-    final bundleIdStr = 'bundle_${department}_${semester}';
-    final bunRes = await _client.rpc('has_premium_access', params: {
-      'target_user_id': user.id,
-      'target_item_type': 'semester_bundle',
-      'target_item_id': bundleIdStr,
-      'target_department': department,
-    });
-    return bunRes == true;
+      // 2. Check semester bundle purchase
+      final bundleId = 'bundle_${department}_${semester}';
+      final bundleRows = await _client
+          .from('user_purchases')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('item_type', 'semester_bundle')
+          .eq('item_id', bundleId)
+          .limit(1);
+      return (bundleRows as List).isNotEmpty;
+    } catch (e) {
+      if (kDebugMode) print('checkSubjectAccess error: $e');
+      return false;
+    }
   }
 
   /// Fetches Semester Bundle pricing directly (Tier 3 Upfront)

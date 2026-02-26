@@ -75,18 +75,28 @@ serve(async (req: Request) => {
         // 4. Delivery (Insert into user_purchases)
         console.log(`[ABS] Unlocking content for user ${user.id}, item ${orderData.item_id}, type ${orderData.item_type}`);
 
+        // Extract department from item_id format:
+        //   unit_CSE_1_Physics_2   → CSE
+        //   subject_CSE_1_Physics  → CSE
+        //   bundle_CSE_1           → CSE
+        const parts = (orderData.item_id as string).split('_');
+        const department = parts.length > 1 ? parts[1] : null;
+
+        // Use INSERT with ON CONFLICT DO NOTHING since the unique constraint
+        // is now (user_id, item_type, item_id, department) — 4 columns.
         const { error: deliveryError } = await supabaseClient
             .from('user_purchases')
             .upsert({
                 user_id: user.id,
                 item_type: orderData.item_type,
                 item_id: orderData.item_id,
-                order_id: orderData.id
-            }, { onConflict: 'user_id,item_type,item_id' });
+                order_id: orderData.id,
+                department: department
+            }, { onConflict: 'user_id,item_type,item_id,department' });
 
         if (deliveryError) {
-            console.error('Delivery Error:', deliveryError);
-            throw deliveryError;
+            console.error('Delivery Error:', JSON.stringify(deliveryError));
+            throw new Error(`Failed to unlock content: ${deliveryError.message}`);
         }
 
         return new Response(

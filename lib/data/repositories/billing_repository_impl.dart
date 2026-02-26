@@ -147,27 +147,63 @@ class BillingRepositoryImpl implements BillingRepository {
   }
 
   void _handleRazorpaySuccess(PaymentSuccessResponse response) async {
-    // 1. Manually emit a success event INSTANTLY to notify the UI without waiting for network
-    _alternativePurchaseController.add({
-      'status': 'purchased',
-      'orderId': _activeSupabaseOrderId,
-      'paymentId': response.paymentId,
-    });
+    final orderId = _activeSupabaseOrderId ?? response.orderId;
 
-    // 2. Report Success to our Backend in the background
+    // ── Path 1: Call edge function (updates order to 'completed' → DB trigger fires) ──
     try {
       await _supabase.functions.invoke(
         'report-play-billing-transaction',
         body: {
-          'orderId': _activeSupabaseOrderId ?? response.orderId,
+          'orderId': orderId,
           'razorpayPaymentId': response.paymentId,
           'razorpaySignature': response.signature,
-          'externalTransactionToken': _pendingExternalToken
+          'externalTransactionToken': _pendingExternalToken,
         },
       );
     } catch (e) {
-      print("Error reporting transaction: $e");
+      print('Edge function error (non-fatal): $e');
     }
+
+    // ── Path 2: Direct client-side write to user_purchases (belt-and-suspenders) ──
+    // This covers the case where the edge function fails silently.
+    // Look up the order from Supabase to get item_id / item_type, then write directly.
+    try {
+      if (orderId != null) {
+        final order = await _supabase
+            .from('orders')
+            .select('item_id, item_type, user_id')
+            .eq('id', orderId)
+            .maybeSingle();
+
+        if (order != null) {
+          final String itemId = order['item_id'] as String;
+          final String itemType = order['item_type'] as String;
+          final String department = itemId.split('_').length > 1
+              ? itemId.split('_')[1]
+              : '';
+
+          // Use service role bypassed via edge function, but attempt anon upsert too.
+          // Even if RLS blocks INSERT, the DB trigger will have already handled it.
+          await _supabase.from('user_purchases').upsert({
+            'user_id': order['user_id'],
+            'item_type': itemType,
+            'item_id': itemId,
+            'order_id': orderId,
+            'department': department,
+          }, onConflict: 'user_id,item_type,item_id,department');
+        }
+      }
+    } catch (e) {
+      // Non-fatal: DB trigger on 'orders' is the primary unlock mechanism
+      print('Direct user_purchases write error (non-fatal): $e');
+    }
+
+    // ── Notify UI — content is now unlocked via trigger or direct write ──
+    _alternativePurchaseController.add({
+      'status': 'purchased',
+      'orderId': orderId,
+      'paymentId': response.paymentId,
+    });
   }
 
   void _handleRazorpayError(PaymentFailureResponse response) {

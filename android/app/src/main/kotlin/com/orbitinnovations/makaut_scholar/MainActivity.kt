@@ -1,4 +1,4 @@
-package com.example.makaut_scholar
+package com.orbitinnovations.makaut_scholar
 
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine

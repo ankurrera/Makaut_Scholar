@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -59,37 +60,63 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
     try {
       final auth = Provider.of<AuthService>(context, listen: false);
       final mon = Provider.of<MonetizationService>(context, listen: false);
-      
-      final results = await Future.wait([
-        auth.fetchNotes(widget.department, widget.semester, widget.subject, paperCode: widget.paperCode),
-        mon.checkSubjectAccess(widget.department, widget.semester, widget.subject),
-        mon.getPricingDetails(widget.department, widget.semester, widget.subject),
-        mon.getUnitPrices(widget.department, widget.semester, widget.subject),
-      ]);
-      
-      final notes = results[0] as List<Map<String, dynamic>>;
-      final hasFullAccess = results[1] as bool;
-      final pricing = results[2] as Map<String, dynamic>;
-      final unitPrices = results[3] as Map<int, double>;
 
-      // Fetch per-unit access for each unit that has a price set
+      // ── 1. Fetch notes (must succeed, this is the core data) ──
+      final notes = await auth.fetchNotes(
+        widget.department, widget.semester, widget.subject,
+        paperCode: widget.paperCode,
+      );
+
+      // ── 2. Derive unit prices directly from notes (no separate table) ──
+      final Map<int, double> unitPrices = <int, double>{};
+      for (final note in notes) {
+        if (note['is_premium'] == true) {
+          final int unit = (note['unit'] as num?)?.toInt() ?? 0;
+          final double price = (note['price'] as num?)?.toDouble() ?? 0.0;
+          if (unit > 0 && price > 0 && !unitPrices.containsKey(unit)) {
+            unitPrices[unit] = price;
+          }
+        }
+      }
+
+      // ── 3. Check access (graceful fallback to false) ──
+      bool hasFullAccess = false;
+      try {
+        hasFullAccess = await mon.checkSubjectAccess(
+          widget.department, widget.semester, widget.subject);
+      } catch (e) {
+        if (kDebugMode) print('checkSubjectAccess error (defaulting to locked): $e');
+      }
+
+      // ── 4. Fetch pricing details (graceful fallback) ──
+      Map<String, dynamic> pricing = <String, dynamic>{'subject_price': 0.0};
+      try {
+        pricing = await mon.getPricingDetails(
+          widget.department, widget.semester, widget.subject);
+      } catch (e) {
+        if (kDebugMode) print('getPricingDetails error (defaulting to empty): $e');
+      }
+
+      // ── 5. Check per-unit access ──
       final Set<int> unlockedUnits = {};
       if (!hasFullAccess && unitPrices.isNotEmpty) {
         await Future.wait(unitPrices.keys.map((unit) async {
-          final hasUnit = await mon.checkUnitAccess(
-            widget.department, widget.semester, widget.subject, unit);
-          if (hasUnit) unlockedUnits.add(unit);
+          try {
+            final hasUnit = await mon.checkUnitAccess(
+              widget.department, widget.semester, widget.subject, unit);
+            if (hasUnit) unlockedUnits.add(unit);
+          } catch (_) {}
         }));
       }
-      
+
       if (mounted) {
-        setState(() { 
+        setState(() {
           _notes = notes;
           _hasAccess = hasFullAccess;
           _pricing = pricing;
           _unitPrices = unitPrices;
           _unlockedUnits = unlockedUnits;
-          _isLoading = false; 
+          _isLoading = false;
         });
       }
     } catch (e) {

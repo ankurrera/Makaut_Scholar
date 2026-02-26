@@ -108,27 +108,39 @@ class AuthService extends ChangeNotifier {
   // Delete Account (Permanent)
   Future<void> deleteAccount() async {
     try {
+      // 1. Force a session refresh to guarantee our JWT is pristine.
+      // This prevents the "401 Invalid JWT" Edge Function Gateway error.
+      final refreshResponse = await _client.auth.refreshSession();
+      final session = refreshResponse.session ?? _client.auth.currentSession;
+      
+      if (session == null) {
+        throw Exception('No active session found. Please log in again.');
+      }
+
+      // 2. Invoke the Edge Function. 
+      // The SDK auto-injects 'Authorization: Bearer <token>' when using 'invoke'.
       final response = await _client.functions.invoke(
         'delete-user-account',
-        headers: {
-          'Authorization': 'Bearer ${_client.auth.currentSession?.accessToken}',
-        },
       );
       
       if (response.status != 200) {
         throw Exception(response.data['error'] ?? 'Deletion failed');
       }
       
-      // Local clean up
+      // 3. Local clean up
       await signOut();
     } catch (e) {
-      throw Exception('Failed to delete account: $e');
+      final errorStr = e.toString();
+      if (errorStr.contains('401') || errorStr.contains('Invalid JWT') || errorStr.contains('Unauthorized')) {
+        throw Exception('Your session expired. Please log out, log back in, and try again.');
+      }
+      throw Exception(e.toString().replaceAll('Exception:', '').trim());
     }
   }
 
   Future<List<Map<String, dynamic>>> fetchDepartmentSubjects(String department, int semester) async {
     final data = await _client
-        .from('department_subjects')
+        .from('subjects_bundle')
         .select('subject, paper_code')
         .eq('department', department)
         .eq('semester', semester);
@@ -201,14 +213,18 @@ class AuthService extends ChangeNotifier {
   /// Fetches notes for a department + semester + subject, ordered by unit
   Future<List<Map<String, dynamic>>> fetchNotes(
       String department, int semester, String subject, {String? paperCode}) async {
-    final data = await _client.from('notes')
-        .select()
-        .eq('department', department)
-        .eq('semester', semester)
-        .eq('subject', subject)
-        .order('unit', ascending: true)
-        .order('uploaded_at', ascending: false);
-    return List<Map<String, dynamic>>.from(data);
+    try {
+      final data = await _client.from('notes')
+          .select()
+          .eq('department', department)
+          .eq('semester', semester)
+          .eq('subject', subject)
+          .order('unit', ascending: true)
+          .order('uploaded_at', ascending: false);
+      return List<Map<String, dynamic>>.from(data);
+    } catch (e) {
+      return [];
+    }
   }
 
   /// Fetches distinct semesters that have syllabus for a department
@@ -228,7 +244,7 @@ class AuthService extends ChangeNotifier {
   /// Fetches distinct subjects that have syllabus for a department + semester
   Future<List<Map<String, dynamic>>> fetchSyllabusSubjects(String department, int semester) async {
     final data = await _client
-        .from('department_subjects')
+        .from('subjects_bundle')
         .select('subject, paper_code')
         .eq('department', department)
         .eq('semester', semester);

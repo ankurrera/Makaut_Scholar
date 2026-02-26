@@ -28,7 +28,7 @@ class PremiumCheckoutScreen extends StatefulWidget {
 }
 
 class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
-  String _selectedMethod = 'GooglePlay'; // Default to official method
+  String _selectedMethod = 'GooglePlay'; // Will switch to Razorpay if product unavailable
   bool _isLoading = true;
   bool _successHandled = false;
   late BillingRepository _billingRepository;
@@ -63,16 +63,15 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
           _isLoading = false;
         });
       } else {
-        // Product not found — fall back to Razorpay only
-        setState(() => _isLoading = false);
+        // Product not found in Play Console — fall back to Razorpay
+        setState(() {
+          _selectedMethod = 'Razorpay';
+          _isLoading = false;
+        });
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading products: $e')),
-        );
-      }
-      setState(() => _isLoading = false);
+      // Could not reach Play Console — fall back to Razorpay silently
+      if (mounted) setState(() { _selectedMethod = 'Razorpay'; _isLoading = false; });
     }
   }
 
@@ -215,8 +214,31 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
 
   void _handleError(String message) {
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $message')),
+      showModalBottomSheet(
+        context: context,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+        builder: (_) => Padding(
+          padding: const EdgeInsets.all(28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Error', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20)),
+              const SizedBox(height: 12),
+              Text(message, style: const TextStyle(fontSize: 15, color: Colors.black87)),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF8E82FF), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Got it', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
       );
     }
   }
@@ -275,11 +297,11 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
                 _buildMethodOption(
                   id: 'GooglePlay',
                   name: 'Google Play Billing',
-                  subtitle: 'Recommended • Fast & Secure',
+                  subtitle: _productDetails != null ? 'Recommended • Fast & Secure' : 'Not available for this item',
                   icon: FontAwesomeIcons.googlePlay,
-                  color: const Color(0xFF34A853),
+                  color: _productDetails != null ? const Color(0xFF34A853) : Colors.grey,
                   isSelected: _selectedMethod == 'GooglePlay',
-                  onTap: () => setState(() => _selectedMethod = 'GooglePlay'),
+                  onTap: _productDetails != null ? () => setState(() => _selectedMethod = 'GooglePlay') : null,
                   surfaceColor: surfaceColor,
                   borderColor: borderColor,
                   textColor: textColor,
@@ -436,7 +458,7 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
     required IconData icon,
     required Color color,
     required bool isSelected,
-    required VoidCallback onTap,
+    required VoidCallback? onTap,
     required Color surfaceColor,
     required Color borderColor,
     required Color textColor,
