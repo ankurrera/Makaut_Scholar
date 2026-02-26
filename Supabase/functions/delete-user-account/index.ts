@@ -15,49 +15,62 @@ serve(async (req: Request) => {
     try {
         const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
         const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+        const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
 
-        const authHeader = req.headers.get('Authorization');
-        if (!authHeader) throw new Error('Missing Authorization header');
+        // Parse request body for the token
+        const body = await req.json().catch(() => ({}));
+        const userToken = body.userToken;
 
-        const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+        if (!userToken) {
+            return new Response(
+                JSON.stringify({ error: 'Missing userToken in request body' }),
+                { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+            );
+        }
+
+        // Authenticate the user checking their token against Supabase using anon key
+        const authClient = createClient(supabaseUrl, supabaseAnonKey);
 
         // 1. Verify identity of the user requesting deletion
-        const { data: { user }, error: authError } = await supabaseClient.auth.getUser(authHeader.replace('Bearer ', ''));
+        const { data: { user }, error: authError } = await authClient.auth.getUser(userToken);
 
         if (authError || !user) {
             return new Response(
-                JSON.stringify({ error: 'Unauthorized' }),
+                JSON.stringify({ error: authError ? authError.message : 'Unauthorized' }),
                 { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
             );
         }
 
         const userId = user.id;
 
+        // Admin client with service role key to bypass RLS and delete user
+        const adminClient = createClient(supabaseUrl, supabaseServiceKey);
+
         // 2. Delete User Data (Database)
         // Note: CASCADE should handle most things if FKs are set, but let's be explicit
 
         // Delete Profile Photos (Storage)
         try {
-            const { data: files } = await supabaseClient.storage.from('avatars').list(userId);
+            const { data: files } = await adminClient.storage.from('avatars').list(userId);
             if (files && files.length > 0) {
                 const paths = files.map(f => `${userId}/${f.name}`);
-                await supabaseClient.storage.from('avatars').remove(paths);
+                await adminClient.storage.from('avatars').remove(paths);
             }
         } catch (e) {
             console.error('Error deleting avatar files:', e);
         }
 
         // Delete from DB tables (Profiles and Purchases)
-        const { error: profileError } = await supabaseClient.from('profiles').delete().eq('id', userId);
-        const { error: purchasesError } = await supabaseClient.from('user_purchases').delete().eq('user_id', userId);
-        const { error: ordersError } = await supabaseClient.from('orders').delete().eq('user_id', userId);
+        const { error: profileError } = await adminClient.from('profiles').delete().eq('id', userId);
+        const { error: purchasesError } = await adminClient.from('user_purchases').delete().eq('user_id', userId);
+        const { error: ordersError } = await adminClient.from('orders').delete().eq('user_id', userId);
 
         if (profileError || purchasesError || ordersError) {
             console.error('DB Deletion Error:', { profileError, purchasesError, ordersError });
         }
 
         // 3. Delete the Auth User (Final Step)
-        const { error: deleteUserError } = await supabaseClient.auth.admin.deleteUser(userId);
+        const { error: deleteUserError } = await adminClient.auth.admin.deleteUser(userId);
 
         if (deleteUserError) {
             throw new Error(`Auth deletion failed: ${deleteUserError.message}`);

@@ -1,5 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'dart:io' show File;
+import 'dart:convert' show jsonEncode;
+import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/supabase_client.dart';
 
@@ -108,33 +111,44 @@ class AuthService extends ChangeNotifier {
   // Delete Account (Permanent)
   Future<void> deleteAccount() async {
     try {
-      // 1. Force a session refresh to guarantee our JWT is pristine.
-      // This prevents the "401 Invalid JWT" Edge Function Gateway error.
-      final refreshResponse = await _client.auth.refreshSession();
-      final session = refreshResponse.session ?? _client.auth.currentSession;
+      final session = _client.auth.currentSession;
       
       if (session == null) {
         throw Exception('No active session found. Please log in again.');
       }
 
-      // 2. Invoke the Edge Function. 
-      // The SDK auto-injects 'Authorization: Bearer <token>' when using 'invoke'.
-      final response = await _client.functions.invoke(
-        'delete-user-account',
+      // 2. Invoke the Edge Function via raw HTTP.
+      // The Supabase SDK `functions.invoke` forces `Authorization: Bearer <user_jwt>`
+      // and the API Gateway automatically validates it before reaching the function.
+      // If the JWT is stale (even slightly out of sync computationally), it fails 401.
+      // To bypass, we hit it raw with the anon key and pass the user token in the body.
+      final urlStr = dotenv.env['SUPABASE_URL']!;
+      final url = Uri.parse('$urlStr/functions/v1/delete-user-account');
+      final anonKey = dotenv.env['SUPABASE_ANON_KEY']!;
+
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $anonKey',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'userToken': session.accessToken}),
       );
       
-      if (response.status != 200) {
-        throw Exception(response.data['error'] ?? 'Deletion failed');
+      if (response.statusCode != 200) {
+        throw Exception('Deletion failed: \${response.statusCode} - \${response.body}');
       }
       
       // 3. Local clean up
       await signOut();
+    } on FunctionException catch (e) {
+      if (e.status == 401) {
+        throw Exception('Session expired or unauthorized. Please log out and back in. Details: ${e.details}');
+      }
+      throw Exception('Function error: ${e.details}');
     } catch (e) {
       final errorStr = e.toString();
-      if (errorStr.contains('401') || errorStr.contains('Invalid JWT') || errorStr.contains('Unauthorized')) {
-        throw Exception('Your session expired. Please log out, log back in, and try again.');
-      }
-      throw Exception(e.toString().replaceAll('Exception:', '').trim());
+      throw Exception(errorStr.replaceAll('Exception:', '').trim());
     }
   }
 
