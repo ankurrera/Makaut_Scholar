@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../services/auth_service.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -617,9 +618,13 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
             'View',
             isDark,
             accent,
-            onTap: () {
-              // TODO: Open Privacy Policy URL
-              _showSnack('Opening Privacy Policy...');
+            onTap: () async {
+              final url = Uri.parse('https://makaut-scholar.vercel.app/#privacy');
+              if (await canLaunchUrl(url)) {
+                await launchUrl(url, mode: LaunchMode.externalApplication);
+              } else {
+                _showSnack('Could not launch the Privacy Policy');
+              }
             },
           ),
           const SizedBox(height: 6),

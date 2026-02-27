@@ -128,7 +128,7 @@ class BillingRepositoryImpl implements BillingRepository {
       var options = {
         'key': keyId,
         'amount': (amount * 100).toInt(),
-        'name': 'MAKAUT Scholar',
+        'name': 'ScholarX: MAKAUT Edition',
         'order_id': razorpayOrderId,
         'description': 'Premium Purchase',
         'prefill': {

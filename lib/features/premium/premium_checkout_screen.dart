@@ -63,15 +63,14 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
           _isLoading = false;
         });
       } else {
-        // Product not found in Play Console — fall back to Razorpay
+        // Product not found in Play Console — do NOT fall back silently
         setState(() {
-          _selectedMethod = 'Razorpay';
           _isLoading = false;
         });
       }
     } catch (e) {
-      // Could not reach Play Console — fall back to Razorpay silently
-      if (mounted) setState(() { _selectedMethod = 'Razorpay'; _isLoading = false; });
+      // Could not reach Play Console — do NOT fall back silently
+      if (mounted) setState(() { _isLoading = false; });
     }
   }
 
@@ -297,7 +296,9 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
                 _buildMethodOption(
                   id: 'GooglePlay',
                   name: 'Google Play Billing',
-                  subtitle: _productDetails != null ? 'Recommended • Fast & Secure' : 'Not available for this item',
+                  subtitle: _productDetails != null 
+                    ? 'Recommended • Fast & Secure' 
+                    : _isLoading ? 'Checking availability...' : 'Currently unavailable for this item',
                   icon: FontAwesomeIcons.googlePlay,
                   color: _productDetails != null ? const Color(0xFF34A853) : Colors.grey,
                   isSelected: _selectedMethod == 'GooglePlay',

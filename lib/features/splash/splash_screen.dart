@@ -58,33 +58,33 @@ class _SplashScreenState extends State<SplashScreen> {
           children: [
             // Static Logo Image
             Image.asset(
-              'assets/scholar_logo.png',
-              width: 200,
-              height: 200,
+              'assets/scholarx_logo.png',
+              width: 220,
+              height: 220,
               fit: BoxFit.contain,
             ),
 
-            const SizedBox(height: 30),
+            const SizedBox(height: 10),
             
             // Branding Text
             const Text(
-              'MAKAUT SCHOLAR',
+              'SCHOLARX',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 22,
                 fontWeight: FontWeight.w900,
-                letterSpacing: 2.0,
+                letterSpacing: 4.0,
                 color: Color(0xFF1E1E1E),
                 fontFamily: 'Inter',
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 4),
             const Text(
-              'ESTD 2026',
+              'MAKAUT Edition',
               style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
                 color: Colors.black54,
-                letterSpacing: 1.5,
+                letterSpacing: 1.2,
               ),
             ),
           ],

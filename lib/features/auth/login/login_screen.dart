@@ -152,7 +152,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                           ),
                         ),
                         const SizedBox(height: 20),
-                        Text('MAKAUT Scholar',
+                        Text('ScholarX: MAKAUT Edition',
                           textAlign: TextAlign.center,
                           style: TextStyle(color: textColor, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
                         const SizedBox(height: 6),

@@ -50,7 +50,7 @@ class MakautScholarApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'MAKAUT Scholar',
+      title: 'ScholarX: MAKAUT Edition',
       debugShowCheckedModeBanner: false,
 
       // 4. Academic Themes (Light & Dark)
