@@ -299,18 +299,18 @@ class _ImportantQuestionsListScreenState extends State<ImportantQuestionsListScr
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        if (isPremium) ...[
+                        if (isLocked) ...[
                           const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: isPurchased ? Colors.green.withAlpha(25) : Colors.orange.withAlpha(25),
+                              color: Colors.orange.withAlpha(25),
                               borderRadius: BorderRadius.circular(4),
                             ),
-                            child: Text(
-                              isPurchased ? 'UNLOCKED' : 'PREMIUM',
+                            child: const Text(
+                              'PREMIUM',
                               style: TextStyle(
-                                color: isPurchased ? Colors.green : Colors.orange,
+                                color: Colors.orange,
                                 fontSize: 9,
                                 fontWeight: FontWeight.bold,
                               ),

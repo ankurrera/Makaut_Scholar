@@ -499,13 +499,13 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            if (isPremium) ...[
+                            if (isLocked) ...[
                               const SizedBox(width: 8),
                               Container(
                                 alignment: Alignment.center,
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                 decoration: BoxDecoration(
-                                  gradient: LinearGradient(colors: _goldGradient),
+                                  gradient: const LinearGradient(colors: _goldGradient),
                                   borderRadius: BorderRadius.circular(100), // pill shape looks better
                                   boxShadow: [
                                     BoxShadow(
@@ -515,9 +515,9 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
                                     )
                                   ]
                                 ),
-                                child: Text(
-                                  isLocked ? 'PRO' : 'UNLOCKED',
-                                  style: const TextStyle(
+                                child: const Text(
+                                  'PRO',
+                                  style: TextStyle(
                                     color: Colors.white, 
                                     fontSize: 9, 
                                     fontWeight: FontWeight.w900,
