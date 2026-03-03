@@ -9,6 +9,7 @@ import '../syllabus/syllabus_semester_screen.dart';
 import '../pyq/pyq_semester_screen.dart';
 import '../important_questions/important_questions_semester_screen.dart';
 import '../search/search_results_screen.dart';
+import '../practice/cgpa_calculator_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -218,6 +219,14 @@ class _HomeScreenState extends State<HomeScreen>
             StaggeredSlideFade(
               delayMs: _baseDelay * 3,
               child: _buildFeatureGrid(isDark),
+            ),
+
+            const SizedBox(height: 32),
+
+            // 5. Quick Tools Section
+            StaggeredSlideFade(
+              delayMs: _baseDelay * 4,
+              child: _buildQuickTools(isDark),
             ),
 
           ],
@@ -558,7 +567,82 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-
+  Widget _buildQuickTools(bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Quick Tools",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: isDark ? _textPrimaryDark : _textPrimary,
+          ),
+        ),
+        const SizedBox(height: 16),
+        ScaleButton(
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const CgpaCalculatorScreen()),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: isDark ? _bgSecondaryDark : _bgSecondary,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: isDark ? _borderSubtleDark : _borderSubtle,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: (isDark ? _primary500Dark : _primary500).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(
+                    Iconsax.calculator,
+                    color: isDark ? _primary500Dark : _primary500,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "CGPA Calculator",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? _textPrimaryDark : _textPrimary,
+                        ),
+                      ),
+                      Text(
+                        "Calculate SGPA, CGPA & Percentage",
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: isDark ? _textSecondaryDark : _textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Iconsax.arrow_right_3,
+                  size: 18,
+                  color: (isDark ? _primary500Dark : _primary500).withValues(alpha: 0.5),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 // --- Reusable Widgets ---
