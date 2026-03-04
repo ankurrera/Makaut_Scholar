@@ -1,9 +1,7 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../services/auth_service.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -22,7 +20,6 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
 
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _phoneController = TextEditingController();
   final _collegeController = TextEditingController();
   String? _selectedDepartment;
 
@@ -63,7 +60,6 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
         _isLoading = false;
         if (profile != null) {
           _nameController.text = profile['name'] ?? '';
-          _phoneController.text = profile['phone_number'] ?? '';
           _collegeController.text = profile['college_name'] ?? '';
           _selectedDepartment = profile['department'];
         }
@@ -78,7 +74,6 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     try {
       await Provider.of<AuthService>(context, listen: false).updateProfile(
         name: _nameController.text.trim(),
-        phoneNumber: _phoneController.text.trim(),
         collegeName: _collegeController.text.trim(),
         department: _selectedDepartment ?? '',
       );
@@ -182,7 +177,6 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   void dispose() {
     _animController.dispose();
     _nameController.dispose();
-    _phoneController.dispose();
     _collegeController.dispose();
     super.dispose();
   }
@@ -236,7 +230,6 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                         _isEditing = !_isEditing;
                         if (!_isEditing && _profile != null) {
                           _nameController.text = _profile!['name'] ?? '';
-                          _phoneController.text = _profile!['phone_number'] ?? '';
                           _collegeController.text = _profile!['college_name'] ?? '';
                           _selectedDepartment = _profile!['department'];
                         }
@@ -445,8 +438,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
             ),
           ),
           _detailRow(Iconsax.user, 'Full Name', _profile?['name'] ?? '—', isDark, accent),
-          _divider(isDark),
-          _detailRow(Iconsax.call, 'Phone', _profile?['phone_number'] ?? '—', isDark, accent),
+
           _divider(isDark),
           _detailRow(Iconsax.teacher, 'College', _profile?['college_name'] ?? '—', isDark, accent),
           _divider(isDark),
@@ -512,14 +504,12 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               const SizedBox(height: 18),
               _field(_nameController, 'Full Name', Iconsax.user, isDark, accent,
                   validator: (v) => v!.isEmpty ? 'Name is required' : null),
-              const SizedBox(height: 14),
-              _field(_phoneController, 'Phone Number', Iconsax.call, isDark, accent,
-                  keyboardType: TextInputType.phone),
+
               const SizedBox(height: 14),
               _field(_collegeController, 'College Name', Iconsax.teacher, isDark, accent),
               const SizedBox(height: 14),
               DropdownButtonFormField<String>(
-                value: _selectedDepartment,
+                initialValue: _selectedDepartment,
                 dropdownColor: _card(isDark),
                 style: TextStyle(color: _textP(isDark), fontSize: 14),
                 icon: Icon(Iconsax.arrow_down_1, color: _textS(isDark), size: 16),
@@ -618,14 +608,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
             'View',
             isDark,
             accent,
-            onTap: () async {
-              final url = Uri.parse('https://makaut-scholar.vercel.app/#privacy');
-              if (await canLaunchUrl(url)) {
-                await launchUrl(url, mode: LaunchMode.externalApplication);
-              } else {
-                _showSnack('Could not launch the Privacy Policy');
-              }
-            },
+            onTap: () => Navigator.pushNamed(context, '/privacy'),
           ),
           const SizedBox(height: 6),
         ],

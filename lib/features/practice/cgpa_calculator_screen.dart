@@ -50,7 +50,7 @@ class _CgpaCalculatorScreenState extends State<CgpaCalculatorScreen> with Ticker
     if (credits != null && credits > 0 && creditPoints != null) {
       setState(() {
         _result = creditPoints / credits;
-        _percentage = (_result - 0.75) * 10;
+        _percentage = _result * 10;
         _hasCalculated = true;
       });
     }
@@ -70,7 +70,7 @@ class _CgpaCalculatorScreenState extends State<CgpaCalculatorScreen> with Ticker
     if (totalCredits > 0 && count == 2) {
       setState(() {
         _result = totalCreditIndex / totalCredits;
-        _percentage = (_result - 0.75) * 10;
+        _percentage = _result * 10;
         _hasCalculated = true;
       });
     }
@@ -84,7 +84,7 @@ class _CgpaCalculatorScreenState extends State<CgpaCalculatorScreen> with Ticker
     if (y1 != null && y2 != null && y3 != null && y4 != null) {
       setState(() {
         _result = (y1 + y2 + (1.5 * y3) + (1.5 * y4)) / 5;
-        _percentage = (_result - 0.75) * 10;
+        _percentage = _result * 10;
         _hasCalculated = true;
       });
     }
@@ -102,7 +102,7 @@ class _CgpaCalculatorScreenState extends State<CgpaCalculatorScreen> with Ticker
     if (totalCredits > 0) {
       setState(() {
         _result = totalCreditIndex / totalCredits;
-        _percentage = (_result - 0.75) * 10;
+        _percentage = _result * 10;
         _hasCalculated = true;
       });
     }
@@ -249,8 +249,8 @@ class _CgpaCalculatorScreenState extends State<CgpaCalculatorScreen> with Ticker
     String formula = "";
     switch (_mode) {
       case CalculationMode.semester: formula = "CREDIT POINTS / CREDITS"; break;
-      case CalculationMode.yearly: formula = "(CI_ODD + CI_EVEN) / (C_ODD + C_EVEN)"; break;
-      case CalculationMode.degree: formula = "(Y1 + Y2 + 1.5*Y3 + 1.5*Y4) / 5"; break;
+      case CalculationMode.yearly: formula = "(CP_ODD + CP_EVEN) / (C_ODD + C_EVEN)"; break;
+      case CalculationMode.degree: formula = "(YGPA1 + YGPA2 + 1.5*YGPA3 + 1.5*YGPA4) / 5"; break;
       case CalculationMode.cumulative: formula = "Σ(CREDIT POINTS) / Σ(CREDITS)"; break;
     }
 
@@ -327,7 +327,7 @@ class _CgpaCalculatorScreenState extends State<CgpaCalculatorScreen> with Ticker
           child: Column(
             children: [
               Text(
-                _mode == CalculationMode.degree ? "FINAL DEGREE GPA" : "CALCULATED INDEX",
+                "${_getModeLabel()} SCORE (GPA)",
                 style: const TextStyle(color: Colors.white60, fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 2),
               ),
               const SizedBox(height: 12),
@@ -400,7 +400,7 @@ class _CgpaCalculatorScreenState extends State<CgpaCalculatorScreen> with Ticker
             ),
           ),
           ModernInputField(
-            hint: isDegree ? "Yearly GPA (YGPA)" : "Total Credit Points", 
+            hint: isDegree ? "Yearly GPA (e.g., 8.50)" : "Total Credit Points", 
             onUpdate: (v) => _semesters[index].sgpa = double.tryParse(v),
             initialValue: _semesters[index].sgpa?.toString() ?? '',
             isDark: isDark,

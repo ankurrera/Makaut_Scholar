@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
-import 'dart:ui'; // For ImageFilter
 import 'dart:async';
 import '../../services/auth_service.dart';
 import '../notes/semester_screen.dart';
@@ -28,7 +27,6 @@ class _HomeScreenState extends State<HomeScreen>
 
   // Search State
   final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = '';
   String _selectedFilter = 'All';
   final List<String> _filters = [
     'All',
@@ -41,12 +39,10 @@ class _HomeScreenState extends State<HomeScreen>
   // ── LIGHT MODE PALETTE ──
   final Color _bgPrimary = const Color(0xFFF4F5F7);
   final Color _bgSecondary = const Color(0xFFFFFFFF);
-  final Color _bgTertiary = const Color(0xFFF0F1F5);
   final Color _borderSubtle = const Color(0xFFE6E8EC);
 
   final Color _primary500 = const Color(0xFF7C6FF6);
   final Color _primary400 = const Color(0xFF9B90FF);
-  final Color _primary300 = const Color(0xFFC5BFFF);
   final Color _primaryGradientStart = const Color(0xFF8E82FF);
   final Color _primaryGradientEnd = const Color(0xFFB7AEFF);
 
@@ -54,10 +50,10 @@ class _HomeScreenState extends State<HomeScreen>
   final Color _pinkSoft = const Color(0xFFF4C7D7);
   final Color _blueSoft = const Color(0xFFD9E6FF);
   final Color _purpleSoft = const Color(0xFFE8E4FF);
+  final Color _yellowSoft = const Color(0xFFFFF4D9);
 
   final Color _textPrimary = const Color(0xFF1E1E1E);
   final Color _textSecondary = const Color(0xFF8E8E93);
-  final Color _textTertiary = const Color(0xFFB4B6BD);
 
   // ── DARK MODE PALETTE (backgrounds only) ──
   final Color _bgPrimaryDark = const Color(0xFF0F1115);
@@ -66,11 +62,9 @@ class _HomeScreenState extends State<HomeScreen>
 
   final Color _primary500Dark = const Color(0xFF8E82FF);
   final Color _primary300Dark = const Color(0xFF6E63E6);
-  final Color _primaryGlowDark = const Color(0xFF7C6FF6);
 
   final Color _textPrimaryDark = const Color(0xFFF5F6FA);
   final Color _textSecondaryDark = const Color(0xFF9AA0A6);
-  final Color _textTertiaryDark = const Color(0xFF6C727F);
 
   // Animation delay
   static const int _baseDelay = 200;
@@ -174,12 +168,7 @@ class _HomeScreenState extends State<HomeScreen>
     }
   }
 
-  void _logout(BuildContext context) async {
-    await Provider.of<AuthService>(context, listen: false).signOut();
-    if (context.mounted) {
-      Navigator.pushReplacementNamed(context, '/login');
-    }
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -588,10 +577,10 @@ class _HomeScreenState extends State<HomeScreen>
           child: Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: isDark ? _bgSecondaryDark : _bgSecondary,
+              color: _blueSoft, // Matching PYQ Bank color
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
-                color: isDark ? _borderSubtleDark : _borderSubtle,
+                color: isDark ? _borderSubtleDark.withValues(alpha: 0.5) : _borderSubtle,
               ),
             ),
             child: Row(
@@ -599,12 +588,12 @@ class _HomeScreenState extends State<HomeScreen>
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: (isDark ? _primary500Dark : _primary500).withValues(alpha: 0.1),
+                    color: Colors.white.withValues(alpha: 0.65),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Icon(
                     Iconsax.calculator,
-                    color: isDark ? _primary500Dark : _primary500,
+                    color: _textPrimary,
                     size: 24,
                   ),
                 ),
@@ -618,14 +607,14 @@ class _HomeScreenState extends State<HomeScreen>
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: isDark ? _textPrimaryDark : _textPrimary,
+                          color: _textPrimary,
                         ),
                       ),
                       Text(
                         "Calculate SGPA, CGPA & Percentage",
                         style: TextStyle(
                           fontSize: 13,
-                          color: isDark ? _textSecondaryDark : _textSecondary,
+                          color: _textSecondary,
                         ),
                       ),
                     ],
@@ -634,7 +623,7 @@ class _HomeScreenState extends State<HomeScreen>
                 Icon(
                   Iconsax.arrow_right_3,
                   size: 18,
-                  color: (isDark ? _primary500Dark : _primary500).withValues(alpha: 0.5),
+                  color: _primary500.withValues(alpha: 0.5),
                 ),
               ],
             ),

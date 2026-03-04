@@ -18,23 +18,36 @@ class QuizScreen extends StatefulWidget {
 
 class _QuizScreenState extends State<QuizScreen> {
   int _currentIndex = 0;
-  int _score = 0;
-  int? _selectedAnswerIndex;
-  bool _isAnswered = false;
-  late Timer _timer;
-  int _remainingTime = 30; // 30 seconds per question
+  late List<int?> _selectedAnswers;
+  late List<int> _remainingTimes; // Track time per question
+  late List<QuizQuestion> _shuffledQuestions;
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
+    _shuffledQuestions = widget.questions.map((q) {
+      final List<String> options = List.from(q.options);
+      final String correctOption = options[q.correctIndex];
+      options.shuffle();
+      return QuizQuestion(
+        text: q.text,
+        options: options,
+        correctIndex: options.indexOf(correctOption),
+      );
+    }).toList();
+    _selectedAnswers = List.filled(_shuffledQuestions.length, null);
+    _remainingTimes = List.filled(_shuffledQuestions.length, 30);
     _startTimer();
   }
 
   void _startTimer() {
-    _remainingTime = 30;
+    _timer?.cancel();
+    if (_selectedAnswers[_currentIndex] != null) return;
+
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_remainingTime > 0) {
-        setState(() => _remainingTime--);
+      if (_remainingTimes[_currentIndex] > 0) {
+        setState(() => _remainingTimes[_currentIndex]--);
       } else {
         _submitAnswer(-1); // Time's up
       }
@@ -42,24 +55,18 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   void _submitAnswer(int index) {
-    if (_isAnswered) return;
-    _timer.cancel();
+    if (_selectedAnswers[_currentIndex] != null) return;
+    _timer?.cancel();
 
     setState(() {
-      _selectedAnswerIndex = index;
-      _isAnswered = true;
-      if (index == widget.questions[_currentIndex].correctIndex) {
-        _score++;
-      }
+      _selectedAnswers[_currentIndex] = index;
     });
   }
 
   void _nextQuestion() {
-    if (_currentIndex < widget.questions.length - 1) {
+    if (_currentIndex < _shuffledQuestions.length - 1) {
       setState(() {
         _currentIndex++;
-        _selectedAnswerIndex = null;
-        _isAnswered = false;
       });
       _startTimer();
     } else {
@@ -67,7 +74,48 @@ class _QuizScreenState extends State<QuizScreen> {
     }
   }
 
+  void _prevQuestion() {
+    if (_currentIndex > 0) {
+      setState(() {
+        _currentIndex--;
+      });
+      _startTimer();
+    }
+  }
+
   void _showResults() {
+    int totalScore = 0;
+    for (int i = 0; i < _shuffledQuestions.length; i++) {
+      if (_selectedAnswers[i] == _shuffledQuestions[i].correctIndex) {
+        totalScore++;
+      }
+    }
+
+    final double percentage = (totalScore / _shuffledQuestions.length) * 100;
+    
+    // Achievement Badge Logic
+    IconData badgeIcon;
+    Color badgeColor;
+    String badgeTitle;
+    String feedback;
+
+    if (percentage >= 90) {
+      badgeIcon = Iconsax.crown;
+      badgeColor = Colors.amber;
+      badgeTitle = 'Grand Scholar';
+      feedback = 'Outstanding! You have mastered this subject.';
+    } else if (percentage >= 60) {
+      badgeIcon = Iconsax.award;
+      badgeColor = Colors.blueGrey;
+      badgeTitle = 'Ace Researcher';
+      feedback = 'Great job! You have a solid understanding.';
+    } else {
+      badgeIcon = Iconsax.book;
+      badgeColor = Colors.brown;
+      badgeTitle = 'Rising Learner';
+      feedback = 'Keep grinding! Consistency is the key to mastery.';
+    }
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -76,32 +124,57 @@ class _QuizScreenState extends State<QuizScreen> {
           ? const Color(0xFF171A21) 
           : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Text('Quiz Completed!', textAlign: TextAlign.center),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Iconsax.award, color: Colors.amber, size: 64),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: badgeColor.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(badgeIcon, color: badgeColor, size: 64),
+            ),
             const SizedBox(height: 16),
             Text(
-              'Your Score: $_score / ${widget.questions.length}',
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              badgeTitle,
+              style: TextStyle(
+                fontSize: 24, 
+                fontWeight: FontWeight.bold,
+                color: badgeColor,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
-              _score >= widget.questions.length / 2 
-                ? 'Great job, Scholar!' 
-                : 'Keep practicing!',
-              style: const TextStyle(color: Colors.grey),
+              'Your Score: $totalScore / ${_shuffledQuestions.length}',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
             ),
+            const SizedBox(height: 12),
+            Text(
+              feedback,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.grey, height: 1.4),
+            ),
+            const SizedBox(height: 24),
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context); // Close dialog
-              Navigator.pop(context); // Exit quiz
-            },
-            child: const Text('Return to Practice'),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context); // Close dialog
+                Navigator.pop(context); // Exit quiz
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: badgeColor,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+              child: const Text('Return to Practice', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
           ),
         ],
       ),
@@ -110,7 +183,7 @@ class _QuizScreenState extends State<QuizScreen> {
 
   @override
   void dispose() {
-    _timer.cancel();
+    _timer?.cancel();
     super.dispose();
   }
 
@@ -118,7 +191,8 @@ class _QuizScreenState extends State<QuizScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = isDark ? const Color(0xFF8E82FF) : const Color(0xFF7C6FF6);
-    final currentQuestion = widget.questions[_currentIndex];
+    final currentQuestion = _shuffledQuestions[_currentIndex];
+    final isAnswered = _selectedAnswers[_currentIndex] != null;
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF0F1115) : const Color(0xFFF4F5F7),
@@ -138,9 +212,9 @@ class _QuizScreenState extends State<QuizScreen> {
             child: Padding(
               padding: const EdgeInsets.only(right: 20),
               child: Text(
-                '$_remainingTime s',
+                '${_remainingTimes[_currentIndex]} s',
                 style: TextStyle(
-                  color: _remainingTime < 10 ? Colors.red : primaryColor,
+                  color: _remainingTimes[_currentIndex] < 10 ? Colors.red : primaryColor,
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                 ),
@@ -149,71 +223,105 @@ class _QuizScreenState extends State<QuizScreen> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Progress
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: LinearProgressIndicator(
-                value: (_currentIndex + 1) / widget.questions.length,
-                backgroundColor: primaryColor.withValues(alpha: 0.1),
-                valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
-                minHeight: 8,
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Progress
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: LinearProgressIndicator(
+                      value: (_currentIndex + 1) / _shuffledQuestions.length,
+                      backgroundColor: primaryColor.withValues(alpha: 0.1),
+                      valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+                      minHeight: 8,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  Text(
+                    'Question ${_currentIndex + 1} of ${_shuffledQuestions.length}',
+                    style: TextStyle(color: isDark ? Colors.white70 : Colors.grey, fontSize: 14),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    currentQuestion.text,
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : Colors.black,
+                      height: 1.3,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  ...List.generate(currentQuestion.options.length, (index) {
+                    return _buildOption(index, isDark, primaryColor);
+                  }),
+                ],
               ),
             ),
-            const SizedBox(height: 32),
-            Text(
-              'Question ${_currentIndex + 1} of ${widget.questions.length}',
-              style: TextStyle(color: isDark ? Colors.white70 : Colors.grey, fontSize: 14),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              currentQuestion.text,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : Colors.black,
-                height: 1.3,
-              ),
-            ),
-            const SizedBox(height: 32),
-            ...List.generate(currentQuestion.options.length, (index) {
-              return _buildOption(index, isDark, primaryColor);
-            }),
-            const Spacer(),
-            if (_isAnswered)
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: _nextQuestion,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryColor,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  ),
-                  child: Text(
-                    _currentIndex == widget.questions.length - 1 ? 'Finish Quiz' : 'Next Question',
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                  ),
+          ),
+          _buildNavigation(isDark, primaryColor),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavigation(bool isDark, Color primaryColor) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF171A21) : Colors.white,
+        border: Border(top: BorderSide(color: isDark ? const Color(0xFF2A2F3A) : const Color(0xFFE6E8EC))),
+      ),
+      child: Row(
+        children: [
+          if (_currentIndex > 0)
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: _prevQuestion,
+                icon: const Icon(Iconsax.arrow_left_2),
+                label: const Text('Previous'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: primaryColor,
+                  side: BorderSide(color: primaryColor),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
               ),
-          ],
-        ),
+            ),
+          if (_currentIndex > 0) const SizedBox(width: 16),
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: _nextQuestion,
+              icon: Icon(_currentIndex == _shuffledQuestions.length - 1 ? Iconsax.tick_circle : Iconsax.arrow_right_3),
+              label: Text(_currentIndex == _shuffledQuestions.length - 1 ? 'Finish' : 'Next'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryColor,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildOption(int index, bool isDark, Color primaryColor) {
-    final isSelected = _selectedAnswerIndex == index;
-    final isCorrect = index == widget.questions[_currentIndex].correctIndex;
+    final selectedAnswer = _selectedAnswers[_currentIndex];
+    final isSelected = selectedAnswer == index;
+    final isCorrect = index == _shuffledQuestions[_currentIndex].correctIndex;
+    final isAnswered = selectedAnswer != null;
     
     Color borderColor = isDark ? const Color(0xFF2A2F3A) : const Color(0xFFE6E8EC);
     Color? bgColor = isDark ? const Color(0xFF171A21) : Colors.white;
 
-    if (_isAnswered) {
+    if (isAnswered) {
       if (isCorrect) {
         borderColor = Colors.green;
         bgColor = Colors.green.withValues(alpha: 0.1);
@@ -241,7 +349,7 @@ class _QuizScreenState extends State<QuizScreen> {
             children: [
               Expanded(
                 child: Text(
-                  widget.questions[_currentIndex].options[index],
+                  _shuffledQuestions[_currentIndex].options[index],
                   style: TextStyle(
                     fontSize: 16,
                     color: isDark ? Colors.white : Colors.black,
@@ -249,9 +357,9 @@ class _QuizScreenState extends State<QuizScreen> {
                   ),
                 ),
               ),
-              if (_isAnswered && isCorrect)
+              if (isAnswered && isCorrect)
                 const Icon(Icons.check_circle, color: Colors.green)
-              else if (_isAnswered && isSelected && !isCorrect)
+              else if (isAnswered && isSelected && !isCorrect)
                 const Icon(Icons.cancel, color: Colors.red),
             ],
           ),

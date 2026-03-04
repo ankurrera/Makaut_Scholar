@@ -52,7 +52,8 @@ class AuthService extends ChangeNotifier {
       final response = await _client.auth.signUp(
         email: email,
         password: password,
-        data: {'name': name}, // Store name in user metadata as well
+        data: {'name': name},
+        emailRedirectTo: 'https://nikvdsulxvinkvxstxol.supabase.co/functions/v1/email-confirmed',
       );
 
       final user = response.user;
@@ -403,12 +404,77 @@ class AuthService extends ChangeNotifier {
     return List<Map<String, dynamic>>.from(data);
   }
 
+  /// Fetches distinct semesters that have subjects defined for a department
+  Future<List<int>> fetchMockTestSemesters(String department) async {
+    final data = await _client
+        .from('subjects_bundle')
+        .select('semester')
+        .eq('department', department);
+    final sems = (data as List)
+        .map((row) => row['semester'] as int)
+        .toSet()
+        .toList()
+      ..sort();
+    return sems;
+  }
+
+  /// Fetches all subjects for a department + semester from the master bundle
+  Future<List<String>> fetchMockTestSubjects(String department, int semester) async {
+    final data = await _client
+        .from('subjects_bundle')
+        .select('subject')
+        .eq('department', department)
+        .eq('semester', semester);
+    
+    final subjects = (data as List)
+        .map((row) => row['subject'] as String)
+        .where((s) {
+          final low = s.toLowerCase();
+          return !low.contains('laboratory') && !RegExp(r'\blab\b').hasMatch(low);
+        })
+        .toSet()
+        .toList()
+      ..sort();
+    return subjects;
+  }
+
+  /// Fetches unique question counts for all subjects in a department + semester
+  Future<Map<String, int>> fetchSubjectMockTestCounts(String department, int semester) async {
+    final data = await _client
+        .from('mock_test_questions')
+        .select('subject')
+        .eq('department', department)
+        .eq('semester', semester);
+    
+    final counts = <String, int>{};
+    for (var row in (data as List)) {
+      final sub = row['subject'] as String;
+      counts[sub] = (counts[sub] ?? 0) + 1;
+    }
+    return counts;
+  }
+
+  /// Fetches mock test questions for a subject (Randomly picks max 20)
+  Future<List<Map<String, dynamic>>> fetchMockTestQuestions(
+      String department, int semester, String subject) async {
+    final data = await _client
+        .from('mock_test_questions')
+        .select()
+        .eq('department', department)
+        .eq('semester', semester)
+        .eq('subject', subject);
+    
+    final List<Map<String, dynamic>> questions = List<Map<String, dynamic>>.from(data);
+    questions.shuffle(); // Randomize the list
+    return questions.take(20).toList(); // Return only first 20
+  }
+
   /// Updates the user's profile with additional details
   Future<void> updateProfile({
     required String name,
-    required String phoneNumber,
     required String collegeName,
     required String department,
+    String? avatarUrl,
   }) async {
     final user = _client.auth.currentUser;
     if (user == null) throw Exception('Not logged in');
@@ -416,9 +482,9 @@ class AuthService extends ChangeNotifier {
     await _client.from('profiles').upsert({
       'id': user.id,
       'name': name,
-      'phone_number': phoneNumber,
       'college_name': collegeName,
       'department': department,
+      if (avatarUrl != null) 'avatar_url': avatarUrl,
       'updated_at': DateTime.now().toIso8601String(),
     });
     notifyListeners();

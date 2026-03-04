@@ -7,7 +7,13 @@ class SupabaseClientService {
   static Future<void> init() async {
     final url = dotenv.env['SUPABASE_URL']!;
     final anonKey = dotenv.env['SUPABASE_ANON_KEY']!;
-    await Supabase.initialize(url: url, anonKey: anonKey);
+    await Supabase.initialize(
+      url: url,
+      anonKey: anonKey,
+      authOptions: const FlutterAuthClientOptions(
+        authFlowType: AuthFlowType.pkce,
+      ),
+    );
     client = Supabase.instance.client;
   }
 }

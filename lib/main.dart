@@ -12,6 +12,7 @@ import 'features/profile/create_profile_screen.dart';
 import 'features/profile/profile_screen.dart';
 import 'features/navigation/main_nav_shell.dart';
 import 'features/splash/splash_screen.dart';
+import 'features/legal/privacy_policy_screen.dart';
 import 'services/monetization_service.dart';
 import 'domain/repositories/billing_repository.dart';
 import 'data/repositories/billing_repository_impl.dart';
@@ -187,6 +188,7 @@ class MakautScholarApp extends StatelessWidget {
         '/home': (context) => const MainNavShell(),
         '/create_profile': (context) => const CreateProfileScreen(),
         '/profile': (context) => const ProfileScreen(),
+        '/privacy': (context) => const PrivacyPolicyScreen(),
       },
     );
   }

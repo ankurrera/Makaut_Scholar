@@ -32,9 +32,17 @@ class _SplashScreenState extends State<SplashScreen> {
 
     await minDelay;
     
+    // Re-check session after delay in case deep link arrived during splash
+    final currentSession = authService.currentSession;
+    
     if (!mounted) return;
 
-    if (sessionCheck != null) {
+    if (currentSession != null) {
+      if (profile == null) {
+        // Fetch profile again if we just got a session
+        try { profile = await authService.getProfile(); } catch (_) {}
+      }
+      
       if (profile != null && profile['college_name'] != null && profile['college_name'].toString().isNotEmpty) {
         Navigator.pushReplacementNamed(context, '/home');
       } else {

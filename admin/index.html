@@ -651,6 +651,10 @@
                 <i class="fa-solid fa-bullseye"></i>
                 <span>Exam Focus</span>
             </div>
+            <div class="nav-item" onclick="switchTab('practice', this)">
+                <i class="fa-solid fa-vial"></i>
+                <span>Practice (Mock Tests)</span>
+            </div>
             <div class="nav-item" onclick="switchTab('monetization', this)">
                 <i class="fa-solid fa-coins"></i>
                 <span>Monetization & Pricing</span>
@@ -1213,6 +1217,122 @@
                 </div>
             </div>
         </section>
+
+        <!-- PRACTICE TAB -->
+        <section id="practiceTab" class="tab-content">
+            <div class="page-header">
+                <div class="page-title">
+                    <h1>Practice (Mock Tests)</h1>
+                    <p>Create and manage MCQ quizzes for subjects.</p>
+                </div>
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" placeholder="Search questions..." onkeyup="filterList('mockList', this.value)">
+                </div>
+            </div>
+
+            <div class="glass">
+                <h2><i class="fa-solid fa-plus-circle" style="color: var(--accent);"></i> New MCQ</h2>
+                <div class="form-grid">
+                    <div class="field">
+                        <label>Department</label>
+                        <select id="mockDept" onchange="loadSubjects('mockDept', 'mockSem', 'mockSubject')">
+                            <option value="">Select Dept</option>
+                            <option>CSE</option>
+                            <option>ECE</option>
+                            <option>ME</option>
+                            <option>CE</option>
+                            <option>EE</option>
+                            <option>IT</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Semester</label>
+                        <select id="mockSem" onchange="loadSubjects('mockDept', 'mockSem', 'mockSubject')">
+                            <option value="">Select Sem</option>
+                            <option value="1">Sem 1</option>
+                            <option value="2">Sem 2</option>
+                            <option value="3">Sem 3</option>
+                            <option value="4">Sem 4</option>
+                            <option value="5">Sem 5</option>
+                            <option value="6">Sem 6</option>
+                            <option value="7">Sem 7</option>
+                            <option value="8">Sem 8</option>
+                        </select>
+                    </div>
+                    <div class="field full-width">
+                        <label>Subject</label>
+                        <select id="mockSubject">
+                            <option value="">Select Dept &amp; Sem</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Paper Code</label>
+                        <input type="text" id="mockPaperCode" placeholder="e.g. CS501">
+                    </div>
+                    <div class="field full-width">
+                        <label>Question Text</label>
+                        <textarea id="mockQuestion" rows="3" placeholder="Enter the MCQ question..."></textarea>
+                    </div>
+                    <div class="field full-width">
+                        <label>Smart Options (Type with commas then press Enter)</label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="mockSmartOptions"
+                                placeholder="Option A, Option B, Option C, Option D" style="flex: 1;"
+                                onkeyup="if(event.key==='Enter') distributeOptions()">
+                            <button class="btn" style="padding: 10px 16px;" onclick="distributeOptions()">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>Option 1</label>
+                        <input type="text" id="mockOp1" placeholder="First option">
+                    </div>
+                    <div class="field">
+                        <label>Option 2</label>
+                        <input type="text" id="mockOp2" placeholder="Second option">
+                    </div>
+                    <div class="field">
+                        <label>Option 3</label>
+                        <input type="text" id="mockOp3" placeholder="Third option">
+                    </div>
+                    <div class="field">
+                        <label>Option 4</label>
+                        <input type="text" id="mockOp4" placeholder="Fourth option">
+                    </div>
+                    <div class="field">
+                        <label>Correct Option</label>
+                        <select id="mockCorrect">
+                            <option value="0">Option 1</option>
+                            <option value="1">Option 2</option>
+                            <option value="2">Option 3</option>
+                            <option value="3">Option 4</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Explanation (Optional)</label>
+                        <input type="text" id="mockExplanation" placeholder="Brief hint or explanation">
+                    </div>
+                    <div class="full-width" style="text-align: right;">
+                        <button class="btn" id="mockUploadBtn" onclick="uploadMockTest()">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Add Question</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass">
+                <div class="table-header">
+                    <h2>Mock Test Questions</h2>
+                    <div class="badge" id="mockCount">0 Items</div>
+                </div>
+                <div id="mockList">
+                    <!-- Dynamic Items -->
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- ── EDIT MODAL ── -->
@@ -1313,7 +1433,7 @@
             document.getElementById(tab + 'Tab').classList.add('active');
         }
 
-        function loadAll() { loadNotes(); loadSyllabus(); loadPYQ(); loadIMP(); loadThreshold(); loadPricingTiers(); }
+        function loadAll() { loadNotes(); loadSyllabus(); loadPYQ(); loadIMP(); loadMockTests(); loadThreshold(); loadPricingTiers(); }
 
         // ══════════════════════════════════════════
         //  UI HELPERS
@@ -1407,6 +1527,7 @@
                         'sylSubject': 'sylPaperCode',
                         'pyqSubject': 'pyqPaperCode',
                         'impSubject': 'impPaperCode',
+                        'mockSubject': 'mockPaperCode',
                         'priceSubject': 'priceAmount'
                     };
 
@@ -1803,6 +1924,137 @@
                 const { data } = await sb.from('app_settings').select('setting_value').eq('setting_key', 'preview_interactions_threshold').single();
                 if (data) document.getElementById('nudgeThreshold').value = data.setting_value;
             } catch (e) { console.log(e); }
+        }
+
+        // ══════════════════════════════════════════
+        //  PRACTICE (MOCK TESTS)
+        // ══════════════════════════════════════════
+        async function loadMockTests() {
+            const { data, error } = await sb.from('mock_test_questions').select('*').order('created_at', { ascending: false });
+            if (error) return console.error(error);
+            const list = document.getElementById('mockList');
+            document.getElementById('mockCount').textContent = `${data.length} Items`;
+            list.innerHTML = data.map(q => `
+                <div class="item-row">
+                    <div class="item-main">
+                        <div class="item-name">${esc(q.question_text)}</div>
+                        <div class="item-sub">${esc(q.department)} · Sem ${q.semester} · ${esc(q.subject)} <b>(${esc(q.paper_code)})</b></div>
+                    </div>
+                    <div class="badge">${q.options.length} Options</div>
+                    <div class="badge" style="color:var(--green);">Index ${q.correct_index}</div>
+                    <div class="actions">
+                        <button class="icon-btn delete" onclick="deleteMockQuestion('${q.id}')"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function uploadMockTest() {
+            const btn = document.getElementById('mockUploadBtn');
+            const dept = document.getElementById('mockDept').value;
+            const sem = parseInt(document.getElementById('mockSem').value);
+            const sub = document.getElementById('mockSubject').value;
+            const code = document.getElementById('mockPaperCode').value;
+            const question = document.getElementById('mockQuestion').value;
+            const op1 = document.getElementById('mockOp1').value;
+            const op2 = document.getElementById('mockOp2').value;
+            const op3 = document.getElementById('mockOp3').value;
+            const op4 = document.getElementById('mockOp4').value;
+            const correct = parseInt(document.getElementById('mockCorrect').value);
+            const explanation = document.getElementById('mockExplanation').value;
+
+            if (!dept || !sem || !sub || !question || !op1 || !op2 || !op3 || !op4) {
+                return showToast('Please fill all required fields', 'error');
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Adding...';
+
+            try {
+                // 1. Prepare base meta
+                const baseMeta = {
+                    department: dept,
+                    semester: sem,
+                    subject: sub,
+                    paper_code: code,
+                    question_text: question,
+                    options: [op1, op2, op3, op4],
+                    correct_index: correct,
+                    explanation: explanation || null
+                };
+
+                // 2. Find sibling departments if paper_code exists (Multiplexing)
+                let targets = [baseMeta];
+                if (code && code.trim()) {
+                    const { data: siblings } = await sb.from('subjects_bundle')
+                        .select('department, semester, subject')
+                        .eq('paper_code', code.trim());
+
+                    if (siblings && siblings.length > 0) {
+                        const seen = new Set([`${dept}|${sem}|${sub}`]);
+                        siblings.forEach(s => {
+                            const key = `${s.department}|${s.semester}|${s.subject}`;
+                            if (!seen.has(key)) {
+                                seen.add(key);
+                                targets.push({
+                                    ...baseMeta,
+                                    department: s.department,
+                                    semester: s.semester,
+                                    subject: s.subject
+                                });
+                            }
+                        });
+                    }
+                }
+
+                // 3. Batch insert
+                const { error } = await sb.from('mock_test_questions').insert(targets);
+                if (error) throw error;
+
+                showToast(`Question synced across ${targets.length} subject entries`);
+                loadMockTests();
+
+                // Clear fields
+                document.getElementById('mockQuestion').value = '';
+                document.getElementById('mockOp1').value = '';
+                document.getElementById('mockOp2').value = '';
+                document.getElementById('mockOp3').value = '';
+                document.getElementById('mockOp4').value = '';
+                document.getElementById('mockExplanation').value = '';
+                document.getElementById('mockPaperCode').value = '';
+            } catch (e) { showToast(e.message, 'error'); }
+            finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-plus"></i><span>Add Question</span>';
+            }
+        }
+
+        async function deleteMockQuestion(id) {
+            if (!confirm('Permanent delete this question?')) return;
+            try {
+                const { error } = await sb.from('mock_test_questions').delete().eq('id', id);
+                if (error) throw error;
+                showToast('Question deleted');
+                loadMockTests();
+            } catch (e) { showToast(e.message, 'error'); }
+        }
+
+        function distributeOptions() {
+            const val = document.getElementById('mockSmartOptions').value;
+            if (!val) return;
+            const parts = val.split(',').map(p => p.trim()).filter(p => p !== '');
+            if (parts.length >= 1) document.getElementById('mockOp1').value = parts[0] || '';
+            if (parts.length >= 2) document.getElementById('mockOp2').value = parts[1] || '';
+            if (parts.length >= 3) document.getElementById('mockOp3').value = parts[2] || '';
+            if (parts.length >= 4) document.getElementById('mockOp4').value = parts[3] || '';
+
+            if (parts.length >= 4) {
+                showToast('Options distributed!');
+                document.getElementById('mockSmartOptions').value = '';
+                document.getElementById('mockCorrect').focus();
+            } else if (parts.length > 0) {
+                showToast(`Distributed ${parts.length} options. Need 4.`, 'warning');
+            }
         }
 
         async function deleteItem(table, bucket, id, url) {

@@ -1,10 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:provider/provider.dart';
 import 'cgpa_calculator_screen.dart';
 import 'quiz_screen.dart';
+import 'mock_test_semester_screen.dart';
+import '../../services/auth_service.dart';
 
-class PracticeScreen extends StatelessWidget {
+class PracticeScreen extends StatefulWidget {
   const PracticeScreen({super.key});
+
+  @override
+  State<PracticeScreen> createState() => _PracticeScreenState();
+}
+
+class _PracticeScreenState extends State<PracticeScreen> {
+  String? _userDepartment;
+  bool _isLoadingDept = false;
+
+  Future<void> _handleMockTestTap() async {
+    final auth = Provider.of<AuthService>(context, listen: false);
+    
+    setState(() => _isLoadingDept = true);
+    try {
+      final profile = await auth.getProfile();
+      final dept = profile?['department'] as String?;
+      
+      if (!mounted) return;
+      setState(() => _isLoadingDept = false);
+
+      if (dept == null || dept.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please set your department in Profile first to access Mock Tests.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => MockTestSemesterScreen(department: dept),
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoadingDept = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,84 +65,62 @@ class PracticeScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: bgPrimary,
-      body: SafeArea(
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Practice',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: textPrimary,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                    Text(
-                      'Sharpen your skills & calculate results',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  _PracticeCard(
-                    title: 'Mock Tests',
-                    subtitle: 'Test your knowledge with subject-specific quizzes based on PYQs.',
-                    icon: Iconsax.task_square,
-                    color: const Color(0xFF8E82FF),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => QuizScreen(
-                            title: 'Sample Mock Test',
-                            questions: [
-                              QuizQuestion(
-                                text: 'What is the full form of MAKAUT?',
-                                options: [
-                                  'Maulana Abul Kalam Azad University of Technology',
-                                  'Maharashtra University of Technology',
-                                  'Madras University of Technology',
-                                  'None of the above'
-                                ],
-                                correctIndex: 0,
-                              ),
-                              QuizQuestion(
-                                text: 'Which of the following is a core subject in Computer Science?',
-                                options: [
-                                  'Civil Engineering',
-                                  'Data Structures',
-                                  'Botany',
-                                  'Zoology'
-                                ],
-                                correctIndex: 1,
-                              ),
-                            ],
+      body: Stack(
+        children: [
+          SafeArea(
+            child: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Practice',
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: textPrimary,
+                            letterSpacing: -0.5,
                           ),
                         ),
-                      );
-                    },
-                    isDark: isDark,
+                        Text(
+                          'Sharpen your skills & calculate results',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ]),
-              ),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate([
+                      _PracticeCard(
+                        title: 'Mock Tests',
+                        subtitle: 'Test your knowledge with department-wise quizzes based on your semester.',
+                        icon: Iconsax.task_square,
+                        color: const Color(0xFF8E82FF),
+                        onTap: _handleMockTestTap,
+                        isDark: isDark,
+                      ),
+                    ]),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          if (_isLoadingDept)
+            Container(
+              color: Colors.black.withValues(alpha: 0.3),
+              child: const Center(child: CircularProgressIndicator(color: Color(0xFF8E82FF))),
+            ),
+        ],
       ),
     );
   }

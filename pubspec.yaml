@@ -25,6 +25,8 @@ dependencies:
   in_app_purchase_android: ^0.4.0+8
   font_awesome_flutter: ^10.7.0
   razorpay_flutter: ^1.4.1
+  http: ^1.2.1
+  url_launcher: ^6.3.0
 
 dev_dependencies:
   flutter_test:
@@ -41,6 +43,7 @@ flutter:
     - .env
     - assets/logo.png
     - assets/scholarx_logo.png
+    - assets/google_logo.png
 
 flutter_launcher_icons:
   android: true
