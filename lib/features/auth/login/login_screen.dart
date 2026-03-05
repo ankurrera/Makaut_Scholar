@@ -118,12 +118,24 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
   String _friendlyError(String raw) {
     final lower = raw.toLowerCase();
+    
+    // Specifically handle the "Instance of 'NotInitializedError'" or related strings
+    if (lower.contains('notinitializederror') || lower.contains('not been initialized')) {
+      return 'Supabase is still initializing. Please check your internet and try again in a few seconds.';
+    }
+    
+    if (lower.contains('supabase') && lower.contains('initialization')) {
+      return 'Supabase is still starting up. Please try again in a moment.';
+    }
+    
     if (lower.contains('invalid') || lower.contains('credentials') || lower.contains('password')) {
       return 'Incorrect email or password.';
     }
+    
     if (lower.contains('timed out') || lower.contains('socket') || lower.contains('network')) {
-      return 'Network error. Check your connection.';
+      return 'Network error. Check your connection or retry.';
     }
+    
     return raw.replaceAll('Exception:', '').trim();
   }
 

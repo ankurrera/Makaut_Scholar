@@ -5,11 +5,12 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/repositories/billing_repository.dart';
+import '../../core/supabase_client.dart';
 
 class BillingRepositoryImpl implements BillingRepository {
   final InAppPurchase _iap = InAppPurchase.instance;
   late Razorpay _razorpay;
-  final _supabase = Supabase.instance.client;
+  SupabaseClient get _supabase => SupabaseClientService.client;
   
   // To keep track of the current alternative billing token if provided by Google
   String? _pendingExternalToken;
@@ -18,13 +19,20 @@ class BillingRepositoryImpl implements BillingRepository {
   // Manual stream for alternative billing success notifications
   final StreamController<Map<String, dynamic>> _alternativePurchaseController = StreamController<Map<String, dynamic>>.broadcast();
 
+  Future<void> _ensureInitialized() async {
+    if (!SupabaseClientService.isInitialized) {
+      await SupabaseClientService.init();
+    }
+  }
+
   BillingRepositoryImpl() {
     _razorpay = Razorpay();
     _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handleRazorpaySuccess);
     _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handleRazorpayError);
     _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
     
-    _initializeUserChoiceBilling();
+    // Defer Google Play init to avoid blocking the first few frames
+    Future.microtask(() => _initializeUserChoiceBilling());
   }
 
   @override
@@ -78,6 +86,7 @@ class BillingRepositoryImpl implements BillingRepository {
 
   Future<void> _reportGooglePlayPurchase(PurchaseDetails purchase) async {
     try {
+      await _ensureInitialized();
       await _supabase.functions.invoke(
         'report-play-billing-transaction',
         body: {
@@ -99,6 +108,7 @@ class BillingRepositoryImpl implements BillingRepository {
     required double amount,
     required String gateway,
   }) async {
+    await _ensureInitialized();
     final response = await _supabase.functions.invoke(
       'create-razorpay-order',
       body: {
@@ -132,8 +142,8 @@ class BillingRepositoryImpl implements BillingRepository {
         'order_id': razorpayOrderId,
         'description': 'Premium Purchase',
         'prefill': {
-          'contact': _supabase.auth.currentUser?.phone ?? '',
-          'email': _supabase.auth.currentUser?.email ?? ''
+          'contact': SupabaseClientService.isInitialized ? _supabase.auth.currentUser?.phone ?? '' : '',
+          'email': SupabaseClientService.isInitialized ? _supabase.auth.currentUser?.email ?? '' : ''
         },
         'external': {
           'wallets': ['paytm']
@@ -151,6 +161,7 @@ class BillingRepositoryImpl implements BillingRepository {
 
     // ── Path 1: Call edge function (updates order to 'completed' → DB trigger fires) ──
     try {
+      await _ensureInitialized();
       await _supabase.functions.invoke(
         'report-play-billing-transaction',
         body: {
@@ -168,7 +179,7 @@ class BillingRepositoryImpl implements BillingRepository {
     // This covers the case where the edge function fails silently.
     // Look up the order from Supabase to get item_id / item_type, then write directly.
     try {
-      if (orderId != null) {
+      if (orderId != null && SupabaseClientService.isInitialized) {
         final order = await _supabase
             .from('orders')
             .select('item_id, item_type, user_id')

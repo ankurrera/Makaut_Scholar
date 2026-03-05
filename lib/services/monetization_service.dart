@@ -1,15 +1,22 @@
 import 'package:flutter/foundation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/supabase_client.dart';
 
 class MonetizationService extends ChangeNotifier {
-  final _client = SupabaseClientService.client;
+  SupabaseClient get _client => SupabaseClientService.client;
   int _previewInteractions = 0;
   int _nudgeThreshold = 3;
 
   MonetizationService() {
     _initInteractions();
     _fetchSettings();
+  }
+
+  Future<void> _ensureInitialized() async {
+    if (!SupabaseClientService.isInitialized) {
+      await SupabaseClientService.init();
+    }
   }
 
   Future<void> _initInteractions() async {
@@ -19,6 +26,8 @@ class MonetizationService extends ChangeNotifier {
 
   Future<void> _fetchSettings() async {
     try {
+      await _ensureInitialized();
+      if (!SupabaseClientService.isInitialized) return;
       final response = await _client
           .from('app_settings')
           .select('setting_value')
@@ -29,7 +38,7 @@ class MonetizationService extends ChangeNotifier {
         _nudgeThreshold = int.tryParse(response['setting_value'].toString()) ?? 3;
       }
     } catch (e) {
-      if (kDebugMode) print('Failed to fetch threshold: $e');
+      debugPrint('Failed to fetch threshold: $e');
     }
   }
 
@@ -52,6 +61,9 @@ class MonetizationService extends ChangeNotifier {
   /// Returns { 'subject_price': double, 'bundle_price': double?, 'purchased_subjects_count': int }
   Future<Map<String, dynamic>> getPricingDetails(String department, int semester, String subject) async {
     try {
+      await _ensureInitialized();
+      if (!SupabaseClientService.isInitialized) return {'subject_price': 0.0};
+      
       // 1. Get Subject Price and Bundle ID
       final targetSub = await _client
           .from('subjects_bundle')
@@ -140,10 +152,11 @@ class MonetizationService extends ChangeNotifier {
   /// Checks if the user has access to a specific unit
   /// Checks in order: unit purchase → subject purchase → bundle purchase
   Future<bool> checkUnitAccess(String department, int semester, String subject, int unit) async {
-    final user = _client.auth.currentUser;
-    if (user == null) return false;
-
     try {
+      await _ensureInitialized();
+      final user = _client.auth.currentUser;
+      if (user == null) return false;
+
       // 1. Check unit-level purchase
       final unitId = 'unit_${department}_${semester}_${subject}_$unit';
       final unitRows = await _client
@@ -165,10 +178,11 @@ class MonetizationService extends ChangeNotifier {
 
   /// Checks if the user has full subject access (subject or semester bundle purchase)
   Future<bool> checkSubjectAccess(String department, int semester, String subject) async {
-    final user = _client.auth.currentUser;
-    if (user == null) return false;
-
     try {
+      await _ensureInitialized();
+      final user = _client.auth.currentUser;
+      if (user == null) return false;
+
       // 1. Check subject-level purchase
       final subjectId = 'subject_${department}_${semester}_$subject';
       final subRows = await _client
@@ -200,6 +214,9 @@ class MonetizationService extends ChangeNotifier {
   /// Returns { 'bundle_price': double, 'has_access': bool }
   Future<Map<String, dynamic>> getSemesterBundleInfo(String department, int semester) async {
     try {
+      await _ensureInitialized();
+      if (!SupabaseClientService.isInitialized) return {'bundle_price': 0.0, 'has_access': false};
+
       final bundle = await _client
           .from('semester_bundles')
           .select('bundle_price')

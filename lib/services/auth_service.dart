@@ -6,6 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/supabase_client.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import '../main.dart' as main_file;
 
 class NetworkException implements Exception {
   final String message;
@@ -16,23 +17,65 @@ class NetworkException implements Exception {
 
 class AuthService extends ChangeNotifier {
   // Access the client via your existing service
-  final SupabaseClient _client = SupabaseClientService.client;
+  SupabaseClient get _client => SupabaseClientService.client;
 
-  User? get currentUser => _client.auth.currentUser;
-  Session? get currentSession => _client.auth.currentSession;
+  User? get currentUser {
+    if (!SupabaseClientService.isInitialized) return null;
+    try {
+      return _client.auth.currentUser;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Session? get currentSession {
+    if (!SupabaseClientService.isInitialized) return null;
+    try {
+      return _client.auth.currentSession;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Ensures Supabase is initialized before performing an action
+  Future<void> _ensureInitialized() async {
+    if (!SupabaseClientService.isInitialized) {
+      await SupabaseClientService.init();
+    }
+  }
 
   AuthService() {
-    _client.auth.onAuthStateChange.listen((data) {
-      if (data.event == AuthChangeEvent.signedIn) {
-        setupPushNotifications();
+    _initializeAsync();
+  }
+
+  Future<void> _initializeAsync() async {
+    try {
+      await _ensureInitialized();
+      _initAuthStateListener();
+    } catch (e) {
+      debugPrint('AuthService: Failed to async initialize: $e');
+    }
+  }
+
+  void _initAuthStateListener() {
+    try {
+      if (SupabaseClientService.isInitialized) {
+        _client.auth.onAuthStateChange.listen((data) {
+          if (data.event == AuthChangeEvent.signedIn) {
+            setupPushNotifications();
+          }
+          notifyListeners();
+        });
       }
-      notifyListeners();
-    });
+    } catch (e) {
+      debugPrint('AuthService: Failed to init auth state listener: $e');
+    }
   }
 
   // Sign In
   Future<void> signIn({required String email, required String password}) async {
     try {
+      await _ensureInitialized();
       final response = await _client.auth.signInWithPassword(
         email: email,
         password: password,
@@ -53,6 +96,7 @@ class AuthService extends ChangeNotifier {
     required String password,
   }) async {
     try {
+      await _ensureInitialized();
       final response = await _client.auth.signUp(
         email: email,
         password: password,
@@ -86,6 +130,7 @@ class AuthService extends ChangeNotifier {
   // Google Sign In
   Future<void> signInWithGoogle() async {
     try {
+      await _ensureInitialized();
       await _client.auth.signInWithOAuth(
         OAuthProvider.google,
         redirectTo: kIsWeb ? null : 'io.supabase.flutter://callback',
@@ -98,6 +143,7 @@ class AuthService extends ChangeNotifier {
   // Facebook Sign In
   Future<void> signInWithFacebook() async {
     try {
+      await _ensureInitialized();
       await _client.auth.signInWithOAuth(
         OAuthProvider.facebook,
         redirectTo: kIsWeb ? null : 'io.supabase.flutter://callback',
@@ -159,6 +205,7 @@ class AuthService extends ChangeNotifier {
   }
 
   Future<List<Map<String, dynamic>>> fetchDepartmentSubjects(String department, int semester) async {
+    await _ensureInitialized();
     final data = await _client
         .from('subjects_bundle')
         .select('subject, paper_code')
@@ -184,7 +231,8 @@ class AuthService extends ChangeNotifier {
   /// Fetches the current user's profile data. Throws NetworkException if offline.
   Future<Map<String, dynamic>?> getProfile() async {
     try {
-      final user = _client.auth.currentUser;
+      if (!SupabaseClientService.isInitialized) return null;
+      final user = currentUser;
       if (user == null) return null;
       final data = await _client.from('profiles').select().eq('id', user.id).maybeSingle();
       return data;
@@ -192,13 +240,14 @@ class AuthService extends ChangeNotifier {
       if (e.toString().contains('SocketException') || e.toString().contains('Failed host lookup')) {
         throw NetworkException('You are currently offline.');
       }
-      if (kDebugMode) print('Error fetching profile: $e');
+      debugPrint('Error fetching profile: $e');
       return null;
     }
   }
 
   /// Fetches distinct subjects for a department + semester
   Future<List<String>> fetchSubjects(String department, int semester) async {
+    await _ensureInitialized();
     final data = await _client
         .from('notes')
         .select('subject')
@@ -214,6 +263,7 @@ class AuthService extends ChangeNotifier {
 
   /// Fetches unique unit counts for all subjects in a department + semester
   Future<Map<String, int>> fetchSubjectUnitCounts(String department, int semester) async {
+    await _ensureInitialized();
     final data = await _client
         .from('notes')
         .select('subject, unit')
@@ -234,6 +284,7 @@ class AuthService extends ChangeNotifier {
   Future<List<Map<String, dynamic>>> fetchNotes(
       String department, int semester, String subject, {String? paperCode}) async {
     try {
+      await _ensureInitialized();
       final data = await _client.from('notes')
           .select()
           .eq('department', department)
@@ -249,6 +300,7 @@ class AuthService extends ChangeNotifier {
 
   /// Fetches distinct semesters that have syllabus for a department
   Future<List<int>> fetchSyllabusSemesters(String department) async {
+    await _ensureInitialized();
     final data = await _client
         .from('syllabus')
         .select('semester')
@@ -263,6 +315,7 @@ class AuthService extends ChangeNotifier {
 
   /// Fetches distinct subjects that have syllabus for a department + semester
   Future<List<Map<String, dynamic>>> fetchSyllabusSubjects(String department, int semester) async {
+    await _ensureInitialized();
     final data = await _client
         .from('subjects_bundle')
         .select('subject, paper_code')
@@ -283,6 +336,7 @@ class AuthService extends ChangeNotifier {
   /// Fetches syllabus entries for a department + semester + subject
   Future<List<Map<String, dynamic>>> fetchSyllabus(
       String department, int semester, String subject, {String? paperCode}) async {
+    await _ensureInitialized();
     final data = await _client.from('syllabus')
         .select()
         .eq('department', department)
@@ -324,6 +378,7 @@ class AuthService extends ChangeNotifier {
 
   /// Fetches distinct semesters that have PYQs for a department
   Future<List<int>> fetchPyqSemesters(String department) async {
+    await _ensureInitialized();
     final data = await _client
         .from('pyq')
         .select('semester')
@@ -338,6 +393,7 @@ class AuthService extends ChangeNotifier {
 
   /// Fetches distinct subjects that have PYQs for a department + semester
   Future<List<String>> fetchPyqSubjects(String department, int semester) async {
+    await _ensureInitialized();
     final data = await _client
         .from('pyq')
         .select('subject')
@@ -353,6 +409,7 @@ class AuthService extends ChangeNotifier {
 
   /// Fetches unique paper (year) counts for all subjects in a department + semester
   Future<Map<String, int>> fetchSubjectPyqCounts(String department, int semester) async {
+    await _ensureInitialized();
     final data = await _client
         .from('pyq')
         .select('subject, year')
@@ -371,6 +428,7 @@ class AuthService extends ChangeNotifier {
 
   /// Fetches unique important questions count for all subjects in a department + semester
   Future<Map<String, int>> fetchSubjectImpCounts(String department, int semester) async {
+    await _ensureInitialized();
     final data = await _client
         .from('important_questions')
         .select('subject')
@@ -388,6 +446,7 @@ class AuthService extends ChangeNotifier {
   /// Fetches Important Questions for a department + semester + subject
   Future<List<Map<String, dynamic>>> fetchImpQuestions(
       String department, int semester, String subject, {String? paperCode}) async {
+    await _ensureInitialized();
     final data = await _client.from('important_questions')
         .select()
         .eq('department', department)
@@ -400,6 +459,7 @@ class AuthService extends ChangeNotifier {
   /// Fetches PYQ papers for a department + semester + subject, ordered by year desc
   Future<List<Map<String, dynamic>>> fetchPyqPapers(
       String department, int semester, String subject, {String? paperCode}) async {
+    await _ensureInitialized();
     final data = await _client.from('pyq')
         .select()
         .eq('department', department)
@@ -411,6 +471,7 @@ class AuthService extends ChangeNotifier {
 
   /// Fetches distinct semesters that have subjects defined for a department
   Future<List<int>> fetchMockTestSemesters(String department) async {
+    await _ensureInitialized();
     final data = await _client
         .from('subjects_bundle')
         .select('semester')
@@ -425,6 +486,7 @@ class AuthService extends ChangeNotifier {
 
   /// Fetches all subjects for a department + semester from the master bundle
   Future<List<String>> fetchMockTestSubjects(String department, int semester) async {
+    await _ensureInitialized();
     final data = await _client
         .from('subjects_bundle')
         .select('subject')
@@ -445,6 +507,7 @@ class AuthService extends ChangeNotifier {
 
   /// Fetches unique question counts for all subjects in a department + semester
   Future<Map<String, int>> fetchSubjectMockTestCounts(String department, int semester) async {
+    await _ensureInitialized();
     final data = await _client
         .from('mock_test_questions')
         .select('subject')
@@ -462,6 +525,7 @@ class AuthService extends ChangeNotifier {
   /// Fetches mock test questions for a subject (Randomly picks max 20)
   Future<List<Map<String, dynamic>>> fetchMockTestQuestions(
       String department, int semester, String subject) async {
+    await _ensureInitialized();
     final data = await _client
         .from('mock_test_questions')
         .select()
@@ -481,6 +545,7 @@ class AuthService extends ChangeNotifier {
     required String department,
     String? avatarUrl,
   }) async {
+    await _ensureInitialized();
     final user = _client.auth.currentUser;
     if (user == null) throw Exception('Not logged in');
 
@@ -497,6 +562,7 @@ class AuthService extends ChangeNotifier {
 
   /// Uploads an avatar image and saves the URL to the profile
   Future<String> uploadAvatar(String filePath) async {
+    await _ensureInitialized();
     final user = _client.auth.currentUser;
     if (user == null) throw Exception('Not logged in');
 
@@ -525,6 +591,7 @@ class AuthService extends ChangeNotifier {
 
   /// Deletes the user's avatar
   Future<void> deleteAvatar() async {
+    await _ensureInitialized();
     final user = _client.auth.currentUser;
     if (user == null) throw Exception('Not logged in');
 
@@ -617,6 +684,13 @@ class AuthService extends ChangeNotifier {
       );
 
       if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+        // iOS foreground config
+        await messaging.setForegroundNotificationPresentationOptions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+
         // Get the token for this device
         final token = await messaging.getToken();
         if (token != null) {
@@ -627,6 +701,40 @@ class AuthService extends ChangeNotifier {
         messaging.onTokenRefresh.listen((newToken) {
           _saveDeviceToken(user.id, newToken);
         });
+
+        // Listen for foreground messages and show a SnackBar
+        FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+          if (message.notification != null) {
+            final context = main_file.globalNavigatorKey.currentContext;
+            if (context != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    '${message.notification?.title ?? "Notification"}\n${message.notification?.body ?? ""}',
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                  duration: const Duration(seconds: 4),
+                  behavior: SnackBarBehavior.floating,
+                  margin: const EdgeInsets.all(16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  backgroundColor: const Color(0xFF7C6FF6),
+                  action: SnackBarAction(
+                    label: 'View',
+                    textColor: Colors.white,
+                    onPressed: () {
+                      // Attempt to route if payload is present
+                      if (message.data['route'] != null) {
+                        Navigator.pushNamed(context, message.data['route']);
+                      } else if (message.data['click_action'] != null) {
+                         Navigator.pushNamed(context, '/notices'); 
+                      }
+                    },
+                  ),
+                )
+              );
+            }
+          }
+        });
       }
     } catch (e) {
       if (kDebugMode) print('Error setting up push notifications: $e');
@@ -636,6 +744,7 @@ class AuthService extends ChangeNotifier {
   /// Save token to Supabase `fcm_tokens` table
   Future<void> _saveDeviceToken(String userId, String token) async {
     try {
+      await _ensureInitialized();
       final platform = kIsWeb ? 'web' : (defaultTargetPlatform == TargetPlatform.iOS ? 'ios' : 'android');
       
       // Upsert the token
@@ -654,6 +763,7 @@ class AuthService extends ChangeNotifier {
   /// Remove token from Supabase (Call this on Sign Out!)
   Future<void> _removeDeviceToken() async {
     try {
+      await _ensureInitialized();
       final user = currentUser;
       if (user == null || kIsWeb) return;
       

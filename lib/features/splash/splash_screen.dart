@@ -18,39 +18,63 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _checkSession() async {
     final authService = Provider.of<AuthService>(context, listen: false);
-    final sessionCheck = authService.currentSession;
     
-    // Very short delay to ensure the UI has time to frame once
+    // Safety guard: Don't let the splash hang forever if Supabase/Network is slow
+    final safetyTimeout = Future.delayed(const Duration(seconds: 8));
     final minDelay = Future.delayed(const Duration(milliseconds: 1200));
 
-    Map<String, dynamic>? profile;
-    if (sessionCheck != null) {
+    bool transitioned = false;
+
+    void navigate(String route) {
+      if (!mounted || transitioned) return;
+      transitioned = true;
+      Navigator.pushReplacementNamed(context, route);
+    }
+
+    // Attempt to check session and profile
+    Future<void> performCheck() async {
       try {
-        profile = await authService.getProfile();
-      } catch (_) {}
+        final sessionCheck = authService.currentSession;
+        Map<String, dynamic>? profile;
+
+        if (sessionCheck != null) {
+          try {
+            profile = await authService.getProfile();
+          } catch (e) {
+            debugPrint('Splash Profile Fetch Error: $e');
+            // If we have a session but profile fetch fails (e.g. offline), 
+            // we still try to proceed or fall back to login if it's a critical error
+          }
+          
+          await minDelay;
+          
+          if (profile != null && profile['college_name'] != null && profile['college_name'].toString().isNotEmpty) {
+            navigate('/home');
+          } else {
+            // Even if profile is null but session exists, they might need to create a profile
+            navigate('/create_profile');
+          }
+        } else {
+          await minDelay;
+          navigate('/login');
+        }
+      } catch (e) {
+        debugPrint('Splash Check Error: $e');
+        await minDelay;
+        navigate('/login');
+      }
     }
 
-    await minDelay;
-    
-    // Re-check session after delay in case deep link arrived during splash
-    final currentSession = authService.currentSession;
-    
-    if (!mounted) return;
-
-    if (currentSession != null) {
-      if (profile == null) {
-        // Fetch profile again if we just got a session
-        try { profile = await authService.getProfile(); } catch (_) {}
-      }
-      
-      if (profile != null && profile['college_name'] != null && profile['college_name'].toString().isNotEmpty) {
-        Navigator.pushReplacementNamed(context, '/home');
-      } else {
-        Navigator.pushReplacementNamed(context, '/create_profile');
-      }
-    } else {
-      Navigator.pushReplacementNamed(context, '/login');
-    }
+    // Race between normal check and safety timeout
+    await Future.any([
+      performCheck(),
+      safetyTimeout.then((_) {
+        if (!transitioned) {
+          debugPrint('Splash safety timeout triggered');
+          navigate('/login');
+        }
+      }),
+    ]);
   }
 
   @override

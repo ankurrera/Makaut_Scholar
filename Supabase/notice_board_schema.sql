@@ -23,6 +23,12 @@ TO public
 USING (true);
 
 -- (Insert policies are managed by Service Role Key used in the scraper)
+CREATE POLICY "Service role can manage notifications" 
+ON public.official_notifications 
+FOR ALL 
+TO service_role 
+USING (true) 
+WITH CHECK (true);
 
 
 -- 2. Create table for FCM Device Tokens

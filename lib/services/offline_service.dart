@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 
 enum ResourceCategory {
   NOTES,
@@ -57,13 +58,21 @@ class OfflineService {
   final Map<String, OfflineResource> _registry = {};
 
   Future<void> init() async {
-    final prefs = await SharedPreferences.getInstance();
-    final data = prefs.getString(_prefKey);
-    if (data != null) {
-      final decoded = json.decode(data) as Map<String, dynamic>;
-      decoded.forEach((key, value) {
-        _registry[key] = OfflineResource.fromJson(value);
-      });
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final data = prefs.getString(_prefKey);
+      if (data != null) {
+        final decoded = json.decode(data) as Map<String, dynamic>;
+        decoded.forEach((key, value) {
+          try {
+            _registry[key] = OfflineResource.fromJson(value);
+          } catch (e) {
+            debugPrint('Error parsing offline resource $key: $e');
+          }
+        });
+      }
+    } catch (e) {
+      debugPrint('OfflineService init failed: $e');
     }
   }
 

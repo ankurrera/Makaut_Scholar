@@ -11,7 +11,7 @@ class NoticeBoardScreen extends StatefulWidget {
 }
 
 class _NoticeBoardScreenState extends State<NoticeBoardScreen> {
-  final _client = SupabaseClientService.client;
+  SupabaseClient get _client => SupabaseClientService.client;
   List<Map<String, dynamic>> _notices = [];
   bool _isLoading = true;
   String? _error;
@@ -29,6 +29,12 @@ class _NoticeBoardScreenState extends State<NoticeBoardScreen> {
     });
 
     try {
+      // Ensure Supabase is ready
+      await SupabaseClientService.init();
+      if (!SupabaseClientService.isInitialized) {
+        throw Exception('Supabase is not initialized. Please check your connection.');
+      }
+
       final response = await _client
           .from('official_notifications')
           .select()

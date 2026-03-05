@@ -143,9 +143,14 @@ def parse_notices(html, base_url):
             continue
         seen_links.add(full_link)
 
-        # Try to extract date from link text or parent text
-        parent_text = link.parent.get_text(separator=" ", strip=True) if link.parent else ""
-        combined_text = f"{parent_text} {text}"
+        # Try to extract date from link text, parent text, or grandparent text
+        parent = link.parent
+        grandparent = parent.parent if parent else None
+        
+        parent_text = parent.get_text(separator=" ", strip=True) if parent else ""
+        grandparent_text = grandparent.get_text(separator=" ", strip=True) if grandparent else ""
+        
+        combined_text = f"{text} {parent_text} {grandparent_text}"
         
         date_match = re.search(date_pattern, combined_text)
         date_str = ""
@@ -187,29 +192,30 @@ def save_to_supabase(notice_record):
 def process(notices):
     new_count = 0
     relevant_found = 0
+    max_notices_to_keep = 7
+
+    print(f"🔍 Keeping only the latest {max_notices_to_keep} student notices...")
+
+    # Sort notices by date descending to ensure we get the latest ones first
+    # However, the site usually lists them newest-first. We'll parse the date and sort just in case.
+    for n in notices:
+        n['parsed_date'] = parse_date(n['date_str'])
     
-    # 4 months = ~120 days
-    cutoff_date = (datetime.now() - timedelta(days=120)).strftime("%Y-%m-%d")
-    print(f"🔍 Filtering notices newer than {cutoff_date}...")
+    notices.sort(key=lambda x: x['parsed_date'], reverse=True)
 
     for notice in notices:
+        if relevant_found >= max_notices_to_keep:
+            break
+
         relevant, category = is_relevant(notice['title'])
         if not relevant:
-            continue
-
-        db_date = parse_date(notice['date_str'])
-        
-        # Apply the 4-month cutoff filter
-        if db_date < cutoff_date:
-            # Uncomment for more debug:
-            # print(f"  [SKIPPED - OLD] {db_date}: {notice['title'][:30]}...")
             continue
             
         relevant_found += 1
         record = {
             "title": notice['title'],
             "link": notice['link'],
-            "date_posted": db_date,
+            "date_posted": notice['parsed_date'],
             "category": category,
             "is_new": True
         }
@@ -219,8 +225,9 @@ def process(notices):
 
     print(f"\n📊 Summary:")
     print(f"   Total unique links found: {len(notices)}")
-    print(f"   Relevant within 4mo:      {relevant_found}")
+    print(f"   Relevant kept:            {relevant_found}")
     print(f"   Newly added/updated:       {new_count}")
+
 
 
 if __name__ == "__main__":

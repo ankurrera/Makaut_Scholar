@@ -3,13 +3,14 @@ import '../core/supabase_client.dart';
 import '../core/models/search_result.dart';
 
 class SearchService {
-  final SupabaseClient _client = SupabaseClientService.client;
+  SupabaseClient get _client => SupabaseClientService.client;
 
   Future<List<SearchResult>> search({
     required String query,
     required String department,
     String filter = 'All',
   }) async {
+    if (!SupabaseClientService.isInitialized) return [];
     if (query.trim().isEmpty) return [];
 
     final List<SearchResult> results = [];

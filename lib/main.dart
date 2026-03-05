@@ -20,26 +20,37 @@ import 'features/legal/about_screen.dart';
 import 'services/monetization_service.dart';
 import 'domain/repositories/billing_repository.dart';
 import 'data/repositories/billing_repository_impl.dart';
+import 'features/notices/notice_board_screen.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase (for Push Notifications)
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  // 1. Critical Base Initializations (Sequential for debugging)
+  try {
+    debugPrint('Starting Dotenv initialization...');
+    await dotenv.load(fileName: ".env").timeout(const Duration(seconds: 5));
+    debugPrint('Dotenv initialized.');
 
-  // 1. Load Environment Variables
-  await dotenv.load(fileName: ".env");
+    debugPrint('Starting Firebase initialization...');
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    ).timeout(const Duration(seconds: 10));
+    debugPrint('Firebase initialized.');
+  } catch (e) {
+    debugPrint('Base Init Warning: $e');
+  }
 
-  // 2. Initialize Supabase
-  await SupabaseClientService.init();
+  // 2. Supabase Initialization
+  debugPrint('Starting Supabase initialization...');
+  await SupabaseClientService.init().catchError((e) {
+    debugPrint('Supabase Early Init Failed: $e');
+  });
+  debugPrint('Supabase initialization finished.');
 
-  // 3. Initialize Offline Service
-  await OfflineService().init();
+
 
   runApp(
-    // 3. Setup Provider Scope
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthService()),
@@ -55,12 +66,15 @@ void main() async {
   );
 }
 
+final GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>();
+
 class MakautScholarApp extends StatelessWidget {
   const MakautScholarApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: globalNavigatorKey,
       title: 'ScholarX: MAKAUT Edition',
       debugShowCheckedModeBanner: false,
 
@@ -200,6 +214,7 @@ class MakautScholarApp extends StatelessWidget {
         '/profile': (context) => const ProfileScreen(),
         '/privacy': (context) => const PrivacyPolicyScreen(),
         '/about': (context) => const AboutScreen(),
+        '/notices': (context) => const NoticeBoardScreen(),
       },
     );
   }
