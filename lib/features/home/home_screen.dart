@@ -254,7 +254,22 @@ class _HomeScreenState extends State<HomeScreen>
             ],
           ),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: isDark ? _bgSecondaryDark : _bgSecondary,
+            shape: BoxShape.circle,
+            border: Border.all(color: isDark ? _borderSubtleDark : _borderSubtle),
+          ),
+          child: IconButton(
+            icon: Icon(Iconsax.notification, color: isDark ? _textPrimaryDark : _textPrimary),
+            onPressed: () {
+              Navigator.pushNamed(context, '/notices');
+            },
+            tooltip: 'Notice Board',
+          ),
+        ),
+        const SizedBox(width: 12),
         GestureDetector(
           onTap: () => Navigator.pushNamed(context, '/profile'),
           child: Container(

@@ -27,6 +27,9 @@ dependencies:
   razorpay_flutter: ^1.4.1
   http: ^1.2.1
   url_launcher: ^6.3.0
+  package_info_plus: ^9.0.0
+  firebase_core: ^4.5.0
+  firebase_messaging: ^16.1.2
 
 dev_dependencies:
   flutter_test:
@@ -44,6 +47,8 @@ flutter:
     - assets/logo.png
     - assets/scholarx_logo.png
     - assets/google_logo.png
+    - assets/lightmode.png
+    - assets/darkmode.png
 
 flutter_launcher_icons:
   android: true

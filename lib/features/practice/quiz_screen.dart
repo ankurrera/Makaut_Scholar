@@ -27,9 +27,17 @@ class _QuizScreenState extends State<QuizScreen> {
   void initState() {
     super.initState();
     _shuffledQuestions = widget.questions.map((q) {
-      final List<String> options = List.from(q.options);
-      final String correctOption = options[q.correctIndex];
+      // Remove prefixes like A., B), (C), d. etc.
+      String cleanOption(String opt) {
+        return opt.replaceAll(RegExp(r'^([A-Da-d][\.\)]|\([A-Da-d]\))\s*'), '').trim();
+      }
+
+      final List<String> cleanOptions = q.options.map(cleanOption).toList();
+      final String correctOption = cleanOptions[q.correctIndex];
+
+      final List<String> options = List.from(cleanOptions);
       options.shuffle();
+
       return QuizQuestion(
         text: q.text,
         options: options,

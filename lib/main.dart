@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'providers/theme_provider.dart';
 
 // Make sure these imports match your folder structure
 import 'core/supabase_client.dart';
@@ -13,12 +16,18 @@ import 'features/profile/profile_screen.dart';
 import 'features/navigation/main_nav_shell.dart';
 import 'features/splash/splash_screen.dart';
 import 'features/legal/privacy_policy_screen.dart';
+import 'features/legal/about_screen.dart';
 import 'services/monetization_service.dart';
 import 'domain/repositories/billing_repository.dart';
 import 'data/repositories/billing_repository_impl.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase (for Push Notifications)
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   // 1. Load Environment Variables
   await dotenv.load(fileName: ".env");
@@ -34,6 +43,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthService()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => MonetizationService()),
         Provider<BillingRepository>(
           create: (_) => BillingRepositoryImpl(),
@@ -55,7 +65,7 @@ class MakautScholarApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
 
       // 4. Academic Themes (Light & Dark)
-      themeMode: ThemeMode.system,
+      themeMode: context.watch<ThemeProvider>().themeMode,
       
       // Light Theme
       theme: ThemeData(
@@ -189,6 +199,7 @@ class MakautScholarApp extends StatelessWidget {
         '/create_profile': (context) => const CreateProfileScreen(),
         '/profile': (context) => const ProfileScreen(),
         '/privacy': (context) => const PrivacyPolicyScreen(),
+        '/about': (context) => const AboutScreen(),
       },
     );
   }

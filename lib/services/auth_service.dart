@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/supabase_client.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class NetworkException implements Exception {
   final String message;
@@ -22,6 +23,9 @@ class AuthService extends ChangeNotifier {
 
   AuthService() {
     _client.auth.onAuthStateChange.listen((data) {
+      if (data.event == AuthChangeEvent.signedIn) {
+        setupPushNotifications();
+      }
       notifyListeners();
     });
   }
@@ -105,6 +109,7 @@ class AuthService extends ChangeNotifier {
 
   // Sign Out
   Future<void> signOut() async {
+    await _removeDeviceToken();
     await _client.auth.signOut();
     notifyListeners();
   }
@@ -584,5 +589,80 @@ class AuthService extends ChangeNotifier {
       return msg.replaceAll('Exception:', '').trim();
     }
     return msg;
+  }
+
+  // ==========================================
+  // Push Notifications (FCM + Supabase)
+  // ==========================================
+
+  /// Request permission and save the FCM token for the current user
+  Future<void> setupPushNotifications() async {
+    final user = currentUser;
+    if (user == null) return;
+
+    try {
+      if (kIsWeb) return; // Push not supported on web for now in this app
+      
+      final messaging = FirebaseMessaging.instance;
+      
+      // Request permission (Required for iOS, ignored on Android)
+      final settings = await messaging.requestPermission(
+        alert: true,
+        announcement: false,
+        badge: true,
+        carPlay: false,
+        criticalAlert: false,
+        provisional: false,
+        sound: true,
+      );
+
+      if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+        // Get the token for this device
+        final token = await messaging.getToken();
+        if (token != null) {
+          await _saveDeviceToken(user.id, token);
+        }
+
+        // Listen for token refreshes
+        messaging.onTokenRefresh.listen((newToken) {
+          _saveDeviceToken(user.id, newToken);
+        });
+      }
+    } catch (e) {
+      if (kDebugMode) print('Error setting up push notifications: $e');
+    }
+  }
+
+  /// Save token to Supabase `fcm_tokens` table
+  Future<void> _saveDeviceToken(String userId, String token) async {
+    try {
+      final platform = kIsWeb ? 'web' : (defaultTargetPlatform == TargetPlatform.iOS ? 'ios' : 'android');
+      
+      // Upsert the token
+      await _client.from('fcm_tokens').upsert({
+        'user_id': userId,
+        'token': token,
+        'platform': platform,
+        'updated_at': DateTime.now().toIso8601String(),
+      }, onConflict: 'token');
+      
+    } catch (e) {
+      if (kDebugMode) print('Error saving device token: $e');
+    }
+  }
+
+  /// Remove token from Supabase (Call this on Sign Out!)
+  Future<void> _removeDeviceToken() async {
+    try {
+      final user = currentUser;
+      if (user == null || kIsWeb) return;
+      
+      final token = await FirebaseMessaging.instance.getToken();
+      if (token != null) {
+        await _client.from('fcm_tokens').delete().eq('token', token).eq('user_id', user.id);
+      }
+    } catch (e) {
+      if (kDebugMode) print('Error removing device token: $e');
+    }
   }
 }

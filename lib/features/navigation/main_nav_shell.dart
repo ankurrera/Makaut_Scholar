@@ -46,17 +46,17 @@ class _MainNavShellState extends State<MainNavShell> {
               children: _screens,
             ),
             Positioned(
-              bottom: 24,
-              left: 0,
-              right: 0,
-              child: StaggeredSlideFade(
-                delayMs: 300,
-                child: _FloatingDock(
-                  currentIndex: _currentIndex,
-                  onTap: (index) => setState(() => _currentIndex = index),
-                ),
+            bottom: MediaQuery.of(context).viewPadding.bottom + 24,
+            left: 0,
+            right: 0,
+            child: StaggeredSlideFade(
+              delayMs: 300,
+              child: _FloatingDock(
+                currentIndex: _currentIndex,
+                onTap: (index) => setState(() => _currentIndex = index),
               ),
             ),
+          ),
           ],
         ),
       ),

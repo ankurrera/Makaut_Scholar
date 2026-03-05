@@ -14,137 +14,264 @@ class PrivacyPolicyScreen extends StatelessWidget {
     final border  = isDark ? AuthTheme.darkBorder  : AuthTheme.lightBorder;
     final text    = isDark ? AuthTheme.darkText     : AuthTheme.lightText;
     final subtext = isDark ? AuthTheme.darkSubtext  : AuthTheme.lightSubtext;
+    final accent  = AuthTheme.accent;
 
     return Scaffold(
       backgroundColor: bg,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Iconsax.arrow_left_copy, color: text, size: 20),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'Privacy Policy',
-          style: TextStyle(
-            color: text,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+      body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildSection(
-              title: 'Introduction',
-              content: 'Welcome to ScholarX. We value your privacy and are committed to protecting your personal data. This Privacy Policy outlines how we collect, use, and safeguard your information when you use our mobile application.',
-              isDark: isDark,
-              card: card,
-              border: border,
-              text: text,
-              subtext: subtext,
+        slivers: [
+          // ── Premium App Bar ───────────────────────────────────────────────
+          SliverAppBar(
+            expandedHeight: 180,
+            pinned: true,
+            stretch: true,
+            backgroundColor: bg,
+            elevation: 0,
+            leading: IconButton(
+              icon: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.05),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Iconsax.arrow_left, color: text, size: 18),
+              ),
+              onPressed: () => Navigator.pop(context),
             ),
-            _buildSection(
-              title: 'Data Collection',
-              content: 'We collect information that you provide directly to us when you create an account, such as your name, email address, and academic details (College, Department). We also collect your profile picture if you choose to upload one.',
-              isDark: isDark,
-              card: card,
-              border: border,
-              text: text,
-              subtext: subtext,
-            ),
-            _buildSection(
-              title: 'How We Use Your Data',
-              content: 'Your data is used to provide and maintain our services, notify you about changes, and allow you to participate in interactive features. We do not sell your personal data to third parties.',
-              isDark: isDark,
-              card: card,
-              border: border,
-              text: text,
-              subtext: subtext,
-            ),
-            _buildSection(
-              title: 'Data Security',
-              content: 'We implement industry-standard security measures to protect your data. Your academic records and profile information are stored securely using Supabase (PostgreSQL) with Row Level Security (RLS).',
-              isDark: isDark,
-              card: card,
-              border: border,
-              text: text,
-              subtext: subtext,
-            ),
-            _buildSection(
-              title: 'Third-Party Services',
-              content: 'We use Supabase for authentication and database management. Some features may use Google Play Billing for premium content, which involves secure third-party payment processing.',
-              isDark: isDark,
-              card: card,
-              border: border,
-              text: text,
-              subtext: subtext,
-            ),
-            const SizedBox(height: 40),
-            Center(
-              child: Text(
-                'Last Updated: March 4, 2026',
+            flexibleSpace: FlexibleSpaceBar(
+              centerTitle: true,
+              title: Text(
+                'Privacy & Policy',
                 style: TextStyle(
-                  color: subtext,
-                  fontSize: 12,
-                  fontStyle: FontStyle.italic,
+                  color: text,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
                 ),
               ),
+              background: Stack(
+                children: [
+                  // Abstract Background Pattern
+                  Positioned(
+                    top: -50,
+                    right: -50,
+                    child: Container(
+                      width: 200,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: accent.withValues(alpha: isDark ? 0.08 : 0.03),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 20,
+                    left: 40,
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: accent.withValues(alpha: isDark ? 0.05 : 0.02),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                  Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 20),
+                          Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Image.asset(
+                              isDark ? 'assets/darkmode.png' : 'assets/lightmode.png',
+                              width: 40,
+                              height: 40,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 20),
-          ],
-        ),
+          ),
+
+          // ── Content ───────────────────────────────────────────────────────
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(24, 12, 24, 80),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                _buildIntro(text, subtext),
+                const SizedBox(height: 32),
+                
+                _buildPolicyItem(
+                  icon: Iconsax.user_tag,
+                  title: 'Academic Identity',
+                  description: 'We collect your Name, Email, College, and Department to create your academic profile on ScholarX.',
+                  isDark: isDark, card: card, border: border, text: text, subtext: subtext, accent: accent,
+                ),
+                
+                _buildPolicyItem(
+                  icon: Iconsax.folder_2,
+                  title: 'Content Access',
+                  description: 'ScholarX accesses Notes, Syllabus, and PYQs. We track your "PRO" status for premium academic resources.',
+                  isDark: isDark, card: card, border: border, text: text, subtext: subtext, accent: accent,
+                ),
+                
+                _buildPolicyItem(
+                  icon: Iconsax.gallery_edit,
+                  title: 'Profile Customization',
+                  description: 'If you upload an avatar, it is stored securely on Supabase Storage and associated with your ScholarX ID.',
+                  isDark: isDark, card: card, border: border, text: text, subtext: subtext, accent: accent,
+                ),
+                
+                _buildPolicyItem(
+                  icon: Iconsax.security_safe,
+                  title: 'Data Sovereignty',
+                  description: 'Your data is protected by Row Level Security (RLS) in our PostgreSQL backend. You own your data.',
+                  isDark: isDark, card: card, border: border, text: text, subtext: subtext, accent: accent,
+                ),
+                
+                _buildPolicyItem(
+                  icon: Iconsax.card_pos,
+                  title: 'Secure Payments',
+                  description: 'Premium purchases are handled via Google Play Billing. We do not store your credit card or sensitive financial data.',
+                  isDark: isDark, card: card, border: border, text: text, subtext: subtext, accent: accent,
+                ),
+                
+                _buildPolicyItem(
+                  icon: Iconsax.trash,
+                  title: 'Account Deletion',
+                  description: 'You can delete your account permanently from the Profile screen. This erases all your records immediately.',
+                  isDark: isDark, card: card, border: border, text: text, subtext: subtext, accent: accent,
+                ),
+
+                const SizedBox(height: 24),
+                _buildFooter(subtext),
+              ]),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildSection({
+  Widget _buildIntro(Color text, Color subtext) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'ScholarX: MAKAUT Edition',
+          style: TextStyle(
+            color: text,
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.5,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Effective March 4, 2026. This policy describes how ScholarX handles your information to provide a better academic experience.',
+          style: TextStyle(
+            color: subtext,
+            fontSize: 14,
+            height: 1.5,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPolicyItem({
+    required IconData icon,
     required String title,
-    required String content,
+    required String description,
     required bool isDark,
     required Color card,
     required Color border,
     required Color text,
     required Color subtext,
+    required Color accent,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 24),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: card,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(color: border, width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.03),
+            color: isDark ? Colors.black.withValues(alpha: 0.15) : Colors.black.withValues(alpha: 0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: TextStyle(
-              color: AuthTheme.accent,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.5,
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(icon, color: accent, size: 20),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: text,
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  description,
+                  style: TextStyle(
+                    color: subtext,
+                    fontSize: 13,
+                    height: 1.4,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 12),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFooter(Color subtext) {
+    return Center(
+      child: Column(
+        children: [
+          const Divider(),
+          const SizedBox(height: 20),
           Text(
-            content,
+            'Built with transparency for the MAKAUT Community.',
+            textAlign: TextAlign.center,
             style: TextStyle(
-              color: subtext,
-              fontSize: 14,
-              height: 1.6,
+              color: subtext.withValues(alpha: 0.7),
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'ScholarX © 2026',
+            style: TextStyle(
+              color: subtext.withValues(alpha: 0.5),
+              fontSize: 11,
             ),
           ),
         ],

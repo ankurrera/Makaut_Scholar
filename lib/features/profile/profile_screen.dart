@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../services/auth_service.dart';
+import '../../providers/theme_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -596,21 +597,24 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               ),
             ),
           ),
-          _settingsTile(Iconsax.moon, 'Appearance', 'System default', isDark, accent),
-          _divider(isDark),
+          
           _settingsTile(Iconsax.notification, 'Notifications', 'Enabled', isDark, accent),
           _divider(isDark),
-          _settingsTile(Iconsax.info_circle, 'About', 'v1.0.0', isDark, accent),
-          _divider(isDark),
+          // ── Appearance Selection ────────────────────────────────────────
           _settingsTile(
-            Iconsax.shield_tick,
-            'Privacy Policy',
-            'View',
+            Iconsax.sun_1,
+            'Appearance',
+            _themeModeLabel(context),
             isDark,
             accent,
-            onTap: () => Navigator.pushNamed(context, '/privacy'),
+            onTap: () => _showThemeSelection(context),
           ),
+          _divider(isDark),
+          _settingsTile(Iconsax.info_circle, 'About', 'v1.0.0', isDark, accent, onTap: () => Navigator.pushNamed(context, '/about')),
+          _divider(isDark),
+          _settingsTile(Iconsax.shield_tick, 'Privacy Policy', 'View', isDark, accent, onTap: () => Navigator.pushNamed(context, '/privacy')),
           const SizedBox(height: 6),
+
         ],
       ),
     );
@@ -670,23 +674,83 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     return SizedBox(
       width: double.infinity,
       height: 50,
-      child: TextButton(
+      child: OutlinedButton(
         onPressed: _deleteAccount,
-        style: TextButton.styleFrom(
-          foregroundColor: Colors.redAccent.withValues(alpha: 0.7),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Colors.redAccent,
+          side: BorderSide(color: Colors.redAccent.withValues(alpha: 0.25)),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         ),
         child: const Text(
-          'Delete My Account permanently',
+          'Delete My Account',
           style: TextStyle(
-            fontSize: 13,
+            fontSize: 15,
             fontWeight: FontWeight.w500,
-            decoration: TextDecoration.underline,
+            // removed underline for professional look
           ),
         ),
       ),
     );
   }
+  // Helper to get label for current theme mode
+  String _themeModeLabel(BuildContext context) {
+    final mode = Provider.of<ThemeProvider>(context, listen: false).themeMode;
+    switch (mode) {
+      case ThemeMode.light:
+        return 'Light';
+      case ThemeMode.dark:
+        return 'Dark';
+      default:
+        return 'System';
+    }
+  }
+
+  // Show bottom sheet to select theme mode
+  void _showThemeSelection(BuildContext context) {
+    final provider = Provider.of<ThemeProvider>(context, listen: false);
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) {
+        ThemeMode selected = provider.themeMode;
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: ThemeMode.values.map((mode) {
+                  String label;
+                  switch (mode) {
+                    case ThemeMode.light:
+                      label = 'Light';
+                      break;
+                    case ThemeMode.dark:
+                      label = 'Dark';
+                      break;
+                    default:
+                      label = 'System';
+                  }
+                  return RadioListTile<ThemeMode>(
+                    title: Text(label),
+                    value: mode,
+                    groupValue: selected,
+                    onChanged: (value) {
+                      if (value != null) {
+                        provider.setThemeMode(value);
+                        setState(() => selected = value);
+                        Navigator.of(context).pop();
+                      }
+                    },
+                  );
+                }).toList(),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
 }
 
 // ────────────────────────── REUSABLE GLASS CARD ──────────────────────────
