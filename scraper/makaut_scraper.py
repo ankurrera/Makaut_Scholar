@@ -19,9 +19,9 @@ else:
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # --- Target URL ---
-MAKAUT_NOTICE_URL = "https://makautwb.ac.in/notices.php"
-FALLBACK_URL = "https://makautwb.ac.in/page.php?id=302"
-BASE_URL = "https://makautwb.ac.in/"
+MAKAUT_NOTICE_URL = "https://www.makautexam.net/announcement.html"
+FALLBACK_URL = "https://www.makautexam.net/"
+BASE_URL = "https://www.makautexam.net/"
 
 # Keywords for filtering
 STUDENT_KEYWORDS = [
@@ -165,17 +165,27 @@ def save_to_supabase(notice_record):
 
 
 def process(notices):
+    from datetime import timedelta
     new_count = 0
     relevant_found = 0
     debug_data = []
+    
+    # 4 months = ~120 days
+    cutoff_date = (datetime.now() - timedelta(days=120)).strftime("%Y-%m-%d")
 
     for notice in notices:
         relevant, category = is_relevant(notice['title'])
         if not relevant:
             continue
 
-        relevant_found += 1
         db_date = parse_date(notice['date_str'])
+        
+        # Apply the 4-month cutoff filter requested by user
+        if db_date < cutoff_date:
+            print(f"  [SKIPPED - TOO OLD] {db_date} < {cutoff_date} : {notice['title'][:30]}...")
+            continue
+            
+        relevant_found += 1
         record = {
             "title": notice['title'],
             "link": notice['link'],
