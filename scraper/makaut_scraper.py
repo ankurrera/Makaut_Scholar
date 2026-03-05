@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import os
 from supabase import create_client, Client
-from datetime import datetime
+from datetime import datetime, timedelta
 import re
 import json
 
@@ -10,13 +10,19 @@ import json
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
 
-if not SUPABASE_URL or not SUPABASE_KEY:
-    print("⚠️  WARNING: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY missing!")
-    print("   Running in DRY-RUN mode — no data will be saved to the database.")
-    supabase: Client = None
-else:
-    print(f"✅ Supabase connected to: {SUPABASE_URL}")
-    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+def get_supabase_client():
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        print("⚠️  WARNING: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY missing!")
+        print("   Running in DRY-RUN mode — no data will be saved to the database.")
+        return None
+    try:
+        print(f"✅ Supabase connected to: {SUPABASE_URL}")
+        return create_client(SUPABASE_URL, SUPABASE_KEY)
+    except Exception as e:
+        print(f"❌ Error connecting to Supabase: {e}")
+        return None
+
+supabase: Client = get_supabase_client()
 
 # --- Target URL ---
 MAKAUT_NOTICE_URL = "https://www.makautexam.net/"
@@ -42,12 +48,19 @@ ADMIN_KEYWORDS = [
 
 def parse_date(date_str):
     date_str = date_str.strip()
+    # Handle common prefix format DD-MM-YYYY- Title or DD-MM-YYYY Title
+    date_match = re.search(r'(\d{1,2}[-/\.]\d{1,2}[-/\.]\d{4})', date_str)
+    if date_match:
+        date_str = date_match.group(1)
+
     formats = ["%d-%m-%Y", "%d/%m/%Y", "%Y-%m-%d", "%d.%m.%Y", "%B %d, %Y", "%d %B %Y"]
     for fmt in formats:
         try:
             return datetime.strptime(date_str, fmt).strftime("%Y-%m-%d")
         except ValueError:
             continue
+    
+    # If no date found, default to today
     return datetime.now().strftime("%Y-%m-%d")
 
 
@@ -65,7 +78,7 @@ def is_relevant(title):
                 return True, "Academic Calendar"
             if keyword in ["mar", "mooc", "internship", "nptel", "coursera"]:
                 return True, "MAR & MOOCs"
-            if keyword in ["registration", "enrollment", "form fill-up", "form fill up"]:
+            if keyword in ["registration", "enrollment", "form fill-up", "form fill up", "enrolment"]:
                 return True, "Registration"
             return True, "General Student Notice"
     return False, "Uncategorized"
@@ -81,9 +94,12 @@ def fetch_from_url(url):
             browser = p.chromium.launch()
             page = browser.new_page()
             
-            # Navigate to the page and wait for JS to execute (networkidle ensures all ajax requests finish)
+            # Navigate to the page and wait for JS to execute
             print(f"  [playwright] Navigating to {url}...")
-            page.goto(url, wait_until='networkidle', timeout=30000)
+            page.goto(url, wait_until='networkidle', timeout=60000)
+            
+            # Small extra wait for slow loaders
+            page.wait_for_timeout(3000) 
             
             html = page.content()
             print(f"✅ Fetched {url} — Size: {len(html)} bytes")
@@ -102,21 +118,13 @@ def parse_notices(html, base_url):
     date_pattern = r'(\d{1,2}[-/\.]\d{1,2}[-/\.]\d{4})'
     seen_links = set()
 
-    # Try multiple common selectors for notice containers
-    # MAKAUT typically puts notices in table rows or list items
+    # Find all anchor tags
     all_links = soup.find_all('a', href=True)
     print(f"  Found {len(all_links)} anchor tags total.")
 
     for link in all_links:
         href = link['href']
         text = link.get_text(separator=" ", strip=True)
-
-        if not text or len(text) < 8:
-            continue
-
-        # Skip navigation/footer/header noise
-        if any(skip in text.lower() for skip in ['home', 'about us', 'contact', 'login', 'gallery', 'sitemap', 'careers', 'tender']):
-            continue
 
         # Resolve full URL
         if href.startswith('http'):
@@ -132,26 +140,21 @@ def parse_notices(html, base_url):
             continue
         seen_links.add(full_link)
 
-        # Try to extract date
-        date_match = re.search(date_pattern, text)
+        # Try to extract date from link text or parent text
+        parent_text = link.parent.get_text(separator=" ", strip=True) if link.parent else ""
+        combined_text = f"{parent_text} {text}"
+        
+        date_match = re.search(date_pattern, combined_text)
         date_str = ""
         if date_match:
             date_str = date_match.group(1)
-            # Remove date from title to keep it clean
-            clean_text = text.replace(date_str, "").strip()
-            clean_text = re.sub(r'^[-:\s]+|[-:\s]+$', '', clean_text).strip()
-            text = clean_text
+            # Remove date from the title to keep it clean
+            text = text.replace(date_str, "").strip()
+            text = re.sub(r'^[-:\s]+|[-:\s]+$', '', text).strip()
         else:
-            # Check parent element text for date if not in link text
-            parent_text = link.parent.get_text(separator=" ", strip=True) if link.parent else ""
-            parent_date_match = re.search(date_pattern, parent_text)
-            if parent_date_match:
-                date_str = parent_date_match.group(1)
-            else:
-                # Fallback to current date as a last resort
-                date_str = datetime.now().strftime("%d-%m-%Y")
+            date_str = datetime.now().strftime("%d-%m-%Y")
 
-        if text:
+        if text and len(text) > 5:
             notices.append({
                 "title": text,
                 "link": full_link,
@@ -163,29 +166,28 @@ def parse_notices(html, base_url):
 
 def save_to_supabase(notice_record):
     if not supabase:
-        print(f"  [DRY-RUN] {notice_record['category']}: {notice_record['title']}")
+        print(f"  [DRY-RUN] {notice_record['category']}: {notice_record['title'][:50]}...")
         return False
     try:
-        supabase.table("official_notifications").insert(notice_record).execute()
-        print(f"  ✅ [SAVED] {notice_record['category']}: {notice_record['title']}")
+        supabase.table("official_notifications").upsert(notice_record, on_conflict='link').execute()
+        print(f"  ✅ [SAVED/UPDATED] {notice_record['category']}: {notice_record['title'][:50]}...")
         return True
     except Exception as e:
         err_str = str(e)
         if "duplicate key value" in err_str or "23505" in err_str:
-            pass  # Already synced
+            return False # Already synced (upsert shouldn't really hit this but good for safety)
         else:
-            print(f"  ❌ Supabase Error: {err_str}")
+            print(f"  ❌ Supabase Error for '{notice_record['title'][:30]}...': {err_str}")
         return False
 
 
 def process(notices):
-    from datetime import timedelta
     new_count = 0
     relevant_found = 0
-    debug_data = []
     
     # 4 months = ~120 days
     cutoff_date = (datetime.now() - timedelta(days=120)).strftime("%Y-%m-%d")
+    print(f"🔍 Filtering notices newer than {cutoff_date}...")
 
     for notice in notices:
         relevant, category = is_relevant(notice['title'])
@@ -194,9 +196,10 @@ def process(notices):
 
         db_date = parse_date(notice['date_str'])
         
-        # Apply the 4-month cutoff filter requested by user
+        # Apply the 4-month cutoff filter
         if db_date < cutoff_date:
-            print(f"  [SKIPPED - TOO OLD] {db_date} < {cutoff_date} : {notice['title'][:30]}...")
+            # Uncomment for more debug:
+            # print(f"  [SKIPPED - OLD] {db_date}: {notice['title'][:30]}...")
             continue
             
         relevant_found += 1
@@ -207,33 +210,36 @@ def process(notices):
             "category": category,
             "is_new": True
         }
-        debug_data.append(record)
+        
         if save_to_supabase(record):
             new_count += 1
 
     print(f"\n📊 Summary:")
-    print(f"   Total links parsed:    {len(notices)}")
-    print(f"   Relevant notices found: {relevant_found}")
-    print(f"   Newly saved to DB:      {new_count}")
-
-    with open("scraped_notices_debug.json", "w") as f:
-        json.dump(debug_data, f, indent=4, ensure_ascii=False)
-    print(f"   Debug output saved to scraped_notices_debug.json")
+    print(f"   Total unique links found: {len(notices)}")
+    print(f"   Relevant within 4mo:      {relevant_found}")
+    print(f"   Newly added/updated:       {new_count}")
 
 
 if __name__ == "__main__":
     print(f"🚀 Starting MAKAUT Scraper at {datetime.now().isoformat()}")
 
-    # Try primary URL first, then fallback
+    # Try primary URL
     html = fetch_from_url(MAKAUT_NOTICE_URL)
-    if not html or len(html) < 500:
-        print("Primary URL returned too little content, trying fallback...")
-        html = fetch_from_url(FALLBACK_URL)
-
+    
+    # If primary has notices, parse them. Also try fallback if no notices found on primary.
     if html:
         raw_notices = parse_notices(html, BASE_URL)
-        process(raw_notices)
+        if len(raw_notices) < 5:
+            print("Very few notices found on primary, trying fallback...")
+            html_fallback = fetch_from_url(FALLBACK_URL)
+            if html_fallback:
+                raw_notices.extend(parse_notices(html_fallback, BASE_URL))
+        
+        if raw_notices:
+            process(raw_notices)
+        else:
+            print("❌ No notices found in the fetched HTML.")
     else:
-        print("❌ Could not fetch any HTML content from MAKAUT.")
+        print("❌ Could not fetch any HTML content.")
 
     print("✅ Scraper Job Finished.")
