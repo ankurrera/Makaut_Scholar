@@ -72,16 +72,26 @@ def is_relevant(title):
 
 
 def fetch_from_url(url):
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-    }
+    from playwright.sync_api import sync_playwright
+    
+    html = ""
     try:
-        response = requests.get(url, headers=headers, timeout=15)
-        response.raise_for_status()
-        print(f"✅ Fetched {url} — Status: {response.status_code}, Size: {len(response.text)} bytes")
-        return response.text
-    except requests.exceptions.RequestException as e:
-        print(f"❌ Error fetching {url}: {e}")
+        with sync_playwright() as p:
+            print("  [playwright] Launching headless browser...")
+            browser = p.chromium.launch()
+            page = browser.new_page()
+            
+            # Navigate to the page and wait for JS to execute (networkidle ensures all ajax requests finish)
+            print(f"  [playwright] Navigating to {url}...")
+            page.goto(url, wait_until='networkidle', timeout=30000)
+            
+            html = page.content()
+            print(f"✅ Fetched {url} — Size: {len(html)} bytes")
+            browser.close()
+            return html
+            
+    except Exception as e:
+        print(f"❌ Playwright Error fetching {url}: {e}")
         return None
 
 
