@@ -19,8 +19,8 @@ else:
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # --- Target URL ---
-MAKAUT_NOTICE_URL = "https://www.makautexam.net/announcement.html"
-FALLBACK_URL = "https://www.makautexam.net/"
+MAKAUT_NOTICE_URL = "https://www.makautexam.net/"
+FALLBACK_URL = "https://www.makautexam.net/announcement.html"
 BASE_URL = "https://www.makautexam.net/"
 
 # Keywords for filtering
@@ -29,9 +29,9 @@ STUDENT_KEYWORDS = [
     "form fill-up", "form fill up", "admit card", "pps", "ppr",
     "academic calendar", "holiday", "commencement",
     "mar", "mooc", "nptel", "coursera", "internship",
-    "registration", "enrollment", "syllabus", "postponement",
+    "registration", "enrollment", "enrolment", "syllabus", "postponement",
     "notification", "recruitment", "notice", "circular", "date sheet",
-    "special", "back paper", "backlog"
+    "special", "back paper", "backlog", "certificate"
 ]
 
 ADMIN_KEYWORDS = [
@@ -137,14 +137,18 @@ def parse_notices(html, base_url):
         date_str = ""
         if date_match:
             date_str = date_match.group(1)
-            text = text.replace(date_str, "").strip()
-            text = re.sub(r'^[-:\s]+|[-:\s]+$', '', text).strip()
+            # Remove date from title to keep it clean
+            clean_text = text.replace(date_str, "").strip()
+            clean_text = re.sub(r'^[-:\s]+|[-:\s]+$', '', clean_text).strip()
+            text = clean_text
         else:
+            # Check parent element text for date if not in link text
             parent_text = link.parent.get_text(separator=" ", strip=True) if link.parent else ""
             parent_date_match = re.search(date_pattern, parent_text)
             if parent_date_match:
                 date_str = parent_date_match.group(1)
             else:
+                # Fallback to current date as a last resort
                 date_str = datetime.now().strftime("%d-%m-%Y")
 
         if text:
