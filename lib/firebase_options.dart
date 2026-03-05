@@ -3,6 +3,7 @@
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
@@ -40,8 +41,8 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyABfpt9EzvVniSx8Bb32GSDCj6RJm2_0oo',
+  static FirebaseOptions get web => FirebaseOptions(
+    apiKey: dotenv.env['FIREBASE_API_KEY_WEB'] ?? '',
     appId: '1:1003021617321:web:9a017a9e4022dfee7241b8',
     messagingSenderId: '1003021617321',
     projectId: 'makaut-scholar-cb82e',
@@ -50,16 +51,16 @@ class DefaultFirebaseOptions {
     measurementId: 'G-MCSNQ00XCW',
   );
 
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDFmwATmjjIjPFVTmfJpHOcJHyYsoWhZLs',
+  static FirebaseOptions get android => FirebaseOptions(
+    apiKey: dotenv.env['FIREBASE_API_KEY_ANDROID'] ?? '',
     appId: '1:1003021617321:android:42dd6501ffec831d7241b8',
     messagingSenderId: '1003021617321',
     projectId: 'makaut-scholar-cb82e',
     storageBucket: 'makaut-scholar-cb82e.firebasestorage.app',
   );
 
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCjk0bBKpBFO3ic8hVJ4xJiRCH1dh3gm3k',
+  static FirebaseOptions get ios => FirebaseOptions(
+    apiKey: dotenv.env['FIREBASE_API_KEY_IOS'] ?? '',
     appId: '1:1003021617321:ios:3b43a01400ce7e0b7241b8',
     messagingSenderId: '1003021617321',
     projectId: 'makaut-scholar-cb82e',
@@ -67,8 +68,8 @@ class DefaultFirebaseOptions {
     iosBundleId: 'com.example.makautScholar',
   );
 
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyCjk0bBKpBFO3ic8hVJ4xJiRCH1dh3gm3k',
+  static FirebaseOptions get macos => FirebaseOptions(
+    apiKey: dotenv.env['FIREBASE_API_KEY_IOS'] ?? '',
     appId: '1:1003021617321:ios:3b43a01400ce7e0b7241b8',
     messagingSenderId: '1003021617321',
     projectId: 'makaut-scholar-cb82e',
@@ -76,8 +77,8 @@ class DefaultFirebaseOptions {
     iosBundleId: 'com.example.makautScholar',
   );
 
-  static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyABfpt9EzvVniSx8Bb32GSDCj6RJm2_0oo',
+  static FirebaseOptions get windows => FirebaseOptions(
+    apiKey: dotenv.env['FIREBASE_API_KEY_WEB'] ?? '',
     appId: '1:1003021617321:web:1149c04cbf2ff7fc7241b8',
     messagingSenderId: '1003021617321',
     projectId: 'makaut-scholar-cb82e',
