@@ -47,7 +47,6 @@ class _NoticeBoardScreenState extends State<NoticeBoardScreen> {
           _notices = List<Map<String, dynamic>>.from(response);
           _isLoading = false;
         });
-        _markNoticesAsRead();
       }
     } catch (e) {
       if (mounted) {
@@ -151,15 +150,7 @@ class _NoticeBoardScreenState extends State<NoticeBoardScreen> {
             textSecondary: textSecondary,
             cardBg: cardBg,
             isDark: isDark,
-          return _NoticeCard(
-            notice: notice,
-            primaryColor: primaryColor,
-            textPrimary: textPrimary,
-            textSecondary: textSecondary,
-            cardBg: cardBg,
-            isDark: isDark,
             onTap: () => _openLink(notice['link'], notice['title']),
-          );
           );
         },
       ),

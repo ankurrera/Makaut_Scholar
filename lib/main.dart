@@ -8,14 +8,6 @@ import 'providers/theme_provider.dart';
 import 'features/notices/notice_board_screen.dart';
 import 'features/notes/pdf_viewer_screen.dart';
 
-@pragma('vm:entry-point')
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // If you're going to use other Firebase services in the background, such as Firestore,
-  // make sure you call `initializeApp` before using other Firebase services.
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  debugPrint("Handling a background message: ${message.messageId}");
-}
-
 // Make sure these imports match your folder structure
 import 'core/supabase_client.dart';
 import 'services/auth_service.dart';
@@ -31,8 +23,15 @@ import 'features/legal/about_screen.dart';
 import 'services/monetization_service.dart';
 import 'domain/repositories/billing_repository.dart';
 import 'data/repositories/billing_repository_impl.dart';
-import 'features/notices/notice_board_screen.dart';
 
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // If you're going to use other Firebase services in the background, such as Firestore,
+  // make sure you call `initializeApp` before using other Firebase services.
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  debugPrint("Handling a background message: ${message.messageId}");
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
