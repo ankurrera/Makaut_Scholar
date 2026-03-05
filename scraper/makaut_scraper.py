@@ -16,7 +16,10 @@ def get_supabase_client():
         print("   Running in DRY-RUN mode — no data will be saved to the database.")
         return None
     try:
+        # Debug: Print key info (securely) to identify if it's anon or service_role
+        key_type = "SERVICE_ROLE" if len(SUPABASE_KEY) > 100 else "ANON/SHORT"
         print(f"✅ Supabase connected to: {SUPABASE_URL}")
+        print(f"📊 Auth Mode: Using {key_type} key (Length: {len(SUPABASE_KEY)})")
         return create_client(SUPABASE_URL, SUPABASE_KEY)
     except Exception as e:
         print(f"❌ Error connecting to Supabase: {e}")
