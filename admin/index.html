@@ -659,6 +659,10 @@
                 <i class="fa-solid fa-coins"></i>
                 <span>Monetization & Pricing</span>
             </div>
+            <div class="nav-item" onclick="switchTab('notices', this)">
+                <i class="fa-solid fa-bullhorn"></i>
+                <span>Official Notices</span>
+            </div>
         </nav>
 
         <div class="sidebar-footer">
@@ -1333,6 +1337,71 @@
                 </div>
             </div>
         </section>
+
+        <!-- OFFICIAL NOTICES TAB -->
+        <section id="noticesTab" class="tab-content">
+            <div class="page-header">
+                <div class="page-title">
+                    <h1>Official Notices</h1>
+                    <p>Publish and manage university notifications manually.</p>
+                </div>
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" placeholder="Search notices..." onkeyup="filterList('noticesList', this.value)">
+                </div>
+            </div>
+
+            <div class="glass">
+                <h2><i class="fa-solid fa-bullhorn" style="color: var(--accent);"></i> Publish New Notice</h2>
+                <div class="form-grid">
+                    <div class="field full-width">
+                        <label>Notice Title</label>
+                        <input type="text" id="noticeTitle"
+                            placeholder="e.g. Schedule for Even Semester Examinations 2025-26">
+                    </div>
+                    <div class="field">
+                        <label>Category</label>
+                        <select id="noticeCategory">
+                            <option>Exam</option>
+                            <option>Result</option>
+                            <option>Academic</option>
+                            <option>General</option>
+                            <option>Tender</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Post Date</label>
+                        <input type="date" id="noticeDate">
+                    </div>
+                    <div class="field full-width">
+                        <label>Notice PDF</label>
+                        <div class="dropzone" onclick="document.getElementById('noticeFileInput').click()">
+                            <i class="fa-solid fa-file-pdf"
+                                style="font-size: 32px; color: var(--accent); margin-bottom: 12px;"></i>
+                            <p id="noticeFileName">Click or drop official notice PDF</p>
+                            <input type="file" id="noticeFileInput" accept=".pdf" style="display: none;"
+                                onchange="handleFileSelect(this, 'noticeFileName')">
+                        </div>
+                    </div>
+                    <div class="full-width" style="text-align: right;">
+                        <button class="btn" id="noticeUploadBtn" onclick="uploadNotice()">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>Publish & Notify Students</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass">
+                <div class="table-header">
+                    <h2>Published Notices</h2>
+                    <div class="badge" id="noticeCount">0 Items</div>
+                </div>
+                <div id="noticesList">
+                    <!-- Dynamic Items -->
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- ── EDIT MODAL ── -->
@@ -1433,7 +1502,21 @@
             document.getElementById(tab + 'Tab').classList.add('active');
         }
 
-        function loadAll() { loadNotes(); loadSyllabus(); loadPYQ(); loadIMP(); loadMockTests(); loadThreshold(); loadPricingTiers(); }
+        function loadAll() { 
+            loadNotes(); 
+            loadSyllabus(); 
+            loadPYQ(); 
+            loadIMP(); 
+            loadMockTests(); 
+            loadThreshold(); 
+            loadPricingTiers(); 
+            loadNotices();
+            
+            // Set default date for notice
+            const today = new Date().toISOString().split('T')[0];
+            const dateEl = document.getElementById('noticeDate');
+            if (dateEl) dateEl.value = today;
+        }
 
         // ══════════════════════════════════════════
         //  UI HELPERS
@@ -1542,6 +1625,28 @@
                 // Trigger auto-fill if browser remembers selection or it's pre-selected
                 if (target.value) target.onchange();
             } catch (e) { target.innerHTML = '<option>Error loading</option>'; }
+        }
+
+        async function loadNotices() {
+            try {
+                const { data, error } = await sb.from('official_notifications').select('*').order('date_posted', { ascending: false });
+                if (error) throw error;
+                const list = document.getElementById('noticesList');
+                document.getElementById('noticeCount').textContent = `${data.length} Items`;
+                list.innerHTML = data.map(n => `
+                    <div class="item-row">
+                        <div class="item-main">
+                            <div class="item-name">${esc(n.title)}</div>
+                            <div class="item-sub">${n.date_posted} · <b>${esc(n.category)}</b></div>
+                        </div>
+                        <div class="badge">${esc(n.category)}</div>
+                        <div class="actions">
+                            <button class="icon-btn" onclick="window.open('${n.link}')"><i class="fa-solid fa-eye"></i></button>
+                            <button class="icon-btn delete" onclick="deleteItem('official_notifications', 'notices_pdf', '${n.id}', '${n.link}')"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) { console.error('Error loading notices:', e); }
         }
 
         async function loadNotes() {
@@ -2173,6 +2278,54 @@
                 closeModal();
                 loadAll();
             } catch (e) { showToast(e.message, 'error'); }
+        }
+
+        async function uploadNotice() {
+            const btn = document.getElementById('noticeUploadBtn');
+            const file = document.getElementById('noticeFileInput').files[0];
+            const title = document.getElementById('noticeTitle').value.trim();
+            const category = document.getElementById('noticeCategory').value;
+            const dateStr = document.getElementById('noticeDate').value;
+
+            if (!file || !title || !dateStr) return showToast('Fill all fields', 'error');
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Publishing...';
+
+            try {
+                // 1. Upload to Storage
+                const cleanTitle = title.replace(/[^a-z0-9]/gi, '_').substring(0, 50);
+                const path = `notices/${Date.now()}_\${cleanTitle}.pdf`;
+                
+                const { error: uploadError } = await sb.storage.from('notices_pdf').upload(path, file);
+                if (uploadError) throw uploadError;
+                
+                const { data: url } = sb.storage.from('notices_pdf').getPublicUrl(path);
+
+                // 2. Insert into DB
+                const { error: dbError } = await sb.from('official_notifications').insert({
+                    title: title,
+                    category: category,
+                    date_posted: dateStr,
+                    link: url.publicUrl,
+                    is_new: true
+                });
+
+                if (dbError) throw dbError;
+
+                showToast('Notice published and broadcast triggered!');
+                loadNotices();
+                
+                // Reset form
+                document.getElementById('noticeTitle').value = '';
+                document.getElementById('noticeFileInput').value = '';
+                document.getElementById('noticeFileName').textContent = 'Click or drop official notice PDF';
+            } catch (e) {
+                showToast(e.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i><span>Publish & Notify Students</span>';
+            }
         }
 
         function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }

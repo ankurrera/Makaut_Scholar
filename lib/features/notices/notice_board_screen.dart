@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../core/supabase_client.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
+import '../notes/pdf_viewer_screen.dart';
 
 class NoticeBoardScreen extends StatefulWidget {
   const NoticeBoardScreen({super.key});
@@ -59,30 +59,18 @@ class _NoticeBoardScreenState extends State<NoticeBoardScreen> {
     }
   }
 
-  Future<void> _markNoticesAsRead() async {
-    // Optional: Update 'is_new' to false locally for UI, 
-    // real app might track this per-user in a separate table.
-  }
-
-  Future<void> _openLink(String urlStr) async {
-    try {
-      final url = Uri.parse(urlStr);
-      if (await canLaunchUrl(url)) {
-        await launchUrl(url, mode: LaunchMode.externalApplication);
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not open the link.')),
-          );
-        }
-      }
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid link.')),
-        );
-      }
-    }
+  Future<void> _openLink(String urlStr, String title) async {
+    if (urlStr.isEmpty) return;
+    
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PdfViewerScreen(
+          url: urlStr,
+          title: title,
+        ),
+      ),
+    );
   }
 
   @override
@@ -163,7 +151,15 @@ class _NoticeBoardScreenState extends State<NoticeBoardScreen> {
             textSecondary: textSecondary,
             cardBg: cardBg,
             isDark: isDark,
-            onTap: () => _openLink(notice['link']),
+          return _NoticeCard(
+            notice: notice,
+            primaryColor: primaryColor,
+            textPrimary: textPrimary,
+            textSecondary: textSecondary,
+            cardBg: cardBg,
+            isDark: isDark,
+            onTap: () => _openLink(notice['link'], notice['title']),
+          );
           );
         },
       ),
@@ -216,79 +212,112 @@ class _NoticeCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
         decoration: BoxDecoration(
           color: cardBg,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: isDark ? const Color(0xFF2A2F3A) : const Color(0xFFE6E8EC)),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: isDark ? const Color(0xFF2A2F3A) : const Color(0xFFE6E8EC),
+            width: 1,
+          ),
           boxShadow: [
             if (!isDark)
               BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+                color: Colors.black.withOpacity(0.03),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
               ),
           ],
         ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: catColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(16),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Left Category Indicator (Vertical Pill)
+              Container(
+                width: 4,
+                decoration: BoxDecoration(
+                  color: catColor,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-              child: Icon(catIcon, color: catColor, size: 24),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF2A2F3A) : const Color(0xFFF4F5F7),
-                          borderRadius: BorderRadius.circular(6),
+              const SizedBox(width: 16),
+              
+              // Notification Content
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(catIcon, color: catColor, size: 14),
+                        const SizedBox(width: 6),
+                        Text(
+                          category.toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 10,
+                            letterSpacing: 0.5,
+                            fontWeight: FontWeight.w800,
+                            color: catColor,
+                          ),
                         ),
-                        child: Text(
+                        const Spacer(),
+                        Text(
                           dateStr,
                           style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 10,
                             color: textSecondary,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      if (isNew)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.red.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: const Text('NEW', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.red)),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    notice['title'],
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: textPrimary,
-                      height: 1.4,
+                      ],
                     ),
-                  ),
+                    const SizedBox(height: 10),
+                    Text(
+                      notice['title'],
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: textPrimary,
+                        height: 1.3,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              const SizedBox(width: 12),
+              
+              // Deep Blue Arrow or New Indicator
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (isNew)
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: Colors.redAccent,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                           BoxShadow(color: Colors.redAccent, blurRadius: 4),
+                        ]
+                      ),
+                    )
+                  else
+                    Icon(
+                      Iconsax.arrow_right_3,
+                      size: 16,
+                      color: textSecondary.withOpacity(0.5),
+                    ),
                 ],
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

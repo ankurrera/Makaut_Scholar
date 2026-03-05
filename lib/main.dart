@@ -2,8 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'firebase_options.dart';
 import 'providers/theme_provider.dart';
+import 'features/notices/notice_board_screen.dart';
+import 'features/notes/pdf_viewer_screen.dart';
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // If you're going to use other Firebase services in the background, such as Firestore,
+  // make sure you call `initializeApp` before using other Firebase services.
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  debugPrint("Handling a background message: ${message.messageId}");
+}
 
 // Make sure these imports match your folder structure
 import 'core/supabase_client.dart';
@@ -36,6 +47,10 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     ).timeout(const Duration(seconds: 10));
+    
+    // Set background messaging handler
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    
     debugPrint('Firebase initialized.');
   } catch (e) {
     debugPrint('Base Init Warning: $e');
@@ -215,6 +230,13 @@ class MakautScholarApp extends StatelessWidget {
         '/privacy': (context) => const PrivacyPolicyScreen(),
         '/about': (context) => const AboutScreen(),
         '/notices': (context) => const NoticeBoardScreen(),
+        '/pdf_viewer': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+          return PdfViewerScreen(
+            url: args?['pdfUrl'] ?? args?['url'] ?? '',
+            title: args?['title'] ?? 'Notice',
+          );
+        },
       },
     );
   }

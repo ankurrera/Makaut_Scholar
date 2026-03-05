@@ -724,7 +724,16 @@ class AuthService extends ChangeNotifier {
                     textColor: Colors.white,
                     onPressed: () {
                       // Attempt to route if payload is present
-                      if (message.data['route'] != null) {
+                      if (message.data['url'] != null) {
+                        Navigator.pushNamed(
+                          context, 
+                          '/pdf_viewer', 
+                          arguments: {
+                            'pdfUrl': message.data['url'],
+                            'title': message.notification?.title ?? 'Notice'
+                          }
+                        );
+                      } else if (message.data['route'] != null) {
                         Navigator.pushNamed(context, message.data['route']);
                       } else if (message.data['click_action'] != null) {
                          Navigator.pushNamed(context, '/notices'); 
