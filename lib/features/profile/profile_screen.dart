@@ -31,14 +31,14 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   final _picker = ImagePicker();
 
   // ── Palette ──
-  static const _accentLight = Color(0xFF7C6FF6);
-  static const _accentDark = Color(0xFF8E82FF);
+  static const _accentLight = Color(0xFF1E5240);
+  static const _accentDark = Color(0xFF2D7A5E);
 
-  Color _bg(bool d) => d ? const Color(0xFF0F1115) : const Color(0xFFF4F5F7);
-  Color _card(bool d) => d ? const Color(0xFF171A21) : Colors.white;
+  Color _bg(bool d) => d ? const Color(0xFF121512) : const Color(0xFFF8F6F1);
+  Color _card(bool d) => d ? const Color(0xFF1C2020) : Colors.white;
   Color _textP(bool d) => d ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E);
   Color _textS(bool d) => d ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
-  Color _border(bool d) => d ? const Color(0xFF2A2F3A) : const Color(0xFFE6E8EC);
+  Color _border(bool d) => d ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC);
   Color _accent(bool d) => d ? _accentDark : _accentLight;
 
   @override
@@ -288,7 +288,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           // ── Full-bleed cover image ──
           if (_isUploadingPhoto)
             Container(
-              color: isDark ? const Color(0xFF171A21) : Colors.grey[200],
+              color: isDark ? const Color(0xFF1C2020) : Colors.grey[200],
               child: Center(child: CircularProgressIndicator(color: accent, strokeWidth: 2.5)),
             )
           else if (hasPhoto)
@@ -402,8 +402,8 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: isDark
-              ? [const Color(0xFF2D1B69), const Color(0xFF1A1530), const Color(0xFF0F1115)]
-              : [const Color(0xFF9F8FFF), const Color(0xFF7C6FF6), const Color(0xFFEDE9FE)],
+              ? [const Color(0xFF2D1B69), const Color(0xFF1A1530), const Color(0xFF121512)]
+              : [const Color(0xFF4A9E7C), const Color(0xFF1E5240), const Color(0xFFEDE9FE)],
         ),
       ),
       child: Center(

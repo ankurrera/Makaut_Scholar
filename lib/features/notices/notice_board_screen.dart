@@ -75,11 +75,11 @@ class _NoticeBoardScreenState extends State<NoticeBoardScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = isDark ? const Color(0xFF8E82FF) : const Color(0xFF7C6FF6);
-    final bgPrimary = isDark ? const Color(0xFF0F1115) : const Color(0xFFF4F5F7);
+    final primaryColor = isDark ? const Color(0xFF2D7A5E) : const Color(0xFF1E5240);
+    final bgPrimary = isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1);
     final textPrimary = isDark ? Colors.white : const Color(0xFF1E1E1E);
     final textSecondary = isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
-    final cardBg = isDark ? const Color(0xFF171A21) : Colors.white;
+    final cardBg = isDark ? const Color(0xFF1C2020) : Colors.white;
 
     return Scaffold(
       backgroundColor: bgPrimary,
@@ -208,7 +208,7 @@ class _NoticeCard extends StatelessWidget {
           color: cardBg,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: isDark ? const Color(0xFF2A2F3A) : const Color(0xFFE6E8EC),
+            color: isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC),
             width: 1,
           ),
           boxShadow: [

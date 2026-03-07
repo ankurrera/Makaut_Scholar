@@ -35,14 +35,14 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
   String? _error;
 
   // ── Palette ──
-  static const _accentLight = Color(0xFF7C6FF6);
-  static const _accentDark = Color(0xFF8E82FF);
+  static const _accentLight = Color(0xFF1E5240);
+  static const _accentDark = Color(0xFF2D7A5E);
 
-  Color _bg(bool d) => d ? const Color(0xFF0F1115) : const Color(0xFFF4F5F7);
+  Color _bg(bool d) => d ? const Color(0xFF121512) : const Color(0xFFF8F6F1);
   Color _card(bool d) => d ? const Color(0xFF181B22) : Colors.white;
   Color _textP(bool d) => d ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E);
   Color _textS(bool d) => d ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
-  Color _border(bool d) => d ? const Color(0xFF2A2F3A) : const Color(0xFFE6E8EC);
+  Color _border(bool d) => d ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC);
   Color _accent(bool d) => d ? _accentDark : _accentLight;
 
   // ── Luxury Palette ──
@@ -162,7 +162,7 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
-                backgroundColor: const Color(0xFF8E82FF),
+                backgroundColor: const Color(0xFF2D7A5E),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
@@ -243,7 +243,7 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Unlock Successful! ✨ Preparing your content...'),
-              backgroundColor: Color(0xFF8E82FF),
+              backgroundColor: Color(0xFF2D7A5E),
               duration: Duration(seconds: 2),
             ),
           );

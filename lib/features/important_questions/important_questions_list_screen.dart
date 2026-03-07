@@ -112,7 +112,7 @@ class _ImportantQuestionsListScreenState extends State<ImportantQuestionsListScr
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Unlock Successful! ✨ Preparing your content...'),
-              backgroundColor: Color(0xFF8E82FF),
+              backgroundColor: Color(0xFF2D7A5E),
               duration: Duration(seconds: 2),
             ),
           );
@@ -131,7 +131,7 @@ class _ImportantQuestionsListScreenState extends State<ImportantQuestionsListScr
     final accent = isDark ? const Color(0xFFFF708D) : const Color(0xFFFF4D6D);
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF0F1115) : const Color(0xFFF4F5F7),
+      backgroundColor: isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
@@ -144,7 +144,7 @@ class _ImportantQuestionsListScreenState extends State<ImportantQuestionsListScr
                         physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                         slivers: [
                           SliverAppBar(
-                            backgroundColor: isDark ? const Color(0xFF0F1115) : const Color(0xFFF4F5F7),
+                            backgroundColor: isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1),
                             elevation: 0,
                             pinned: true,
                             expandedHeight: 180,
@@ -152,9 +152,9 @@ class _ImportantQuestionsListScreenState extends State<ImportantQuestionsListScr
                               icon: Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: isDark ? const Color(0xFF171A21) : Colors.white,
+                                  color: isDark ? const Color(0xFF1C2020) : Colors.white,
                                   borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: isDark ? const Color(0xFF2A2F3A) : const Color(0xFFE6E8EC)),
+                                  border: Border.all(color: isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC)),
                                 ),
                                 child: Icon(Iconsax.arrow_left, color: isDark ? Colors.white : Colors.black, size: 18),
                               ),

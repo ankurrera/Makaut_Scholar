@@ -15,10 +15,10 @@ class SemesterScreen extends StatefulWidget {
 class _SemesterScreenState extends State<SemesterScreen> {
   late String _userDepartment;
 
-  static const _accentLight = Color(0xFF7C6FF6);
-  static const _accentDark = Color(0xFF8E82FF);
+  static const _accentLight = Color(0xFF1E5240);
+  static const _accentDark = Color(0xFF2D7A5E);
 
-  Color _bg(bool d) => d ? const Color(0xFF0F1115) : const Color(0xFFF4F5F7);
+  Color _bg(bool d) => d ? const Color(0xFF121512) : const Color(0xFFF8F6F1);
   Color _textP(bool d) => d ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E);
   Color _textS(bool d) => d ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
   Color _accent(bool d) => d ? _accentDark : _accentLight;
@@ -160,7 +160,7 @@ class _SemesterTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF171A21) : Colors.white,
+        color: isDark ? const Color(0xFF1C2020) : Colors.white,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(

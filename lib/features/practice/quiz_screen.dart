@@ -129,7 +129,7 @@ class _QuizScreenState extends State<QuizScreen> {
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         backgroundColor: Theme.of(context).brightness == Brightness.dark 
-          ? const Color(0xFF171A21) 
+          ? const Color(0xFF1C2020) 
           : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         content: Column(
@@ -198,12 +198,12 @@ class _QuizScreenState extends State<QuizScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = isDark ? const Color(0xFF8E82FF) : const Color(0xFF7C6FF6);
+    final primaryColor = isDark ? const Color(0xFF2D7A5E) : const Color(0xFF1E5240);
     final currentQuestion = _shuffledQuestions[_currentIndex];
     final isAnswered = _selectedAnswers[_currentIndex] != null;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF0F1115) : const Color(0xFFF4F5F7),
+      backgroundColor: isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -282,8 +282,8 @@ class _QuizScreenState extends State<QuizScreen> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF171A21) : Colors.white,
-        border: Border(top: BorderSide(color: isDark ? const Color(0xFF2A2F3A) : const Color(0xFFE6E8EC))),
+        color: isDark ? const Color(0xFF1C2020) : Colors.white,
+        border: Border(top: BorderSide(color: isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC))),
       ),
       child: Row(
         children: [
@@ -326,8 +326,8 @@ class _QuizScreenState extends State<QuizScreen> {
     final isCorrect = index == _shuffledQuestions[_currentIndex].correctIndex;
     final isAnswered = selectedAnswer != null;
     
-    Color borderColor = isDark ? const Color(0xFF2A2F3A) : const Color(0xFFE6E8EC);
-    Color? bgColor = isDark ? const Color(0xFF171A21) : Colors.white;
+    Color borderColor = isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC);
+    Color? bgColor = isDark ? const Color(0xFF1C2020) : Colors.white;
 
     if (isAnswered) {
       if (isCorrect) {

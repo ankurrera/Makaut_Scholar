@@ -28,10 +28,10 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
   bool _hasError = false;
 
   // ── Palette ──
-  Color _bg(bool d) => d ? const Color(0xFF0F1115) : const Color(0xFFF4F5F7);
+  Color _bg(bool d) => d ? const Color(0xFF121512) : const Color(0xFFF8F6F1);
   Color _textP(bool d) => d ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E);
   Color _textS(bool d) => d ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
-  Color _accent(bool d) => d ? const Color(0xFF8E82FF) : const Color(0xFF7C6FF6);
+  Color _accent(bool d) => d ? const Color(0xFF2D7A5E) : const Color(0xFF1E5240);
 
   static const _secureChannel = MethodChannel('com.makaut_scholar/screen_security');
 

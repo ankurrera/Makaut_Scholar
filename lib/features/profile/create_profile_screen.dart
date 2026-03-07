@@ -116,10 +116,10 @@ class _CreateProfileScreenState extends State<CreateProfileScreen>
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // ── Refined Palette ──
-    const accent     = Color(0xFF7C6FF6);
-    final bg         = isDark ? const Color(0xFF0F1115) : const Color(0xFFF7F8FA);
-    final card       = isDark ? const Color(0xFF171A21) : Colors.white;
-    final border     = isDark ? const Color(0xFF2A2F3A) : const Color(0xFFE6E8EC);
+    const accent     = Color(0xFF1E5240);
+    final bg         = isDark ? const Color(0xFF121512) : const Color(0xFFF7F8FA);
+    final card       = isDark ? const Color(0xFF1C2020) : Colors.white;
+    final border     = isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC);
     final textP      = isDark ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E);
     final textS      = isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
     final glowOp     = isDark ? 0.2 : 0.1;
@@ -284,7 +284,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen>
                             height: 60,
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
-                                colors: [Color(0xFF7C6FF6), Color(0xFF6352E9)],
+                                colors: [Color(0xFF1E5240), Color(0xFF1A4835)],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
@@ -331,13 +331,13 @@ class _CreateProfileScreenState extends State<CreateProfileScreen>
   }
 
   InputDecoration _fieldDecoration(IconData icon, String hint, bool isDark, Color accent) {
-    final borderCol = isDark ? const Color(0xFF2A2F3A) : const Color(0xFFE6E8EC);
+    final borderCol = isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC);
     return InputDecoration(
       hintText: hint,
       hintStyle: TextStyle(color: isDark ? const Color(0xFF4A5568) : const Color(0xFFADB5BD), fontSize: 14),
       prefixIcon: Icon(icon, color: isDark ? const Color(0xFF535F77) : const Color(0xFF94A3B8), size: 20),
       filled: true,
-      fillColor: isDark ? const Color(0xFF0F1115).withValues(alpha: 0.5) : const Color(0xFFF9FAFB),
+      fillColor: isDark ? const Color(0xFF121512).withValues(alpha: 0.5) : const Color(0xFFF9FAFB),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
       enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: borderCol, width: 1)),
@@ -425,13 +425,13 @@ class _ProfileField extends StatelessWidget {
   }
 
   InputDecoration _fieldDecoration(IconData icon, String hint, bool isDark, Color accent) {
-    final borderCol = isDark ? const Color(0xFF2A2F3A) : const Color(0xFFE6E8EC);
+    final borderCol = isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC);
     return InputDecoration(
       hintText: hint,
       hintStyle: TextStyle(color: isDark ? const Color(0xFF4A5568) : const Color(0xFFADB5BD), fontSize: 14),
       prefixIcon: Icon(icon, color: isDark ? const Color(0xFF535F77) : const Color(0xFF94A3B8), size: 20),
       filled: true,
-      fillColor: isDark ? const Color(0xFF0F1115).withValues(alpha: 0.5) : const Color(0xFFF9FAFB),
+      fillColor: isDark ? const Color(0xFF121512).withValues(alpha: 0.5) : const Color(0xFFF9FAFB),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
       enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: borderCol, width: 1)),

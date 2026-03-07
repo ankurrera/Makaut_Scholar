@@ -171,7 +171,7 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
                   ? const Color(0xFF1A1D21).withOpacity(0.9)
                   : Colors.white.withOpacity(0.9),
               borderRadius: BorderRadius.circular(32),
-              border: Border.all(color: const Color(0xFF8E82FF).withOpacity(0.3)),
+              border: Border.all(color: const Color(0xFF2D7A5E).withOpacity(0.3)),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -179,10 +179,10 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF8E82FF).withOpacity(0.1),
+                    color: const Color(0xFF2D7A5E).withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Iconsax.tick_circle_copy, color: Color(0xFF8E82FF), size: 48),
+                  child: const Icon(Iconsax.tick_circle_copy, color: Color(0xFF2D7A5E), size: 48),
                 ),
                 const SizedBox(height: 24),
                 const Text(
@@ -200,7 +200,7 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
                 const SizedBox(
                   width: 40,
                   height: 40,
-                  child: CircularProgressIndicator(strokeWidth: 3, color: Color(0xFF8E82FF)),
+                  child: CircularProgressIndicator(strokeWidth: 3, color: Color(0xFF2D7A5E)),
                 ),
                 const SizedBox(height: 24),
               ],
@@ -229,7 +229,7 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF8E82FF), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2D7A5E), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
                   onPressed: () => Navigator.pop(context),
                   child: const Text('Got it', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
                 ),
@@ -252,7 +252,7 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
     final Color borderColor = isDarkMode ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.08);
     final Color textColor = isDarkMode ? Colors.white : const Color(0xFF1A1D21);
     final Color textDimColor = isDarkMode ? Colors.white70 : const Color(0xFF4A4D54);
-    final Color accentColor = const Color(0xFF8E82FF); // Signature Purple
+    final Color accentColor = const Color(0xFF2D7A5E); // Forest Green
 
     return Scaffold(
       backgroundColor: bgColor,

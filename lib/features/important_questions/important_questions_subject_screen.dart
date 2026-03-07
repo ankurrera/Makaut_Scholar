@@ -85,7 +85,7 @@ class _ImportantQuestionsSubjectScreenState extends State<ImportantQuestionsSubj
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF0F1115) : const Color(0xFFF4F5F7),
+      backgroundColor: isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1),
       body: SafeArea(
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(),
@@ -101,10 +101,10 @@ class _ImportantQuestionsSubjectScreenState extends State<ImportantQuestionsSubj
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF171A21) : Colors.white,
+                          color: isDark ? const Color(0xFF1C2020) : Colors.white,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: isDark ? const Color(0xFF2A2F3A) : const Color(0xFFE6E8EC),
+                            color: isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC),
                           ),
                         ),
                         child: Icon(Iconsax.arrow_left_2, size: 20, color: isDark ? Colors.white : Colors.black),
@@ -206,10 +206,10 @@ class _ImportantQuestionsSubjectScreenState extends State<ImportantQuestionsSubj
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF171A21) : Colors.white,
+              color: isDark ? const Color(0xFF1C2020) : Colors.white,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isDark ? const Color(0xFF2A2F3A) : const Color(0xFFE6E8EC),
+                color: isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC),
               ),
             ),
             child: Row(

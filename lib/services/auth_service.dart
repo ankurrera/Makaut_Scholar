@@ -718,7 +718,7 @@ class AuthService extends ChangeNotifier {
                   behavior: SnackBarBehavior.floating,
                   margin: const EdgeInsets.all(16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  backgroundColor: const Color(0xFF7C6FF6),
+                  backgroundColor: const Color(0xFF1E5240),
                   action: SnackBarAction(
                     label: 'View',
                     textColor: Colors.white,

@@ -19,7 +19,7 @@ class _MockTestSemesterScreenState extends State<MockTestSemesterScreen>
   String? _error;
   late String _userDepartment;
 
-  static const _accentColor = Color(0xFF8E82FF);
+  static const _accentColor = Color(0xFF2D7A5E);
 
   @override
   void initState() {
@@ -61,8 +61,8 @@ class _MockTestSemesterScreenState extends State<MockTestSemesterScreen>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textPrimary = isDark ? Colors.white : const Color(0xFF1E1E1E);
     final textSecondary = isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
-    final bgPrimary = isDark ? const Color(0xFF0F1115) : const Color(0xFFF4F5F7);
-    final cardBg = isDark ? const Color(0xFF171A21) : Colors.white;
+    final bgPrimary = isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1);
+    final cardBg = isDark ? const Color(0xFF1C2020) : Colors.white;
 
     return Scaffold(
       backgroundColor: bgPrimary,
@@ -105,7 +105,7 @@ class _MockTestSemesterScreenState extends State<MockTestSemesterScreen>
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: isDark ? const Color(0xFF2A2F3A) : const Color(0xFFE6E8EC)),
+        border: Border.all(color: isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC)),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),

@@ -22,8 +22,8 @@ class _CgpaCalculatorScreenState extends State<CgpaCalculatorScreen> with Ticker
   bool _hasCalculated = false;
 
   // -- DESIGN SYSTEM --
-  final Color _accentColor = const Color(0xFF8E82FF);
-  final Color _accentGlow = const Color(0xFF7C6FF6).withValues(alpha: 0.3);
+  final Color _accentColor = const Color(0xFF2D7A5E);
+  final Color _accentGlow = const Color(0xFF1E5240).withValues(alpha: 0.3);
 
   void _calculate() {
     setState(() => _hasCalculated = false);
@@ -198,9 +198,9 @@ class _CgpaCalculatorScreenState extends State<CgpaCalculatorScreen> with Ticker
       height: 52,
       padding: const EdgeInsets.all(5),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF171A21) : Colors.white,
+        color: isDark ? const Color(0xFF1C2020) : Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: isDark ? const Color(0xFF2A2F3A) : const Color(0xFFE2E8F0)),
+        border: Border.all(color: isDark ? const Color(0xFF2A3030) : const Color(0xFFE2E8F0)),
       ),
       child: Row(
         children: CalculationMode.values.map((mode) {
@@ -567,7 +567,7 @@ class _ModernInputFieldState extends State<ModernInputField> {
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: widget.isDark ? const Color(0xFF2A2F3A) : const Color(0xFFE2E8F0),
+            color: widget.isDark ? const Color(0xFF2A3030) : const Color(0xFFE2E8F0),
             width: 1.5,
           ),
         ),

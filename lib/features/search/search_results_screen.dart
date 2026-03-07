@@ -96,11 +96,11 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     // --- Palette ---
-    final Color bg = isDark ? const Color(0xFF0F1115) : const Color(0xFFF4F5F7);
-    final Color card = isDark ? const Color(0xFF171A21) : Colors.white;
+    final Color bg = isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1);
+    final Color card = isDark ? const Color(0xFF1C2020) : Colors.white;
     final Color textP = isDark ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E);
     final Color textS = isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
-    final Color accent = const Color(0xFF7C6FF6);
+    final Color accent = const Color(0xFF1E5240);
 
     return Scaffold(
       backgroundColor: bg,
@@ -217,7 +217,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             // --- Results ---
             Expanded(
               child: _isLoading 
-                ? const Center(child: CircularProgressIndicator(color: Color(0xFF7C6FF6)))
+                ? const Center(child: CircularProgressIndicator(color: Color(0xFF1E5240)))
                 : _results.isEmpty 
                   ? _buildEmptyState(textS, textP)
                   : ListView.builder(
