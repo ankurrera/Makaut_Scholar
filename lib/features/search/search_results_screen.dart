@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../services/search_service.dart';
 import '../../core/models/search_result.dart';
+import '../../core/widgets/dot_loading.dart';
 import '../notes/notes_viewer_screen.dart';
 import '../pyq/pyq_papers_screen.dart';
 import '../syllabus/syllabus_semester_screen.dart'; // Just a placeholder for now
@@ -28,7 +29,13 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   List<SearchResult> _results = [];
   bool _isLoading = false;
   String _selectedFilter = 'All';
-  final List<String> _filters = ['All', 'Notes', 'Syllabus', 'PYQs', 'Important'];
+  final List<String> _filters = [
+    'All',
+    'Notes',
+    'Syllabus',
+    'PYQs',
+    'Important'
+  ];
 
   @override
   void initState() {
@@ -77,14 +84,13 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
       case SearchResultType.syllabus:
         // Syllabus navigation usually goes to a list, we can show specific PDF if we had a direct viewer
         // For now, let's just go up or show a snackbar if not fully implemented
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Opening Syllabus for ${result.subject}...'))
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Opening Syllabus for ${result.subject}...')));
         return;
       case SearchResultType.important:
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Opening Important Questions for ${result.subject}...'))
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content:
+                Text('Opening Important Questions for ${result.subject}...')));
         return;
     }
 
@@ -94,13 +100,15 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     // --- Palette ---
     final Color bg = isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1);
     final Color card = isDark ? const Color(0xFF1C2020) : Colors.white;
-    final Color textP = isDark ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E);
-    final Color textS = isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
-    final Color accent = const Color(0xFF1E5240);
+    final Color textP =
+        isDark ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E);
+    final Color textS =
+        isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
+    final Color accent = const Color(0xFFE5252A);
 
     return Scaffold(
       backgroundColor: bg,
@@ -112,7 +120,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
               child: Row(
                 children: [
-                   IconButton(
+                  IconButton(
                     onPressed: () => Navigator.pop(context),
                     icon: Icon(Iconsax.arrow_left_2, color: textP),
                   ),
@@ -191,17 +199,24 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                       },
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
                           color: isSelected ? accent : card,
                           borderRadius: BorderRadius.circular(20),
-                          border: isSelected ? null : Border.all(color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05)),
+                          border: isSelected
+                              ? null
+                              : Border.all(
+                                  color: isDark
+                                      ? Colors.white.withValues(alpha: 0.05)
+                                      : Colors.black.withValues(alpha: 0.05)),
                         ),
                         child: Text(
                           filter,
                           style: TextStyle(
                             color: isSelected ? Colors.white : textS,
-                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                            fontWeight:
+                                isSelected ? FontWeight.w600 : FontWeight.w500,
                             fontSize: 13,
                           ),
                         ),
@@ -216,18 +231,20 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
 
             // --- Results ---
             Expanded(
-              child: _isLoading 
-                ? const Center(child: CircularProgressIndicator(color: Color(0xFF1E5240)))
-                : _results.isEmpty 
-                  ? _buildEmptyState(textS, textP)
-                  : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      itemCount: _results.length,
-                      itemBuilder: (context, index) {
-                        final result = _results[index];
-                        return _buildResultTile(result, card, textP, textS, accent);
-                      },
-                    ),
+              child: _isLoading
+                  ? const Center(
+                      child: DotLoadingIndicator(color: Color(0xFFE5252A)))
+                  : _results.isEmpty
+                      ? _buildEmptyState(textS, textP)
+                      : ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          itemCount: _results.length,
+                          itemBuilder: (context, index) {
+                            final result = _results[index];
+                            return _buildResultTile(
+                                result, card, textP, textS, accent);
+                          },
+                        ),
             ),
           ],
         ),
@@ -235,7 +252,8 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     );
   }
 
-  Widget _buildResultTile(SearchResult result, Color cardColor, Color textP, Color textS, Color accent) {
+  Widget _buildResultTile(SearchResult result, Color cardColor, Color textP,
+      Color textS, Color accent) {
     IconData icon;
     Color iconBg;
 
@@ -274,11 +292,13 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             color: iconBg,
             borderRadius: BorderRadius.circular(14),
           ),
-          child: Icon(icon, color: Colors.black.withValues(alpha: 0.7), size: 22),
+          child:
+              Icon(icon, color: Colors.black.withValues(alpha: 0.7), size: 22),
         ),
         title: Text(
           result.title,
-          style: TextStyle(color: textP, fontWeight: FontWeight.bold, fontSize: 15),
+          style: TextStyle(
+              color: textP, fontWeight: FontWeight.bold, fontSize: 15),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -296,11 +316,15 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Iconsax.search_status, size: 64, color: textS.withValues(alpha: 0.3)),
+          Icon(Iconsax.search_status,
+              size: 64, color: textS.withValues(alpha: 0.3)),
           const SizedBox(height: 16),
           Text(
-            _searchController.text.isEmpty ? 'Type to start searching' : 'No results found',
-            style: TextStyle(color: textP, fontSize: 16, fontWeight: FontWeight.w600),
+            _searchController.text.isEmpty
+                ? 'Type to start searching'
+                : 'No results found',
+            style: TextStyle(
+                color: textP, fontSize: 16, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Text(

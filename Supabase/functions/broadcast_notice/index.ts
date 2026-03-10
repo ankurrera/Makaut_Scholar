@@ -45,7 +45,7 @@ serve(async (req) => {
         const { title, category, link } = newNotice
 
         // 2. Fetch all unique FCM tokens from the database
-        const { data: tokensError, data: tokensData } = await supabase
+        const { data: tokensData, error: tokensError } = await supabase
             .from('fcm_tokens')
             .select('token')
 
@@ -55,7 +55,7 @@ serve(async (req) => {
         }
 
         const tokens = tokensData?.map(t => t.token) || []
-        console.log(`Found \${tokens.length} tokens to broadcast to.`)
+        console.log(`Found ${tokens.length} tokens to broadcast to.`)
 
         if (tokens.length === 0) {
             return new Response("No users to send notifications to.", { status: 200 })
@@ -64,21 +64,44 @@ serve(async (req) => {
         // 3. Construct the FCM Multicast Payload directly for Firebase Admin 
         const message = {
             notification: {
-                title: `📌 New \${category} Notice`,
+                title: `📌 New ${category} Notice`,
                 body: title,
+                icon: "notification_icon",
+            },
+            android: {
+                priority: "high" as const,
+                notification: {
+                    channelId: "high_importance_channel",
+                    priority: "high" as const,
+                    clickAction: "FLUTTER_NOTIFICATION_CLICK",
+                    icon: "notification_icon",
+                },
+            },
+            apns: {
+                payload: {
+                    aps: {
+                        alert: {
+                            title: `📌 New ${category} Notice`,
+                            body: title,
+                        },
+                        sound: "default",
+                        badge: 1,
+                    },
+                },
             },
             data: {
-                url: link, // The actual PDF link, so the app can open it directly
+                url: link ?? '',
+                click_action: "FLUTTER_NOTIFICATION_CLICK",
             },
-            tokens: tokens, // Array of tokens (max 500 per batch in sendEachForMulticast)
+            tokens: tokens,
         }
 
         // 4. Send using FCM HTTP v1 Admin SDK
         const response = await getMessaging().sendEachForMulticast(message);
 
-        console.log(`Successfully sent \${response.successCount} messages.`);
+        console.log(`Successfully sent ${response.successCount} messages.`);
         if (response.failureCount > 0) {
-            console.error(`Failed to send \${response.failureCount} messages.`);
+            console.error(`Failed to send ${response.failureCount} messages.`);
             // Optional: Handle token cleanup here if tokens are unregistered (error.code === 'messaging/registration-token-not-registered')
         }
 

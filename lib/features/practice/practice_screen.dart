@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
+import '../../core/widgets/dot_loading.dart';
 import 'mock_test_subject_screen.dart';
 
 class PracticeScreen extends StatefulWidget {
@@ -17,7 +18,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
   String? _error;
   String? _userDepartment;
 
-  static const _accentColor = Color(0xFF2D7A5E);
+  static const _accentColor = Color(0xFFE5252A);
 
   @override
   void initState() {
@@ -36,7 +37,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
       if (profile?['department'] != null) {
         _userDepartment = profile!['department'];
       }
-      
+
       if (_userDepartment == null || _userDepartment!.isEmpty) {
         if (mounted) {
           setState(() {
@@ -69,9 +70,12 @@ class _PracticeScreenState extends State<PracticeScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Palette
-    final Color bgPrimary = isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1);
-    final Color textPrimary = isDark ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E);
-    final Color textSecondary = isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
+    final Color bgPrimary =
+        isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1);
+    final Color textPrimary =
+        isDark ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E);
+    final Color textSecondary =
+        isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
     final Color cardBg = isDark ? const Color(0xFF1C2020) : Colors.white;
 
     return Scaffold(
@@ -81,7 +85,8 @@ class _PracticeScreenState extends State<PracticeScreen> {
           onRefresh: _loadSemesters,
           color: _accentColor,
           child: CustomScrollView(
-            physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+            physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics()),
             slivers: [
               SliverToBoxAdapter(
                 child: Padding(
@@ -117,13 +122,14 @@ class _PracticeScreenState extends State<PracticeScreen> {
     );
   }
 
-  Widget _buildContentSliver(bool isDark, Color textPrimary, Color textSecondary, Color cardBg) {
+  Widget _buildContentSliver(
+      bool isDark, Color textPrimary, Color textSecondary, Color cardBg) {
     if (_isLoading) {
       return const SliverFillRemaining(
-        child: Center(child: CircularProgressIndicator(color: _accentColor)),
+        child: Center(child: DotLoadingIndicator(color: _accentColor)),
       );
     }
-    
+
     if (_error == 'department_missing') {
       return SliverFillRemaining(
         child: Center(
@@ -132,9 +138,14 @@ class _PracticeScreenState extends State<PracticeScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Iconsax.profile_delete, size: 64, color: textSecondary.withValues(alpha: 0.3)),
+                Icon(Iconsax.profile_delete,
+                    size: 64, color: textSecondary.withValues(alpha: 0.3)),
                 const SizedBox(height: 16),
-                Text('Department Required', style: TextStyle(color: textPrimary, fontSize: 18, fontWeight: FontWeight.bold)),
+                Text('Department Required',
+                    style: TextStyle(
+                        color: textPrimary,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 Text(
                   'Please update your department in the Profile section to practice quizzes.',
@@ -156,9 +167,14 @@ class _PracticeScreenState extends State<PracticeScreen> {
             children: [
               const Icon(Iconsax.warning_2, size: 48, color: Colors.redAccent),
               const SizedBox(height: 16),
-              Text('Failed to load quizzes', style: TextStyle(color: textPrimary, fontWeight: FontWeight.bold)),
+              Text('Failed to load quizzes',
+                  style: TextStyle(
+                      color: textPrimary, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              TextButton(onPressed: _loadSemesters, child: const Text('Retry', style: TextStyle(color: _accentColor))),
+              TextButton(
+                  onPressed: _loadSemesters,
+                  child: const Text('Retry',
+                      style: TextStyle(color: _accentColor))),
             ],
           ),
         ),
@@ -171,11 +187,17 @@ class _PracticeScreenState extends State<PracticeScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Iconsax.document_filter, size: 64, color: textSecondary.withValues(alpha: 0.3)),
+              Icon(Iconsax.document_filter,
+                  size: 64, color: textSecondary.withValues(alpha: 0.3)),
               const SizedBox(height: 16),
-              Text('No quizzes available', style: TextStyle(color: textPrimary, fontSize: 18, fontWeight: FontWeight.bold)),
+              Text('No quizzes available',
+                  style: TextStyle(
+                      color: textPrimary,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              Text('Try later for ${_userDepartment ?? 'your department'}', style: TextStyle(color: textSecondary)),
+              Text('Try later for ${_userDepartment ?? 'your department'}',
+                  style: TextStyle(color: textSecondary)),
             ],
           ),
         ),
@@ -188,7 +210,8 @@ class _PracticeScreenState extends State<PracticeScreen> {
         delegate: SliverChildBuilderDelegate(
           (context, index) {
             final semester = _semesters[index];
-            return _buildSemesterCard(semester, isDark, textPrimary, textSecondary, cardBg);
+            return _buildSemesterCard(
+                semester, isDark, textPrimary, textSecondary, cardBg);
           },
           childCount: _semesters.length,
         ),
@@ -196,13 +219,15 @@ class _PracticeScreenState extends State<PracticeScreen> {
     );
   }
 
-  Widget _buildSemesterCard(int semester, bool isDark, Color textPrimary, Color textSecondary, Color cardBg) {
+  Widget _buildSemesterCard(int semester, bool isDark, Color textPrimary,
+      Color textSecondary, Color cardBg) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC)),
+        border: Border.all(
+            color: isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC)),
         boxShadow: [
           if (!isDark)
             BoxShadow(
@@ -224,9 +249,11 @@ class _PracticeScreenState extends State<PracticeScreen> {
         ),
         title: Text(
           'Semester $semester',
-          style: TextStyle(color: textPrimary, fontWeight: FontWeight.bold, fontSize: 16),
+          style: TextStyle(
+              color: textPrimary, fontWeight: FontWeight.bold, fontSize: 16),
         ),
-        subtitle: Text('Select to view subjects', style: TextStyle(color: textSecondary, fontSize: 13)),
+        subtitle: Text('Select to view subjects',
+            style: TextStyle(color: textSecondary, fontSize: 13)),
         trailing: Icon(Iconsax.arrow_right_3, color: textSecondary, size: 18),
         onTap: () {
           if (_userDepartment != null) {

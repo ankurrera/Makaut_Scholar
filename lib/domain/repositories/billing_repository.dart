@@ -10,7 +10,8 @@ abstract class BillingRepository {
     // Find nearest tier (exact match expected since admin uses dropdowns)
     final int tier = priceTiers.firstWhere(
       (t) => t == rounded,
-      orElse: () => priceTiers.reduce((a, b) => (a - rounded).abs() < (b - rounded).abs() ? a : b),
+      orElse: () => priceTiers
+          .reduce((a, b) => (a - rounded).abs() < (b - rounded).abs() ? a : b),
     );
     return 'scholar_price_$tier';
   }
@@ -40,9 +41,10 @@ abstract class BillingRepository {
 
   /// Open Razorpay Checkout with a pre-created order (created via createOrder())
   Future<void> processRazorpayPayment({
-    required String razorpayOrderId,  // From Razorpay API (returned by createOrder)
-    required String internalOrderId,  // Our Supabase order UUID
-    required String keyId,            // Razorpay key
+    required String
+        razorpayOrderId, // From Razorpay API (returned by createOrder)
+    required String internalOrderId, // Our Supabase order UUID
+    required String keyId, // Razorpay key
     required double amount,
     String? externalTransactionToken,
   });

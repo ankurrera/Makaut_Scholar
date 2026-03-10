@@ -3,12 +3,14 @@ import 'package:provider/provider.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../services/auth_service.dart';
 import '../../services/offline_service.dart';
+import '../../core/widgets/dot_loading.dart';
 import '../notes/pdf_viewer_screen.dart';
 
 class SyllabusSubjectScreen extends StatefulWidget {
   final String department;
   final int semester;
-  const SyllabusSubjectScreen({super.key, required this.department, required this.semester});
+  const SyllabusSubjectScreen(
+      {super.key, required this.department, required this.semester});
 
   @override
   State<SyllabusSubjectScreen> createState() => _SyllabusSubjectScreenState();
@@ -61,24 +63,37 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
   }
 
   Future<void> _loadSyllabus() async {
-    setState(() { _isLoading = true; _error = null; });
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
     try {
       final auth = Provider.of<AuthService>(context, listen: false);
       // Fetch all subjects, then for each get syllabus entries
-      final subjects = await auth.fetchSyllabusSubjects(widget.department, widget.semester);
+      final subjects =
+          await auth.fetchSyllabusSubjects(widget.department, widget.semester);
       List<Map<String, dynamic>> allEntries = [];
       for (final subjectData in subjects) {
         final subject = subjectData['subject'] as String;
         final paperCode = subjectData['paper_code'] as String?;
-        final entries = await auth.fetchSyllabus(widget.department, widget.semester, subject, paperCode: paperCode);
+        final entries = await auth.fetchSyllabus(
+            widget.department, widget.semester, subject,
+            paperCode: paperCode);
         allEntries.addAll(entries);
       }
       if (mounted) {
-        setState(() { _syllabusEntries = allEntries; _isLoading = false; });
+        setState(() {
+          _syllabusEntries = allEntries;
+          _isLoading = false;
+        });
         _staggerController.forward(from: 0);
       }
     } catch (e) {
-      if (mounted) setState(() { _error = e.toString(); _isLoading = false; });
+      if (mounted)
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
     }
   }
 
@@ -86,7 +101,8 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => PdfViewerScreen(url: url, filePath: filePath, title: title),
+        builder: (_) =>
+            PdfViewerScreen(url: url, filePath: filePath, title: title),
       ),
     );
   }
@@ -117,9 +133,10 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircularProgressIndicator(color: accent, strokeWidth: 2.5),
+                  DotLoadingIndicator(color: accent),
                   const SizedBox(height: 16),
-                  Text('Loading syllabus...', style: TextStyle(color: _textS(isDark), fontSize: 13)),
+                  Text('Loading syllabus...',
+                      style: TextStyle(color: _textS(isDark), fontSize: 13)),
                 ],
               ),
             )
@@ -131,14 +148,17 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
                       color: accent,
                       onRefresh: _loadSyllabus,
                       child: CustomScrollView(
-                        physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                        physics: const BouncingScrollPhysics(
+                            parent: AlwaysScrollableScrollPhysics()),
                         slivers: [
                           SliverAppBar(
                             backgroundColor: _bg(isDark),
                             elevation: 0,
                             scrolledUnderElevation: 0,
                             pinned: true,
-                            expandedHeight: MediaQuery.of(context).padding.top + kToolbarHeight + 80,
+                            expandedHeight: MediaQuery.of(context).padding.top +
+                                kToolbarHeight +
+                                80,
                             leading: IconButton(
                               icon: Container(
                                 padding: const EdgeInsets.all(8),
@@ -146,25 +166,37 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
                                   color: _card(isDark),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: Icon(Iconsax.arrow_left, color: _textP(isDark), size: 18),
+                                child: Icon(Iconsax.arrow_left,
+                                    color: _textP(isDark), size: 18),
                               ),
                               onPressed: () => Navigator.pop(context),
                             ),
                             flexibleSpace: FlexibleSpaceBar(
                               background: Padding(
-                                padding: EdgeInsets.fromLTRB(20, MediaQuery.of(context).padding.top + kToolbarHeight + 8, 20, 0),
+                                padding: EdgeInsets.fromLTRB(
+                                    20,
+                                    MediaQuery.of(context).padding.top +
+                                        kToolbarHeight +
+                                        8,
+                                    20,
+                                    0),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 5),
                                       decoration: BoxDecoration(
-                                        color: accent.withValues(alpha: isDark ? 0.15 : 0.1),
+                                        color: accent.withValues(
+                                            alpha: isDark ? 0.15 : 0.1),
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Text(
                                         'Sem ${widget.semester} · ${widget.department}',
-                                        style: TextStyle(color: accent, fontSize: 12, fontWeight: FontWeight.w600),
+                                        style: TextStyle(
+                                            color: accent,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600),
                                       ),
                                     ),
                                     const SizedBox(height: 10),
@@ -180,7 +212,8 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
                                     const SizedBox(height: 4),
                                     Text(
                                       '${_syllabusEntries.length} subject${_syllabusEntries.length != 1 ? 's' : ''} available',
-                                      style: TextStyle(color: _textS(isDark), fontSize: 14),
+                                      style: TextStyle(
+                                          color: _textS(isDark), fontSize: 14),
                                     ),
                                   ],
                                 ),
@@ -190,12 +223,14 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
 
                           // ── Subjects section ──
                           if (normal.isNotEmpty) ...[
-                            _sectionHeader('Subjects', Iconsax.book_1, normal.length, isDark),
+                            _sectionHeader('Subjects', Iconsax.book_1,
+                                normal.length, isDark),
                             SliverPadding(
                               padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
                               sliver: SliverList(
                                 delegate: SliverChildBuilderDelegate(
-                                  (context, i) => _animatedTile(normal[i], i, normal.length, isDark),
+                                  (context, i) => _animatedTile(
+                                      normal[i], i, normal.length, isDark),
                                   childCount: normal.length,
                                 ),
                               ),
@@ -204,12 +239,14 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
 
                           // ── Laboratory section ──
                           if (labs.isNotEmpty) ...[
-                            _sectionHeader('Laboratory', Iconsax.cpu, labs.length, isDark),
+                            _sectionHeader(
+                                'Laboratory', Iconsax.cpu, labs.length, isDark),
                             SliverPadding(
                               padding: const EdgeInsets.fromLTRB(20, 4, 20, 40),
                               sliver: SliverList(
                                 delegate: SliverChildBuilderDelegate(
-                                  (context, i) => _animatedTile(labs[i], i, labs.length, isDark),
+                                  (context, i) => _animatedTile(
+                                      labs[i], i, labs.length, isDark),
                                   childCount: labs.length,
                                 ),
                               ),
@@ -247,7 +284,10 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
               ),
               child: Text(
                 '$count',
-                style: TextStyle(color: _accent(isDark), fontSize: 11, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                    color: _accent(isDark),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600),
               ),
             ),
           ],
@@ -256,7 +296,8 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
     );
   }
 
-  Widget _animatedTile(Map<String, dynamic> entry, int index, int total, bool isDark) {
+  Widget _animatedTile(
+      Map<String, dynamic> entry, int index, int total, bool isDark) {
     final interval = Interval(
       (index * 0.08).clamp(0.0, 0.5),
       ((index * 0.08) + 0.5).clamp(0.0, 1.0),
@@ -278,8 +319,6 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
     );
   }
 
-
-
   Widget _subjectTile(Map<String, dynamic> entry, int index, bool isDark) {
     final grad = _gradients[index % _gradients.length];
     final subject = entry['subject'] as String;
@@ -299,7 +338,8 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
           onTap: () {
             if (isDownloaded) {
               final resource = OfflineService().getResource(id);
-              _openPdf(filePath: resource!.localPath, title: '$subject Syllabus');
+              _openPdf(
+                  filePath: resource!.localPath, title: '$subject Syllabus');
             } else {
               _openPdf(url: fileUrl, title: '$subject Syllabus');
             }
@@ -324,7 +364,10 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
                   child: Center(
                     child: Text(
                       '${index + 1}',
-                      style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700),
                     ),
                   ),
                 ),
@@ -355,7 +398,11 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
                           Expanded(
                             child: Text(
                               isDownloaded ? 'Offline Access Enabled' : title,
-                              style: TextStyle(color: isDownloaded ? Colors.green : _textS(isDark), fontSize: 11),
+                              style: TextStyle(
+                                  color: isDownloaded
+                                      ? Colors.green
+                                      : _textS(isDark),
+                                  fontSize: 11),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -369,23 +416,29 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
                 // Download Toggle
                 IconButton(
                   icon: Icon(
-                    isDownloaded ? Iconsax.tick_circle : Iconsax.document_download,
+                    isDownloaded
+                        ? Iconsax.tick_circle
+                        : Iconsax.document_download,
                     color: isDownloaded ? Colors.green : grad[0],
                     size: 20,
                   ),
-                  onPressed: isDownloaded ? null : () async {
-                    try {
-                      await OfflineService().downloadResource(
-                        id: id,
-                        title: '$subject Syllabus',
-                        url: fileUrl,
-                        category: ResourceCategory.SYLLABUS,
-                      );
-                      if (mounted) setState(() {});
-                    } catch (e) {
-                      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
-                    }
-                  },
+                  onPressed: isDownloaded
+                      ? null
+                      : () async {
+                          try {
+                            await OfflineService().downloadResource(
+                              id: id,
+                              title: '$subject Syllabus',
+                              url: fileUrl,
+                              category: ResourceCategory.SYLLABUS,
+                            );
+                            if (mounted) setState(() {});
+                          } catch (e) {
+                            if (mounted)
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(e.toString())));
+                          }
+                        },
                 ),
                 const SizedBox(width: 4),
 
@@ -413,16 +466,21 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 80, height: 80,
+            width: 80,
+            height: 80,
             decoration: BoxDecoration(
               color: _accent(isDark).withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(24),
             ),
-            child: Icon(Iconsax.book_1, size: 36, color: _accent(isDark).withValues(alpha: 0.4)),
+            child: Icon(Iconsax.book_1,
+                size: 36, color: _accent(isDark).withValues(alpha: 0.4)),
           ),
           const SizedBox(height: 20),
           Text('No syllabus yet',
-              style: TextStyle(color: _textP(isDark), fontSize: 17, fontWeight: FontWeight.w600)),
+              style: TextStyle(
+                  color: _textP(isDark),
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600)),
           const SizedBox(height: 6),
           Text('Syllabus PDFs will appear once uploaded',
               style: TextStyle(color: _textS(isDark), fontSize: 13)),
@@ -437,16 +495,21 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 80, height: 80,
+            width: 80,
+            height: 80,
             decoration: BoxDecoration(
               color: Colors.redAccent.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(24),
             ),
-            child: Icon(Iconsax.warning_2, size: 36, color: Colors.redAccent.withValues(alpha: 0.5)),
+            child: Icon(Iconsax.warning_2,
+                size: 36, color: Colors.redAccent.withValues(alpha: 0.5)),
           ),
           const SizedBox(height: 20),
           Text('Failed to load syllabus',
-              style: TextStyle(color: _textP(isDark), fontSize: 17, fontWeight: FontWeight.w600)),
+              style: TextStyle(
+                  color: _textP(isDark),
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600)),
           const SizedBox(height: 16),
           GestureDetector(
             onTap: _loadSyllabus,
@@ -461,7 +524,11 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
                 children: [
                   Icon(Iconsax.refresh, size: 16, color: accent),
                   const SizedBox(width: 8),
-                  Text('Retry', style: TextStyle(color: accent, fontSize: 14, fontWeight: FontWeight.w600)),
+                  Text('Retry',
+                      style: TextStyle(
+                          color: accent,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600)),
                 ],
               ),
             ),

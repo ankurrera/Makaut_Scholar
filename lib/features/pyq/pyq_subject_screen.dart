@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../services/auth_service.dart';
+import '../../core/widgets/dot_loading.dart';
 import 'pyq_papers_screen.dart';
 import '../../core/widgets/modern_folder.dart';
 
 class PyqSubjectScreen extends StatefulWidget {
   final String department;
   final int semester;
-  const PyqSubjectScreen({super.key, required this.department, required this.semester});
+  const PyqSubjectScreen(
+      {super.key, required this.department, required this.semester});
 
   @override
   State<PyqSubjectScreen> createState() => _PyqSubjectScreenState();
@@ -16,7 +18,8 @@ class PyqSubjectScreen extends StatefulWidget {
 
 class _PyqSubjectScreenState extends State<PyqSubjectScreen>
     with SingleTickerProviderStateMixin {
-  List<Map<String, dynamic>> _subjects = []; // Changed from List<String> to support paper_code
+  List<Map<String, dynamic>> _subjects =
+      []; // Changed from List<String> to support paper_code
   Map<String, int> _paperCounts = {};
   bool _isLoading = true;
   String? _error;
@@ -62,10 +65,13 @@ class _PyqSubjectScreenState extends State<PyqSubjectScreen>
   }
 
   Future<void> _loadSubjects() async {
-    setState(() { _isLoading = true; _error = null; });
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
     try {
       final auth = Provider.of<AuthService>(context, listen: false);
-      
+
       // Fetch subjects and paper counts in parallel
       final results = await Future.wait([
         auth.fetchDepartmentSubjects(widget.department, widget.semester),
@@ -73,15 +79,19 @@ class _PyqSubjectScreenState extends State<PyqSubjectScreen>
       ]);
 
       if (mounted) {
-        setState(() { 
+        setState(() {
           _subjects = results[0] as List<Map<String, dynamic>>;
           _paperCounts = results[1] as Map<String, int>;
-          _isLoading = false; 
+          _isLoading = false;
         });
         _staggerController.forward(from: 0);
       }
     } catch (e) {
-      if (mounted) setState(() { _error = e.toString(); _isLoading = false; });
+      if (mounted)
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
     }
   }
 
@@ -97,9 +107,12 @@ class _PyqSubjectScreenState extends State<PyqSubjectScreen>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircularProgressIndicator(color: accent, strokeWidth: 2.5),
+                  Center(
+                    child: DotLoadingIndicator(color: accent),
+                  ),
                   const SizedBox(height: 16),
-                  Text('Loading subjects...', style: TextStyle(color: _textS(isDark), fontSize: 13)),
+                  Text('Loading subjects...',
+                      style: TextStyle(color: _textS(isDark), fontSize: 13)),
                 ],
               ),
             )
@@ -111,14 +124,17 @@ class _PyqSubjectScreenState extends State<PyqSubjectScreen>
                       color: accent,
                       onRefresh: _loadSubjects,
                       child: CustomScrollView(
-                        physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                        physics: const BouncingScrollPhysics(
+                            parent: AlwaysScrollableScrollPhysics()),
                         slivers: [
                           SliverAppBar(
                             backgroundColor: _bg(isDark),
                             elevation: 0,
                             scrolledUnderElevation: 0,
                             pinned: true,
-                            expandedHeight: MediaQuery.of(context).padding.top + kToolbarHeight + 80,
+                            expandedHeight: MediaQuery.of(context).padding.top +
+                                kToolbarHeight +
+                                80,
                             leading: IconButton(
                               icon: Container(
                                 padding: const EdgeInsets.all(8),
@@ -126,25 +142,37 @@ class _PyqSubjectScreenState extends State<PyqSubjectScreen>
                                   color: _card(isDark),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: Icon(Iconsax.arrow_left, color: _textP(isDark), size: 18),
+                                child: Icon(Iconsax.arrow_left,
+                                    color: _textP(isDark), size: 18),
                               ),
                               onPressed: () => Navigator.pop(context),
                             ),
                             flexibleSpace: FlexibleSpaceBar(
                               background: Padding(
-                                padding: EdgeInsets.fromLTRB(20, MediaQuery.of(context).padding.top + kToolbarHeight + 8, 20, 0),
+                                padding: EdgeInsets.fromLTRB(
+                                    20,
+                                    MediaQuery.of(context).padding.top +
+                                        kToolbarHeight +
+                                        8,
+                                    20,
+                                    0),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 5),
                                       decoration: BoxDecoration(
-                                        color: accent.withValues(alpha: isDark ? 0.15 : 0.1),
+                                        color: accent.withValues(
+                                            alpha: isDark ? 0.15 : 0.1),
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Text(
                                         'Sem ${widget.semester} · ${widget.department}',
-                                        style: TextStyle(color: accent, fontSize: 12, fontWeight: FontWeight.w600),
+                                        style: TextStyle(
+                                            color: accent,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600),
                                       ),
                                     ),
                                     const SizedBox(height: 10),
@@ -160,7 +188,8 @@ class _PyqSubjectScreenState extends State<PyqSubjectScreen>
                                     const SizedBox(height: 4),
                                     Text(
                                       '${_subjects.length} subject${_subjects.length != 1 ? 's' : ''} available',
-                                      style: TextStyle(color: _textS(isDark), fontSize: 14),
+                                      style: TextStyle(
+                                          color: _textS(isDark), fontSize: 14),
                                     ),
                                   ],
                                 ),
@@ -170,7 +199,8 @@ class _PyqSubjectScreenState extends State<PyqSubjectScreen>
                           SliverPadding(
                             padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
                             sliver: SliverGrid(
-                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 2,
                                 mainAxisSpacing: 12,
                                 crossAxisSpacing: 12,
@@ -186,13 +216,16 @@ class _PyqSubjectScreenState extends State<PyqSubjectScreen>
                                   return AnimatedBuilder(
                                     animation: _staggerController,
                                     builder: (context, child) {
-                                      final v = interval.transform(_staggerController.value);
+                                      final v = interval
+                                          .transform(_staggerController.value);
                                       return Transform.translate(
                                         offset: Offset(0, 24 * (1 - v)),
-                                        child: Opacity(opacity: v, child: child),
+                                        child:
+                                            Opacity(opacity: v, child: child),
                                       );
                                     },
-                                    child: _subjectTile(_subjects[i], i, isDark),
+                                    child:
+                                        _subjectTile(_subjects[i], i, isDark),
                                   );
                                 },
                                 childCount: _subjects.length,
@@ -205,7 +238,8 @@ class _PyqSubjectScreenState extends State<PyqSubjectScreen>
     );
   }
 
-  Widget _subjectTile(Map<String, dynamic> subjectData, int index, bool isDark) {
+  Widget _subjectTile(
+      Map<String, dynamic> subjectData, int index, bool isDark) {
     final String subject = subjectData['subject'];
     final String? paperCode = subjectData['paper_code'];
     final grad = _gradients[index % _gradients.length];
@@ -262,16 +296,21 @@ class _PyqSubjectScreenState extends State<PyqSubjectScreen>
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 80, height: 80,
+            width: 80,
+            height: 80,
             decoration: BoxDecoration(
               color: _accent(isDark).withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(24),
             ),
-            child: Icon(Iconsax.archive_book, size: 36, color: _accent(isDark).withValues(alpha: 0.4)),
+            child: Icon(Iconsax.archive_book,
+                size: 36, color: _accent(isDark).withValues(alpha: 0.4)),
           ),
           const SizedBox(height: 20),
           Text('No subjects yet',
-              style: TextStyle(color: _textP(isDark), fontSize: 17, fontWeight: FontWeight.w600)),
+              style: TextStyle(
+                  color: _textP(isDark),
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600)),
           const SizedBox(height: 6),
           Text('PYQs will appear once uploaded',
               style: TextStyle(color: _textS(isDark), fontSize: 13)),
@@ -286,16 +325,21 @@ class _PyqSubjectScreenState extends State<PyqSubjectScreen>
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 80, height: 80,
+            width: 80,
+            height: 80,
             decoration: BoxDecoration(
               color: Colors.redAccent.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(24),
             ),
-            child: Icon(Iconsax.warning_2, size: 36, color: Colors.redAccent.withValues(alpha: 0.5)),
+            child: Icon(Iconsax.warning_2,
+                size: 36, color: Colors.redAccent.withValues(alpha: 0.5)),
           ),
           const SizedBox(height: 20),
           Text('Failed to load subjects',
-              style: TextStyle(color: _textP(isDark), fontSize: 17, fontWeight: FontWeight.w600)),
+              style: TextStyle(
+                  color: _textP(isDark),
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600)),
           const SizedBox(height: 16),
           GestureDetector(
             onTap: _loadSubjects,
@@ -310,7 +354,11 @@ class _PyqSubjectScreenState extends State<PyqSubjectScreen>
                 children: [
                   Icon(Iconsax.refresh, size: 16, color: accent),
                   const SizedBox(width: 8),
-                  Text('Retry', style: TextStyle(color: accent, fontSize: 14, fontWeight: FontWeight.w600)),
+                  Text('Retry',
+                      style: TextStyle(
+                          color: accent,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600)),
                 ],
               ),
             ),

@@ -3,6 +3,7 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../core/supabase_client.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../notes/pdf_viewer_screen.dart';
+import '../../core/widgets/dot_loading.dart';
 
 class NoticeBoardScreen extends StatefulWidget {
   const NoticeBoardScreen({super.key});
@@ -33,7 +34,8 @@ class _NoticeBoardScreenState extends State<NoticeBoardScreen> {
       // Ensure Supabase is ready
       await SupabaseClientService.init();
       if (!SupabaseClientService.isInitialized) {
-        throw Exception('Supabase is not initialized. Please check your connection.');
+        throw Exception(
+            'Supabase is not initialized. Please check your connection.');
       }
 
       final response = await _client
@@ -41,7 +43,7 @@ class _NoticeBoardScreenState extends State<NoticeBoardScreen> {
           .select()
           .order('date_posted', ascending: false)
           .limit(50);
-      
+
       if (mounted) {
         setState(() {
           _notices = List<Map<String, dynamic>>.from(response);
@@ -60,7 +62,7 @@ class _NoticeBoardScreenState extends State<NoticeBoardScreen> {
 
   Future<void> _openLink(String urlStr, String title) async {
     if (urlStr.isEmpty) return;
-    
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -75,16 +77,20 @@ class _NoticeBoardScreenState extends State<NoticeBoardScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = isDark ? const Color(0xFF2D7A5E) : const Color(0xFF1E5240);
-    final bgPrimary = isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1);
+    final primaryColor =
+        isDark ? const Color(0xFFE5252A) : const Color(0xFFE5252A);
+    final bgPrimary =
+        isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1);
     final textPrimary = isDark ? Colors.white : const Color(0xFF1E1E1E);
-    final textSecondary = isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
+    final textSecondary =
+        isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
     final cardBg = isDark ? const Color(0xFF1C2020) : Colors.white;
 
     return Scaffold(
       backgroundColor: bgPrimary,
       appBar: AppBar(
-        title: const Text('Official Notices', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Official Notices',
+            style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
@@ -94,13 +100,15 @@ class _NoticeBoardScreenState extends State<NoticeBoardScreen> {
           )
         ],
       ),
-      body: _buildBody(primaryColor, textPrimary, textSecondary, cardBg, isDark),
+      body:
+          _buildBody(primaryColor, textPrimary, textSecondary, cardBg, isDark),
     );
   }
 
-  Widget _buildBody(Color primaryColor, Color textPrimary, Color textSecondary, Color cardBg, bool isDark) {
-    if (_isLoading) {
-      return Center(child: CircularProgressIndicator(color: primaryColor));
+  Widget _buildBody(Color primaryColor, Color textPrimary, Color textSecondary,
+      Color cardBg, bool isDark) {
+    if (_isLoading && _notices.isEmpty) {
+      return Center(child: DotLoadingIndicator(color: primaryColor));
     }
 
     if (_error != null) {
@@ -126,9 +134,14 @@ class _NoticeBoardScreenState extends State<NoticeBoardScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Iconsax.document_filter, size: 64, color: textSecondary.withOpacity(0.3)),
+            Icon(Iconsax.document_filter,
+                size: 64, color: textSecondary.withOpacity(0.3)),
             const SizedBox(height: 16),
-            Text('No official notices yet', style: TextStyle(color: textPrimary, fontSize: 18, fontWeight: FontWeight.bold)),
+            Text('No official notices yet',
+                style: TextStyle(
+                    color: textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold)),
           ],
         ),
       );
@@ -233,7 +246,7 @@ class _NoticeCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 16),
-              
+
               // Notification Content
               Expanded(
                 child: Column(
@@ -280,9 +293,9 @@ class _NoticeCard extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               const SizedBox(width: 12),
-              
+
               // Deep Blue Arrow or New Indicator
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -292,12 +305,11 @@ class _NoticeCard extends StatelessWidget {
                       width: 8,
                       height: 8,
                       decoration: const BoxDecoration(
-                        color: Colors.redAccent,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                           BoxShadow(color: Colors.redAccent, blurRadius: 4),
-                        ]
-                      ),
+                          color: Colors.redAccent,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(color: Colors.redAccent, blurRadius: 4),
+                          ]),
                     )
                   else
                     Icon(

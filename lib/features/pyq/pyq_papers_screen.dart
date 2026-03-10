@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../services/auth_service.dart';
 import '../../services/offline_service.dart';
+import '../../core/widgets/dot_loading.dart';
 import '../notes/pdf_viewer_screen.dart';
 import '../premium/premium_checkout_screen.dart';
 
@@ -69,24 +70,32 @@ class _PyqPapersScreenState extends State<PyqPapersScreen>
   }
 
   Future<void> _loadPapers() async {
-    setState(() { _isLoading = true; _error = null; });
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
     try {
       final auth = Provider.of<AuthService>(context, listen: false);
       final results = await Future.wait([
-        auth.fetchPyqPapers(widget.department, widget.semester, widget.subject, paperCode: widget.paperCode),
+        auth.fetchPyqPapers(widget.department, widget.semester, widget.subject,
+            paperCode: widget.paperCode),
         auth.fetchUserPurchases('pyq'),
       ]);
 
       if (mounted) {
-        setState(() { 
+        setState(() {
           _papers = results[0] as List<Map<String, dynamic>>;
           _purchasedItemIds = results[1] as List<String>;
-          _isLoading = false; 
+          _isLoading = false;
         });
         _staggerController.forward(from: 0);
       }
     } catch (e) {
-      if (mounted) setState(() { _error = e.toString(); _isLoading = false; });
+      if (mounted)
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
     }
   }
 
@@ -94,7 +103,8 @@ class _PyqPapersScreenState extends State<PyqPapersScreen>
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => PdfViewerScreen(url: url, filePath: filePath, title: title),
+        builder: (_) =>
+            PdfViewerScreen(url: url, filePath: filePath, title: title),
       ),
     );
   }
@@ -144,9 +154,10 @@ class _PyqPapersScreenState extends State<PyqPapersScreen>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircularProgressIndicator(color: accent, strokeWidth: 2.5),
+                  DotLoadingIndicator(color: accent),
                   const SizedBox(height: 16),
-                  Text('Loading papers...', style: TextStyle(color: _textS(isDark), fontSize: 13)),
+                  Text('Loading papers...',
+                      style: TextStyle(color: _textS(isDark), fontSize: 13)),
                 ],
               ),
             )
@@ -158,14 +169,17 @@ class _PyqPapersScreenState extends State<PyqPapersScreen>
                       color: accent,
                       onRefresh: _loadPapers,
                       child: CustomScrollView(
-                        physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                        physics: const BouncingScrollPhysics(
+                            parent: AlwaysScrollableScrollPhysics()),
                         slivers: [
                           SliverAppBar(
                             backgroundColor: _bg(isDark),
                             elevation: 0,
                             scrolledUnderElevation: 0,
                             pinned: true,
-                            expandedHeight: MediaQuery.of(context).padding.top + kToolbarHeight + 90,
+                            expandedHeight: MediaQuery.of(context).padding.top +
+                                kToolbarHeight +
+                                90,
                             leading: IconButton(
                               icon: Container(
                                 padding: const EdgeInsets.all(8),
@@ -173,25 +187,37 @@ class _PyqPapersScreenState extends State<PyqPapersScreen>
                                   color: _card(isDark),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: Icon(Iconsax.arrow_left, color: _textP(isDark), size: 18),
+                                child: Icon(Iconsax.arrow_left,
+                                    color: _textP(isDark), size: 18),
                               ),
                               onPressed: () => Navigator.pop(context),
                             ),
                             flexibleSpace: FlexibleSpaceBar(
                               background: Padding(
-                                padding: EdgeInsets.fromLTRB(20, MediaQuery.of(context).padding.top + kToolbarHeight + 8, 20, 0),
+                                padding: EdgeInsets.fromLTRB(
+                                    20,
+                                    MediaQuery.of(context).padding.top +
+                                        kToolbarHeight +
+                                        8,
+                                    20,
+                                    0),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 5),
                                       decoration: BoxDecoration(
-                                        color: accent.withValues(alpha: isDark ? 0.15 : 0.1),
+                                        color: accent.withValues(
+                                            alpha: isDark ? 0.15 : 0.1),
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Text(
                                         'Sem ${widget.semester} · ${widget.department}',
-                                        style: TextStyle(color: accent, fontSize: 12, fontWeight: FontWeight.w600),
+                                        style: TextStyle(
+                                            color: accent,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600),
                                       ),
                                     ),
                                     const SizedBox(height: 10),
@@ -209,7 +235,8 @@ class _PyqPapersScreenState extends State<PyqPapersScreen>
                                     const SizedBox(height: 4),
                                     Text(
                                       '${_papers.length} paper${_papers.length != 1 ? 's' : ''} available',
-                                      style: TextStyle(color: _textS(isDark), fontSize: 14),
+                                      style: TextStyle(
+                                          color: _textS(isDark), fontSize: 14),
                                     ),
                                   ],
                                 ),
@@ -229,14 +256,17 @@ class _PyqPapersScreenState extends State<PyqPapersScreen>
                                   return AnimatedBuilder(
                                     animation: _staggerController,
                                     builder: (context, child) {
-                                      final v = interval.transform(_staggerController.value);
+                                      final v = interval
+                                          .transform(_staggerController.value);
                                       return Transform.translate(
                                         offset: Offset(0, 20 * (1 - v)),
-                                        child: Opacity(opacity: v, child: child),
+                                        child:
+                                            Opacity(opacity: v, child: child),
                                       );
                                     },
                                     child: Padding(
-                                      padding: const EdgeInsets.only(bottom: 14),
+                                      padding:
+                                          const EdgeInsets.only(bottom: 14),
                                       child: _paperTile(_papers[i], i, isDark),
                                     ),
                                   );
@@ -266,7 +296,9 @@ class _PyqPapersScreenState extends State<PyqPapersScreen>
       decoration: BoxDecoration(
         color: _card(isDark),
         borderRadius: BorderRadius.circular(20),
-        border: isLocked ? Border.all(color: Colors.orange.withAlpha(40), width: 1.5) : null,
+        border: isLocked
+            ? Border.all(color: Colors.orange.withAlpha(40), width: 1.5)
+            : null,
       ),
       child: Material(
         color: Colors.transparent,
@@ -296,12 +328,15 @@ class _PyqPapersScreenState extends State<PyqPapersScreen>
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: isLocked ? [const Color(0xFFF0A850), const Color(0xFFFFBE6A)] : grad,
+                      colors: isLocked
+                          ? [const Color(0xFFF0A850), const Color(0xFFFFBE6A)]
+                          : grad,
                     ),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Center(
-                    child: Icon(isLocked ? Iconsax.lock : Iconsax.document_text, color: Colors.white, size: 22),
+                    child: Icon(isLocked ? Iconsax.lock : Iconsax.document_text,
+                        color: Colors.white, size: 22),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -325,7 +360,8 @@ class _PyqPapersScreenState extends State<PyqPapersScreen>
                           if (isLocked) ...[
                             const SizedBox(width: 8),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
                                 color: Colors.orange.withAlpha(25),
                                 borderRadius: BorderRadius.circular(4),
@@ -345,12 +381,20 @@ class _PyqPapersScreenState extends State<PyqPapersScreen>
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          Icon(Iconsax.archive_book, size: 12, color: isLocked ? Colors.orange : grad[0]),
+                          Icon(Iconsax.archive_book,
+                              size: 12,
+                              color: isLocked ? Colors.orange : grad[0]),
                           const SizedBox(width: 5),
                           Expanded(
                             child: Text(
-                              isDownloaded ? 'Offline Access Enabled' : widget.subject,
-                              style: TextStyle(color: isDownloaded ? Colors.green : _textS(isDark), fontSize: 11),
+                              isDownloaded
+                                  ? 'Offline Access Enabled'
+                                  : widget.subject,
+                              style: TextStyle(
+                                  color: isDownloaded
+                                      ? Colors.green
+                                      : _textS(isDark),
+                                  fontSize: 11),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -364,25 +408,35 @@ class _PyqPapersScreenState extends State<PyqPapersScreen>
                 // Download Toggle
                 IconButton(
                   icon: Icon(
-                    isLocked 
-                        ? Iconsax.lock 
-                        : (isDownloaded ? Iconsax.tick_circle : Iconsax.document_download),
-                    color: isLocked ? Colors.orange.withAlpha(150) : (isDownloaded ? Colors.green : grad[0]),
+                    isLocked
+                        ? Iconsax.lock
+                        : (isDownloaded
+                            ? Iconsax.tick_circle
+                            : Iconsax.document_download),
+                    color: isLocked
+                        ? Colors.orange.withAlpha(150)
+                        : (isDownloaded ? Colors.green : grad[0]),
                     size: 20,
                   ),
-                  onPressed: isLocked ? () => _openCheckout(paper) : (isDownloaded ? null : () async {
-                    try {
-                      await OfflineService().downloadResource(
-                        id: id,
-                        title: title,
-                        url: fileUrl,
-                        category: ResourceCategory.PYQ,
-                      );
-                      if (mounted) setState(() {});
-                    } catch (e) {
-                      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
-                    }
-                  }),
+                  onPressed: isLocked
+                      ? () => _openCheckout(paper)
+                      : (isDownloaded
+                          ? null
+                          : () async {
+                              try {
+                                await OfflineService().downloadResource(
+                                  id: id,
+                                  title: title,
+                                  url: fileUrl,
+                                  category: ResourceCategory.PYQ,
+                                );
+                                if (mounted) setState(() {});
+                              } catch (e) {
+                                if (mounted)
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text(e.toString())));
+                              }
+                            }),
                 ),
                 const SizedBox(width: 4),
 
@@ -410,16 +464,21 @@ class _PyqPapersScreenState extends State<PyqPapersScreen>
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 80, height: 80,
+            width: 80,
+            height: 80,
             decoration: BoxDecoration(
               color: _accent(isDark).withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(24),
             ),
-            child: Icon(Iconsax.archive_book, size: 36, color: _accent(isDark).withValues(alpha: 0.4)),
+            child: Icon(Iconsax.archive_book,
+                size: 36, color: _accent(isDark).withValues(alpha: 0.4)),
           ),
           const SizedBox(height: 20),
           Text('No papers yet',
-              style: TextStyle(color: _textP(isDark), fontSize: 17, fontWeight: FontWeight.w600)),
+              style: TextStyle(
+                  color: _textP(isDark),
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600)),
           const SizedBox(height: 6),
           Text('PYQ papers will appear once uploaded',
               style: TextStyle(color: _textS(isDark), fontSize: 13)),
@@ -434,16 +493,21 @@ class _PyqPapersScreenState extends State<PyqPapersScreen>
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 80, height: 80,
+            width: 80,
+            height: 80,
             decoration: BoxDecoration(
               color: Colors.redAccent.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(24),
             ),
-            child: Icon(Iconsax.warning_2, size: 36, color: Colors.redAccent.withValues(alpha: 0.5)),
+            child: Icon(Iconsax.warning_2,
+                size: 36, color: Colors.redAccent.withValues(alpha: 0.5)),
           ),
           const SizedBox(height: 20),
           Text('Failed to load papers',
-              style: TextStyle(color: _textP(isDark), fontSize: 17, fontWeight: FontWeight.w600)),
+              style: TextStyle(
+                  color: _textP(isDark),
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600)),
           const SizedBox(height: 16),
           GestureDetector(
             onTap: _loadPapers,
@@ -458,7 +522,11 @@ class _PyqPapersScreenState extends State<PyqPapersScreen>
                 children: [
                   Icon(Iconsax.refresh, size: 16, color: accent),
                   const SizedBox(width: 8),
-                  Text('Retry', style: TextStyle(color: accent, fontSize: 14, fontWeight: FontWeight.w600)),
+                  Text('Retry',
+                      style: TextStyle(
+                          color: accent,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600)),
                 ],
               ),
             ),

@@ -2295,7 +2295,7 @@
             try {
                 // 1. Upload to Storage
                 const cleanTitle = title.replace(/[^a-z0-9]/gi, '_').substring(0, 50);
-                const path = `notices/${Date.now()}_\${cleanTitle}.pdf`;
+                const path = `notices/${Date.now()}_${cleanTitle}.pdf`;
                 
                 const { error: uploadError } = await sb.storage.from('notices_pdf').upload(path, file);
                 if (uploadError) throw uploadError;

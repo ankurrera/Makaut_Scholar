@@ -13,7 +13,8 @@ class SignupScreen extends StatefulWidget {
   State<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderStateMixin {
+class _SignupScreenState extends State<SignupScreen>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -31,7 +32,8 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
   @override
   void initState() {
     super.initState();
-    _fadeCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
+    _fadeCtrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 500));
     _fadeAnim = CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeOut);
     _fadeCtrl.forward();
   }
@@ -53,7 +55,8 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
     final auth = Provider.of<AuthService>(context);
     if (auth.currentUser != null) {
       _isNavigating = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) => _checkProfileAndNavigate());
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => _checkProfileAndNavigate());
     }
   }
 
@@ -61,7 +64,9 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
     final auth = Provider.of<AuthService>(context, listen: false);
     final profile = await auth.getProfile();
     if (!mounted) return;
-    if (profile != null && profile['college_name'] != null && profile['college_name'].toString().isNotEmpty) {
+    if (profile != null &&
+        profile['college_name'] != null &&
+        profile['college_name'].toString().isNotEmpty) {
       Navigator.pushReplacementNamed(context, '/home');
     } else {
       Navigator.pushReplacementNamed(context, '/create_profile');
@@ -102,13 +107,18 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
 
   String _friendlyError(String raw) {
     final lower = raw.toLowerCase();
-    if (lower.contains('rate') || lower.contains('too many') || lower.contains('over_email')) {
+    if (lower.contains('rate') ||
+        lower.contains('too many') ||
+        lower.contains('over_email')) {
       return 'Too many attempts. Please wait 1–2 minutes.';
     }
-    if (lower.contains('already registered') || lower.contains('user already')) {
+    if (lower.contains('already registered') ||
+        lower.contains('user already')) {
       return 'Email already registered. Try signing in.';
     }
-    if (lower.contains('timed out') || lower.contains('socket') || lower.contains('network')) {
+    if (lower.contains('timed out') ||
+        lower.contains('socket') ||
+        lower.contains('network')) {
       return 'Network error. Check your connection.';
     }
     return raw.replaceAll('Exception:', '').trim();
@@ -116,7 +126,8 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
 
   void _showError(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(msg, style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w500)),
+      content: Text(msg,
+          style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w500)),
       backgroundColor: const Color(0xFFD94F4F),
       behavior: SnackBarBehavior.floating,
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -126,7 +137,8 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
 
   void _showSuccess(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(msg, style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w500)),
+      content: Text(msg,
+          style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w500)),
       backgroundColor: AuthTheme.accent,
       behavior: SnackBarBehavior.floating,
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -138,15 +150,17 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final bg      = isDark ? AuthTheme.darkBg     : AuthTheme.lightBg;
-    final text    = isDark ? AuthTheme.darkText    : AuthTheme.lightText;
+    final bg = isDark ? AuthTheme.darkBg : AuthTheme.lightBg;
+    final text = isDark ? AuthTheme.darkText : AuthTheme.lightText;
     final subtext = isDark ? AuthTheme.darkSubtext : AuthTheme.lightSubtext;
     final hintColor = isDark ? AuthTheme.darkHint : AuthTheme.lightHint;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: isDark
-          ? SystemUiOverlayStyle.light.copyWith(statusBarColor: Colors.transparent)
-          : SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
+          ? SystemUiOverlayStyle.light
+              .copyWith(statusBarColor: Colors.transparent)
+          : SystemUiOverlayStyle.dark
+              .copyWith(statusBarColor: Colors.transparent),
       child: Scaffold(
         backgroundColor: bg,
         body: SafeArea(
@@ -170,16 +184,22 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: isDark ? AuthTheme.darkSurface : AuthTheme.lightSurface,
+                          color: isDark
+                              ? AuthTheme.darkSurface
+                              : AuthTheme.lightSurface,
                           borderRadius: BorderRadius.circular(11),
                           border: Border.all(
-                            color: isDark ? AuthTheme.darkBorder : AuthTheme.lightBorder,
+                            color: isDark
+                                ? AuthTheme.darkBorder
+                                : AuthTheme.lightBorder,
                             width: 1.5,
                           ),
                         ),
                         child: Icon(
                           Iconsax.arrow_left_copy,
-                          color: isDark ? AuthTheme.darkSubtext : AuthTheme.lightSubtext,
+                          color: isDark
+                              ? AuthTheme.darkSubtext
+                              : AuthTheme.lightSubtext,
                           size: 18,
                         ),
                       ),
@@ -228,7 +248,8 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
                       icon: Iconsax.sms_copy,
                       isDark: isDark,
                       keyboardType: TextInputType.emailAddress,
-                      validator: (v) => !v!.contains('@') ? 'Enter a valid email' : null,
+                      validator: (v) =>
+                          !v!.contains('@') ? 'Enter a valid email' : null,
                     ),
                     const SizedBox(height: 18),
                     AuthField(
@@ -240,13 +261,17 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
                       obscureText: !_isPasswordVisible,
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _isPasswordVisible ? Iconsax.eye_slash_copy : Iconsax.eye_copy,
+                          _isPasswordVisible
+                              ? Iconsax.eye_slash_copy
+                              : Iconsax.eye_copy,
                           size: 18,
                           color: hintColor,
                         ),
-                        onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+                        onPressed: () => setState(
+                            () => _isPasswordVisible = !_isPasswordVisible),
                       ),
-                      validator: (v) => v!.length < 6 ? 'Min 6 characters' : null,
+                      validator: (v) =>
+                          v!.length < 6 ? 'Min 6 characters' : null,
                     ),
                     const SizedBox(height: 18),
                     AuthField(
@@ -258,13 +283,19 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
                       obscureText: !_isConfirmPasswordVisible,
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _isConfirmPasswordVisible ? Iconsax.eye_slash_copy : Iconsax.eye_copy,
+                          _isConfirmPasswordVisible
+                              ? Iconsax.eye_slash_copy
+                              : Iconsax.eye_copy,
                           size: 18,
                           color: hintColor,
                         ),
-                        onPressed: () => setState(() => _isConfirmPasswordVisible = !_isConfirmPasswordVisible),
+                        onPressed: () => setState(() =>
+                            _isConfirmPasswordVisible =
+                                !_isConfirmPasswordVisible),
                       ),
-                      validator: (v) => v != _passwordController.text ? 'Passwords do not match' : null,
+                      validator: (v) => v != _passwordController.text
+                          ? 'Passwords do not match'
+                          : null,
                     ),
 
                     const SizedBox(height: 28),
@@ -284,7 +315,8 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
                       isDark: isDark,
                       onTap: () async {
                         try {
-                          await Provider.of<AuthService>(context, listen: false).signInWithGoogle();
+                          await Provider.of<AuthService>(context, listen: false)
+                              .signInWithGoogle();
                         } catch (e) {
                           if (!mounted) return;
                           _showError(e.toString());
@@ -303,7 +335,8 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
                           style: TextStyle(color: subtext, fontSize: 14),
                         ),
                         GestureDetector(
-                          onTap: () => Navigator.pushReplacementNamed(context, '/login'),
+                          onTap: () =>
+                              Navigator.pushReplacementNamed(context, '/login'),
                           child: Text(
                             'Sign in',
                             style: TextStyle(
@@ -316,17 +349,20 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
                       ],
                     ),
                     const SizedBox(height: 32),
-                    
+
                     // ── Privacy Link ──────────────────────────────────────────
                     Center(
                       child: Column(
                         children: [
                           Text(
                             "By creating an account, you agree to our",
-                            style: TextStyle(color: subtext.withValues(alpha: 0.7), fontSize: 12),
+                            style: TextStyle(
+                                color: subtext.withValues(alpha: 0.7),
+                                fontSize: 12),
                           ),
                           GestureDetector(
-                            onTap: () => Navigator.pushNamed(context, '/privacy'),
+                            onTap: () =>
+                                Navigator.pushNamed(context, '/privacy'),
                             child: Text(
                               'Privacy Policy',
                               style: TextStyle(

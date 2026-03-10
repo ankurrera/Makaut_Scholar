@@ -18,7 +18,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _checkSession() async {
     final authService = Provider.of<AuthService>(context, listen: false);
-    
+
     // Safety guard: Don't let the splash hang forever if Supabase/Network is slow
     final safetyTimeout = Future.delayed(const Duration(seconds: 8));
     final minDelay = Future.delayed(const Duration(milliseconds: 1200));
@@ -42,13 +42,15 @@ class _SplashScreenState extends State<SplashScreen> {
             profile = await authService.getProfile();
           } catch (e) {
             debugPrint('Splash Profile Fetch Error: $e');
-            // If we have a session but profile fetch fails (e.g. offline), 
+            // If we have a session but profile fetch fails (e.g. offline),
             // we still try to proceed or fall back to login if it's a critical error
           }
-          
+
           await minDelay;
-          
-          if (profile != null && profile['college_name'] != null && profile['college_name'].toString().isNotEmpty) {
+
+          if (profile != null &&
+              profile['college_name'] != null &&
+              profile['college_name'].toString().isNotEmpty) {
             navigate('/home');
           } else {
             // Even if profile is null but session exists, they might need to create a profile
@@ -80,7 +82,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     // Matching the logo's off-white background (#F7F5F2)
-    const bgColor = Color(0xFFF7F5F2); 
+    const bgColor = Color(0xFFF7F5F2);
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -97,7 +99,7 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
 
             const SizedBox(height: 10),
-            
+
             // Branding Text
             const Text(
               'SCHOLARX',

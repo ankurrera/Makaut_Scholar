@@ -35,7 +35,8 @@ class MonetizationService extends ChangeNotifier {
           .maybeSingle();
 
       if (response != null && response['setting_value'] != null) {
-        _nudgeThreshold = int.tryParse(response['setting_value'].toString()) ?? 3;
+        _nudgeThreshold =
+            int.tryParse(response['setting_value'].toString()) ?? 3;
       }
     } catch (e) {
       debugPrint('Failed to fetch threshold: $e');
@@ -59,11 +60,12 @@ class MonetizationService extends ChangeNotifier {
 
   /// Fetches Pricing for Subject (Tier 2) and Semester Bundle (Tier 3)
   /// Returns { 'subject_price': double, 'bundle_price': double?, 'purchased_subjects_count': int }
-  Future<Map<String, dynamic>> getPricingDetails(String department, int semester, String subject) async {
+  Future<Map<String, dynamic>> getPricingDetails(
+      String department, int semester, String subject) async {
     try {
       await _ensureInitialized();
       if (!SupabaseClientService.isInitialized) return {'subject_price': 0.0};
-      
+
       // 1. Get Subject Price and Bundle ID
       final targetSub = await _client
           .from('subjects_bundle')
@@ -75,7 +77,8 @@ class MonetizationService extends ChangeNotifier {
 
       if (targetSub == null) return {'subject_price': 0.0};
 
-      final double subjectPrice = (targetSub['subject_price'] as num?)?.toDouble() ?? 0.0;
+      final double subjectPrice =
+          (targetSub['subject_price'] as num?)?.toDouble() ?? 0.0;
       final String? bundleId = targetSub['semester_bundle_id'] as String?;
       double? bundlePrice;
 
@@ -100,7 +103,7 @@ class MonetizationService extends ChangeNotifier {
             .select('subject')
             .eq('department', department)
             .eq('semester', semester);
-        
+
         final allSemesterSubjects = (allSemesterSubjectsResponse as List)
             .map((s) => s['subject'] as String)
             .toList();
@@ -108,20 +111,21 @@ class MonetizationService extends ChangeNotifier {
         // Check user purchases for these subjects
         // item_id format typically: "subject_{dept}_{sem}_{subjectName}"
         if (allSemesterSubjects.isNotEmpty) {
-           final purchases = await _client
+          final purchases = await _client
               .from('user_purchases')
               .select('item_id')
               .eq('user_id', user.id)
               .eq('item_type', 'subject');
-              
-           final purchasedIds = (purchases as List).map((p) => p['item_id'] as String).toList();
-           
-           for (final sub in allSemesterSubjects) {
-             final expectedId = 'subject_${department}_${semester}_$sub';
-             if (purchasedIds.contains(expectedId)) {
-               purchasedSubjects++;
-             }
-           }
+
+          final purchasedIds =
+              (purchases as List).map((p) => p['item_id'] as String).toList();
+
+          for (final sub in allSemesterSubjects) {
+            final expectedId = 'subject_${department}_${semester}_$sub';
+            if (purchasedIds.contains(expectedId)) {
+              purchasedSubjects++;
+            }
+          }
         }
       }
 
@@ -138,11 +142,13 @@ class MonetizationService extends ChangeNotifier {
   }
 
   /// Calculates dynamic bundle upgrade offer
-  double calculateBundleUpgradePrice(double originalBundlePrice, int purchasedSubjectsCount, double individualSubjectPrice) {
+  double calculateBundleUpgradePrice(double originalBundlePrice,
+      int purchasedSubjectsCount, double individualSubjectPrice) {
     if (purchasedSubjectsCount >= 3) {
       // Flow 1 (Smart Upgrade Pricing)
       // "Semester Price - Sum of 3 subjects paid"
-      final sumPaid = purchasedSubjectsCount * individualSubjectPrice; // Estimating based on current price
+      final sumPaid = purchasedSubjectsCount *
+          individualSubjectPrice; // Estimating based on current price
       final upgradePrice = originalBundlePrice - sumPaid;
       return upgradePrice > 0 ? upgradePrice : 0.0; // Ensure it's not negative
     }
@@ -151,7 +157,8 @@ class MonetizationService extends ChangeNotifier {
 
   /// Checks if the user has access to a specific unit
   /// Checks in order: unit purchase → subject purchase → bundle purchase
-  Future<bool> checkUnitAccess(String department, int semester, String subject, int unit) async {
+  Future<bool> checkUnitAccess(
+      String department, int semester, String subject, int unit) async {
     try {
       await _ensureInitialized();
       final user = _client.auth.currentUser;
@@ -177,7 +184,8 @@ class MonetizationService extends ChangeNotifier {
   }
 
   /// Checks if the user has full subject access (subject or semester bundle purchase)
-  Future<bool> checkSubjectAccess(String department, int semester, String subject) async {
+  Future<bool> checkSubjectAccess(
+      String department, int semester, String subject) async {
     try {
       await _ensureInitialized();
       final user = _client.auth.currentUser;
@@ -212,10 +220,12 @@ class MonetizationService extends ChangeNotifier {
 
   /// Fetches Semester Bundle pricing directly (Tier 3 Upfront)
   /// Returns { 'bundle_price': double, 'has_access': bool }
-  Future<Map<String, dynamic>> getSemesterBundleInfo(String department, int semester) async {
+  Future<Map<String, dynamic>> getSemesterBundleInfo(
+      String department, int semester) async {
     try {
       await _ensureInitialized();
-      if (!SupabaseClientService.isInitialized) return {'bundle_price': 0.0, 'has_access': false};
+      if (!SupabaseClientService.isInitialized)
+        return {'bundle_price': 0.0, 'has_access': false};
 
       final bundle = await _client
           .from('semester_bundles')
@@ -226,11 +236,12 @@ class MonetizationService extends ChangeNotifier {
 
       if (bundle == null) return {'bundle_price': 0.0, 'has_access': false};
 
-      final double bundlePrice = (bundle['bundle_price'] as num?)?.toDouble() ?? 0.0;
-      
+      final double bundlePrice =
+          (bundle['bundle_price'] as num?)?.toDouble() ?? 0.0;
+
       final user = _client.auth.currentUser;
       bool hasAccess = false;
-      
+
       if (user != null) {
         final bundleIdStr = 'bundle_${department}_${semester}';
         final bunRes = await _client.rpc('has_premium_access', params: {

@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../services/auth_service.dart';
+import '../../core/widgets/dot_loading.dart'; // Added this import
 import 'quiz_screen.dart';
 
 class MockTestSubjectScreen extends StatefulWidget {
   final String department;
   final int semester;
-  const MockTestSubjectScreen({super.key, required this.department, required this.semester});
+  const MockTestSubjectScreen(
+      {super.key, required this.department, required this.semester});
 
   @override
   State<MockTestSubjectScreen> createState() => _MockTestSubjectScreenState();
@@ -19,7 +21,7 @@ class _MockTestSubjectScreenState extends State<MockTestSubjectScreen> {
   bool _isLoading = true;
   String? _error;
 
-  static const _accentColor = Color(0xFF2D7A5E);
+  static const _accentColor = Color(0xFFE5252A);
 
   @override
   void initState() {
@@ -34,8 +36,10 @@ class _MockTestSubjectScreenState extends State<MockTestSubjectScreen> {
     });
     try {
       final auth = Provider.of<AuthService>(context, listen: false);
-      final subjects = await auth.fetchMockTestSubjects(widget.department, widget.semester);
-      final counts = await auth.fetchSubjectMockTestCounts(widget.department, widget.semester);
+      final subjects =
+          await auth.fetchMockTestSubjects(widget.department, widget.semester);
+      final counts = await auth.fetchSubjectMockTestCounts(
+          widget.department, widget.semester);
       if (mounted) {
         setState(() {
           _subjects = subjects;
@@ -57,28 +61,33 @@ class _MockTestSubjectScreenState extends State<MockTestSubjectScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator(color: _accentColor)),
+      builder: (context) =>
+          const Center(child: DotLoadingIndicator(color: _accentColor)),
     );
 
     try {
       final auth = Provider.of<AuthService>(context, listen: false);
-      final questionsData = await auth.fetchMockTestQuestions(widget.department, widget.semester, subject);
-      
+      final questionsData = await auth.fetchMockTestQuestions(
+          widget.department, widget.semester, subject);
+
       if (!mounted) return;
       Navigator.pop(context); // Close loading dialog
 
       if (questionsData.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No questions available for this subject yet.')),
+          const SnackBar(
+              content: Text('No questions available for this subject yet.')),
         );
         return;
       }
 
-      final questions = questionsData.map((q) => QuizQuestion(
-        text: q['question_text'] as String,
-        options: List<String>.from(q['options']),
-        correctIndex: q['correct_index'] as int,
-      )).toList();
+      final questions = questionsData
+          .map((q) => QuizQuestion(
+                text: q['question_text'] as String,
+                options: List<String>.from(q['options']),
+                correctIndex: q['correct_index'] as int,
+              ))
+          .toList();
 
       Navigator.push(
         context,
@@ -102,8 +111,10 @@ class _MockTestSubjectScreenState extends State<MockTestSubjectScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textPrimary = isDark ? Colors.white : const Color(0xFF1E1E1E);
-    final textSecondary = isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
-    final bgPrimary = isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1);
+    final textSecondary =
+        isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
+    final bgPrimary =
+        isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1);
     final cardBg = isDark ? const Color(0xFF1C2020) : Colors.white;
 
     return Scaffold(
@@ -117,11 +128,15 @@ class _MockTestSubjectScreenState extends State<MockTestSubjectScreen> {
         ),
         title: Text(
           'Semester ${widget.semester} Subjects',
-          style: TextStyle(color: textPrimary, fontWeight: FontWeight.bold, fontSize: 18),
+          style: TextStyle(
+              color: textPrimary, fontWeight: FontWeight.bold, fontSize: 18),
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: _accentColor))
+          ? const Center(
+              child: DotLoadingIndicator(
+                  color:
+                      _accentColor)) // Changed CircularProgressIndicator to DotLoadingIndicator
           : _error != null
               ? _buildError(textPrimary, textSecondary)
               : _subjects.isEmpty
@@ -135,20 +150,23 @@ class _MockTestSubjectScreenState extends State<MockTestSubjectScreen> {
                         itemBuilder: (context, index) {
                           final subject = _subjects[index];
                           final count = _subjectCounts[subject] ?? 0;
-                          return _buildSubjectCard(subject, count, isDark, textPrimary, textSecondary, cardBg);
+                          return _buildSubjectCard(subject, count, isDark,
+                              textPrimary, textSecondary, cardBg);
                         },
                       ),
                     ),
     );
   }
 
-  Widget _buildSubjectCard(String subject, int count, bool isDark, Color textP, Color textS, Color cardBg) {
+  Widget _buildSubjectCard(String subject, int count, bool isDark, Color textP,
+      Color textS, Color cardBg) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC)),
+        border: Border.all(
+            color: isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC)),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -158,15 +176,18 @@ class _MockTestSubjectScreenState extends State<MockTestSubjectScreen> {
             color: _accentColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: const Icon(Iconsax.document_text, color: _accentColor, size: 24),
+          child:
+              const Icon(Iconsax.document_text, color: _accentColor, size: 24),
         ),
         title: Text(
           subject,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(color: textP, fontWeight: FontWeight.bold, fontSize: 15),
+          style: TextStyle(
+              color: textP, fontWeight: FontWeight.bold, fontSize: 15),
         ),
-        subtitle: Text('$count Questions Available', style: TextStyle(color: textS, fontSize: 12)),
+        subtitle: Text('$count Questions Available',
+            style: TextStyle(color: textS, fontSize: 12)),
         trailing: Icon(Iconsax.play_circle, color: _accentColor, size: 24),
         onTap: () => _startQuiz(subject),
       ),
@@ -178,9 +199,12 @@ class _MockTestSubjectScreenState extends State<MockTestSubjectScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Iconsax.note_remove, size: 64, color: textS.withValues(alpha: 0.3)),
+          Icon(Iconsax.note_remove,
+              size: 64, color: textS.withValues(alpha: 0.3)),
           const SizedBox(height: 16),
-          Text('No subjects with quizzes', style: TextStyle(color: textP, fontSize: 18, fontWeight: FontWeight.bold)),
+          Text('No subjects with quizzes',
+              style: TextStyle(
+                  color: textP, fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           Text('Try later for this semester', style: TextStyle(color: textS)),
         ],
@@ -195,8 +219,12 @@ class _MockTestSubjectScreenState extends State<MockTestSubjectScreen> {
         children: [
           const Icon(Iconsax.warning_2, size: 48, color: Colors.redAccent),
           const SizedBox(height: 16),
-          Text('Failed to load subjects', style: TextStyle(color: textP, fontWeight: FontWeight.bold)),
-          TextButton(onPressed: _loadSubjects, child: const Text('Retry', style: TextStyle(color: _accentColor))),
+          Text('Failed to load subjects',
+              style: TextStyle(color: textP, fontWeight: FontWeight.bold)),
+          TextButton(
+              onPressed: _loadSubjects,
+              child:
+                  const Text('Retry', style: TextStyle(color: _accentColor))),
         ],
       ),
     );

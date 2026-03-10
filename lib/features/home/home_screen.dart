@@ -22,6 +22,7 @@ class _HomeScreenState extends State<HomeScreen>
   String _userName = 'Scholar';
   String? _profileName;
   String? _profileDepartment;
+  String? _profilePhotoUrl;
   String _greeting = '';
   Timer? _greetingTimer;
 
@@ -41,10 +42,10 @@ class _HomeScreenState extends State<HomeScreen>
   final Color _bgSecondary = const Color(0xFFFFFFFF);
   final Color _borderSubtle = const Color(0xFFE6E8EC);
 
-  final Color _primary500 = const Color(0xFF7C6FF6);
-  final Color _primary400 = const Color(0xFF9B90FF);
-  final Color _primaryGradientStart = const Color(0xFF8E82FF);
-  final Color _primaryGradientEnd = const Color(0xFFB7AEFF);
+  final Color _primary500 = const Color(0xFFE5252A);
+  final Color _primary400 = const Color(0xFFFF4D4D);
+  final Color _primaryGradientStart = const Color(0xFFE5252A);
+  final Color _primaryGradientEnd = const Color(0xFFFF4D4D);
 
   final Color _mintSoft = const Color(0xFFCDEBE7);
   final Color _pinkSoft = const Color(0xFFF4C7D7);
@@ -56,12 +57,12 @@ class _HomeScreenState extends State<HomeScreen>
   final Color _textSecondary = const Color(0xFF8E8E93);
 
   // ── DARK MODE PALETTE (backgrounds only) ──
-  final Color _bgPrimaryDark = const Color(0xFF0F1115);
-  final Color _bgSecondaryDark = const Color(0xFF171A21);
-  final Color _borderSubtleDark = const Color(0xFF2A2F3A);
+  final Color _bgPrimaryDark = const Color(0xFF000000);
+  final Color _bgSecondaryDark = const Color(0xFF121212);
+  final Color _borderSubtleDark = const Color(0xFF222222);
 
-  final Color _primary500Dark = const Color(0xFF8E82FF);
-  final Color _primary300Dark = const Color(0xFF6E63E6);
+  final Color _primary500Dark = const Color(0xFFE5252A);
+  final Color _primary300Dark = const Color(0xFFCC1F24);
 
   final Color _textPrimaryDark = const Color(0xFFF5F6FA);
   final Color _textSecondaryDark = const Color(0xFF9AA0A6);
@@ -164,11 +165,10 @@ class _HomeScreenState extends State<HomeScreen>
           _userName = user!.userMetadata!['name'].split(' ').first;
         }
         _profileDepartment = profile?['department'] as String?;
+        _profilePhotoUrl = profile?['avatar_url'] as String?;
       });
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -181,7 +181,7 @@ class _HomeScreenState extends State<HomeScreen>
         child: ListView(
           physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.fromLTRB(
-              24, 20, 24, 120), // Bottom padding for dock
+              24, 20, 24, 180), // Increased bottom padding for dock
           children: [
             // 1. Header
             StaggeredSlideFade(
@@ -218,6 +218,8 @@ class _HomeScreenState extends State<HomeScreen>
               child: _buildQuickTools(isDark),
             ),
 
+            // Explicit padding box to prevent floating dock overlap
+            const SizedBox(height: 130),
           ],
         ),
       ),
@@ -236,18 +238,21 @@ class _HomeScreenState extends State<HomeScreen>
               Text(
                 '$_greeting,',
                 style: TextStyle(
+                  fontFamily: 'NDOT',
                   fontSize: 26,
-                  fontWeight: FontWeight.w500,
-                  color: isDark ? _textSecondaryDark : _textSecondary,
+                  fontWeight: FontWeight.w400,
+                  color: isDark ? _textPrimaryDark : _textPrimary,
                   height: 1.2,
                 ),
               ),
               Text(
                 _userName,
-                style: TextStyle(
+                style: const TextStyle(
+                  fontFamily: 'NDOT',
                   fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? _textPrimaryDark : _textPrimary,
+                  fontWeight: FontWeight.w800,
+                  color:
+                      Color(0xFFE5252A), // Nothing OS Red from reference image
                   height: 1.2,
                 ),
               ),
@@ -259,10 +264,12 @@ class _HomeScreenState extends State<HomeScreen>
           decoration: BoxDecoration(
             color: isDark ? _bgSecondaryDark : _bgSecondary,
             shape: BoxShape.circle,
-            border: Border.all(color: isDark ? _borderSubtleDark : _borderSubtle),
+            border:
+                Border.all(color: isDark ? _borderSubtleDark : _borderSubtle),
           ),
           child: IconButton(
-            icon: Icon(Iconsax.notification, color: isDark ? _textPrimaryDark : _textPrimary),
+            icon: Icon(Iconsax.notification,
+                color: isDark ? _textPrimaryDark : _textPrimary),
             onPressed: () {
               Navigator.pushNamed(context, '/notices');
             },
@@ -285,19 +292,33 @@ class _HomeScreenState extends State<HomeScreen>
               ),
               shape: BoxShape.circle,
             ),
-            child: Center(
-              child: Text(
-                _userName.isNotEmpty ? _userName[0].toUpperCase() : 'S',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
+            child: _profilePhotoUrl != null && _profilePhotoUrl!.isNotEmpty
+                ? ClipOval(
+                    child: Image.network(
+                      _profilePhotoUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          _buildFallbackAvatar(),
+                    ),
+                  )
+                : _buildFallbackAvatar(),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildFallbackAvatar() {
+    return Center(
+      child: Text(
+        _userName.isNotEmpty ? _userName[0].toUpperCase() : 'S',
+        style: const TextStyle(
+          fontFamily: 'NDOT',
+          color: Colors.white,
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
     );
   }
 
@@ -310,11 +331,13 @@ class _HomeScreenState extends State<HomeScreen>
           decoration: BoxDecoration(
             color: isDark ? _bgSecondaryDark : _bgSecondary,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: isDark ? _borderSubtleDark : _borderSubtle),
+            border:
+                Border.all(color: isDark ? _borderSubtleDark : _borderSubtle),
           ),
           child: TextField(
             controller: _searchController,
-            readOnly: true, // Navigate on tap to a dedicated search screen for better experience
+            readOnly:
+                true, // Navigate on tap to a dedicated search screen for better experience
             onTap: () => _openSearch(),
             style: TextStyle(
               color: isDark ? _textPrimaryDark : _textPrimary,
@@ -395,7 +418,8 @@ class _HomeScreenState extends State<HomeScreen>
     Navigator.push(
       context,
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => SearchResultsScreen(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            SearchResultsScreen(
           initialQuery: _searchController.text,
           initialFilter: _selectedFilter,
           department: _profileDepartment ?? 'CSE',
@@ -436,8 +460,12 @@ class _HomeScreenState extends State<HomeScreen>
               },
               child: Container(
                 decoration: BoxDecoration(
-                  color: _purpleSoft,
+                  color: isDark ? _bgSecondaryDark : _bgSecondary,
                   borderRadius: BorderRadius.circular(32),
+                  border: Border.all(
+                    color: isDark ? _borderSubtleDark : _borderSubtle,
+                    width: 1.5,
+                  ),
                 ),
                 padding: const EdgeInsets.all(24),
                 child: Column(
@@ -446,7 +474,7 @@ class _HomeScreenState extends State<HomeScreen>
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: _bgSecondary.withValues(alpha: 0.65),
+                        color: isDark ? _bgPrimaryDark : _bgPrimary,
                         shape: BoxShape.circle,
                       ),
                       child: Icon(Iconsax.book, color: _primary500, size: 24),
@@ -455,45 +483,31 @@ class _HomeScreenState extends State<HomeScreen>
                     Text(
                       "Academic\nNotes",
                       style: TextStyle(
+                          fontFamily: 'NDOT',
                           fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: _textPrimary,
+                          fontWeight: FontWeight.w800,
+                          color: isDark ? _textPrimaryDark : _textPrimary,
                           height: 1.2),
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      "Craft words that connect emotionally with users",
+                      "Access comprehensive semester notes and study materials",
                       style: TextStyle(
                           fontSize: 14,
-                          color: _textPrimary.withValues(alpha: 0.6)),
+                          color: isDark ? _textSecondaryDark : _textSecondary),
                     ),
                     const Spacer(),
-                    Row(
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Time",
-                                style: TextStyle(
-                                    fontSize: 12, color: _textSecondary)),
-                            Text("10:30am",
-                                style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: _textPrimary)),
-                          ],
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: _primary500,
+                          shape: BoxShape.circle,
                         ),
-                        const Spacer(),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: _primary500,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(Icons.arrow_outward,
-                              color: Colors.white, size: 20),
-                        )
-                      ],
+                        child: Icon(Icons.arrow_outward,
+                            color: Colors.white, size: 20),
+                      ),
                     )
                   ],
                 ),
@@ -514,7 +528,7 @@ class _HomeScreenState extends State<HomeScreen>
                     color: _blueSoft,
                     icon: Iconsax.archive_book,
                     title: "PYQ Bank",
-                    subtitle: "2018-24",
+                    subtitle: "PAST YEARS",
                     onTap: () {
                       final dept = _profileDepartment ?? 'CSE';
                       Navigator.push(
@@ -532,7 +546,7 @@ class _HomeScreenState extends State<HomeScreen>
                     color: _pinkSoft,
                     icon: Iconsax.flash,
                     title: "Exam Focus",
-                    subtitle: "Oct 16",
+                    subtitle: "CURATED Q'S",
                     onTap: () {
                       final dept = _profileDepartment ?? 'CSE';
                       Navigator.push(
@@ -551,7 +565,7 @@ class _HomeScreenState extends State<HomeScreen>
                     color: _mintSoft,
                     icon: Iconsax.book_1,
                     title: "Syllabus",
-                    subtitle: "PDF",
+                    subtitle: "TRACKER",
                     onTap: () {
                       final dept = _profileDepartment ?? 'CSE';
                       Navigator.push(
@@ -592,23 +606,38 @@ class _HomeScreenState extends State<HomeScreen>
           child: Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: _blueSoft, // Matching PYQ Bank color
-              borderRadius: BorderRadius.circular(24),
+              color: isDark ? _bgSecondaryDark : _bgSecondary,
+              borderRadius:
+                  BorderRadius.circular(16), // Sharper corners for Nothing OS
               border: Border.all(
-                color: isDark ? _borderSubtleDark.withValues(alpha: 0.5) : _borderSubtle,
+                color: isDark ? _borderSubtleDark : _borderSubtle,
+                width: 1.5,
               ),
+              boxShadow: isDark
+                  ? []
+                  : [
+                      BoxShadow(
+                        color: _textPrimary.withValues(alpha: 0.05),
+                        offset: const Offset(4, 4),
+                        blurRadius: 0, // Hard shadow for geometric feel
+                      ),
+                    ],
             ),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.65),
-                    borderRadius: BorderRadius.circular(16),
+                    color: isDark ? _bgPrimaryDark : _bgPrimary,
+                    borderRadius: BorderRadius.circular(12), // Sharper icon box
+                    border: Border.all(
+                      color: isDark ? _borderSubtleDark : _borderSubtle,
+                      width: 1.0,
+                    ),
                   ),
                   child: Icon(
                     Iconsax.calculator,
-                    color: _textPrimary,
+                    color: isDark ? _textPrimaryDark : _textPrimary,
                     size: 24,
                   ),
                 ),
@@ -618,27 +647,38 @@ class _HomeScreenState extends State<HomeScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "CGPA Calculator",
+                        "CGPA CALCULATOR", // Uppercase for dot matrix
                         style: TextStyle(
+                          fontFamily: 'NDOT',
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: _textPrimary,
+                          letterSpacing: 1.0,
+                          color: isDark ? _textPrimaryDark : _textPrimary,
                         ),
                       ),
+                      const SizedBox(height: 4),
                       Text(
                         "Calculate SGPA, CGPA & Percentage",
                         style: TextStyle(
-                          fontSize: 13,
-                          color: _textSecondary,
+                          fontSize: 12, // Slightly smaller subtitle
+                          fontWeight: FontWeight.w500,
+                          color: isDark ? _textSecondaryDark : _textSecondary,
                         ),
                       ),
                     ],
                   ),
                 ),
-                Icon(
-                  Iconsax.arrow_right_3,
-                  size: 18,
-                  color: _primary500.withValues(alpha: 0.5),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: _primary500,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 16,
+                    color: Colors.white,
+                  ),
                 ),
               ],
             ),
@@ -697,8 +737,16 @@ class PastelCard extends StatelessWidget {
     Widget content = Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: color,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF121212)
+            : const Color(0xFFFFFFFF), // _bgSecondary
         borderRadius: BorderRadius.circular(32),
+        border: Border.all(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? const Color(0xFF222222)
+              : const Color(0xFFE6E8EC),
+          width: 1.5,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -709,18 +757,27 @@ class PastelCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.65),
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? const Color(0xFF000000)
+                        : const Color(0xFFF4F5F7), // _bgPrimary
                     shape: BoxShape.circle),
-                child: Icon(icon, color: const Color(0xFF1E1E1E), size: 18),
+                child: Icon(icon,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? const Color(0xFFF5F6FA)
+                        : const Color(0xFF1E1E1E),
+                    size: 18),
               ),
             ],
           ),
           const Spacer(),
           Text(title,
-              style: const TextStyle(
+              style: TextStyle(
+                  fontFamily: 'NDOT',
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E1E1E))),
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? const Color(0xFFF5F6FA)
+                      : const Color(0xFF1E1E1E))),
           Text(subtitle,
               style: const TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
         ],
@@ -801,7 +858,6 @@ class _ScaleButtonState extends State<ScaleButton>
     );
   }
 }
-
 
 // Keep the animation widget
 class StaggeredSlideFade extends StatefulWidget {

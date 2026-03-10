@@ -11,13 +11,14 @@ class BillingRepositoryImpl implements BillingRepository {
   final InAppPurchase _iap = InAppPurchase.instance;
   late Razorpay _razorpay;
   SupabaseClient get _supabase => SupabaseClientService.client;
-  
+
   // To keep track of the current alternative billing token if provided by Google
   String? _pendingExternalToken;
   String? _activeSupabaseOrderId;
 
   // Manual stream for alternative billing success notifications
-  final StreamController<Map<String, dynamic>> _alternativePurchaseController = StreamController<Map<String, dynamic>>.broadcast();
+  final StreamController<Map<String, dynamic>> _alternativePurchaseController =
+      StreamController<Map<String, dynamic>>.broadcast();
 
   Future<void> _ensureInitialized() async {
     if (!SupabaseClientService.isInitialized) {
@@ -30,7 +31,7 @@ class BillingRepositoryImpl implements BillingRepository {
     _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handleRazorpaySuccess);
     _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handleRazorpayError);
     _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
-    
+
     // Defer Google Play init to avoid blocking the first few frames
     Future.microtask(() => _initializeUserChoiceBilling());
   }
@@ -39,7 +40,8 @@ class BillingRepositoryImpl implements BillingRepository {
   Stream<List<PurchaseDetails>> get purchaseStream => _iap.purchaseStream;
 
   @override
-  Stream<Map<String, dynamic>> get alternativePurchaseStream => _alternativePurchaseController.stream;
+  Stream<Map<String, dynamic>> get alternativePurchaseStream =>
+      _alternativePurchaseController.stream;
 
   @override
   Future<bool> isStoreAvailable() async {
@@ -48,7 +50,8 @@ class BillingRepositoryImpl implements BillingRepository {
 
   @override
   Future<List<ProductDetails>> fetchProducts(Set<String> productIds) async {
-    final ProductDetailsResponse response = await _iap.queryProductDetails(productIds);
+    final ProductDetailsResponse response =
+        await _iap.queryProductDetails(productIds);
     if (response.error != null) {
       throw response.error!;
     }
@@ -56,12 +59,14 @@ class BillingRepositoryImpl implements BillingRepository {
   }
 
   @override
-  Future<void> launchBillingFlow(ProductDetails product, {String? orderId}) async {
+  Future<void> launchBillingFlow(ProductDetails product,
+      {String? orderId}) async {
     final PurchaseParam purchaseParam = PurchaseParam(
       productDetails: product,
-      applicationUserName: orderId, // Used to link this purchase to our Supabase order
+      applicationUserName:
+          orderId, // Used to link this purchase to our Supabase order
     );
-    
+
     _activeSupabaseOrderId = orderId;
     // Use buyConsumable since we use generic price-tier products
     await _iap.buyConsumable(purchaseParam: purchaseParam, autoConsume: true);
@@ -72,7 +77,8 @@ class BillingRepositoryImpl implements BillingRepository {
       // Listen to Google Play purchase updates and auto-report to backend
       _iap.purchaseStream.listen((purchases) {
         for (var purchase in purchases) {
-          if (purchase.status == PurchaseStatus.purchased || purchase.status == PurchaseStatus.restored) {
+          if (purchase.status == PurchaseStatus.purchased ||
+              purchase.status == PurchaseStatus.restored) {
             if (purchase.pendingCompletePurchase) {
               _iap.completePurchase(purchase);
             }
@@ -142,8 +148,12 @@ class BillingRepositoryImpl implements BillingRepository {
         'order_id': razorpayOrderId,
         'description': 'Premium Purchase',
         'prefill': {
-          'contact': SupabaseClientService.isInitialized ? _supabase.auth.currentUser?.phone ?? '' : '',
-          'email': SupabaseClientService.isInitialized ? _supabase.auth.currentUser?.email ?? '' : ''
+          'contact': SupabaseClientService.isInitialized
+              ? _supabase.auth.currentUser?.phone ?? ''
+              : '',
+          'email': SupabaseClientService.isInitialized
+              ? _supabase.auth.currentUser?.email ?? ''
+              : ''
         },
         'external': {
           'wallets': ['paytm']
@@ -189,9 +199,8 @@ class BillingRepositoryImpl implements BillingRepository {
         if (order != null) {
           final String itemId = order['item_id'] as String;
           final String itemType = order['item_type'] as String;
-          final String department = itemId.split('_').length > 1
-              ? itemId.split('_')[1]
-              : '';
+          final String department =
+              itemId.split('_').length > 1 ? itemId.split('_')[1] : '';
 
           // Use service role bypassed via edge function, but attempt anon upsert too.
           // Even if RLS blocks INSERT, the DB trigger will have already handled it.

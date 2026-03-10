@@ -43,13 +43,13 @@ class _AboutScreenState extends State<AboutScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    final bg      = isDark ? AuthTheme.darkBg      : AuthTheme.lightBg;
-    final card    = isDark ? AuthTheme.darkSurface : AuthTheme.lightSurface;
-    final border  = isDark ? AuthTheme.darkBorder  : AuthTheme.lightBorder;
-    final text    = isDark ? AuthTheme.darkText     : AuthTheme.lightText;
-    final subtext = isDark ? AuthTheme.darkSubtext  : AuthTheme.lightSubtext;
-    final accent  = AuthTheme.accent;
+
+    final bg = isDark ? AuthTheme.darkBg : AuthTheme.lightBg;
+    final card = isDark ? AuthTheme.darkSurface : AuthTheme.lightSurface;
+    final border = isDark ? AuthTheme.darkBorder : AuthTheme.lightBorder;
+    final text = isDark ? AuthTheme.darkText : AuthTheme.lightText;
+    final subtext = isDark ? AuthTheme.darkSubtext : AuthTheme.lightSubtext;
+    final accent = AuthTheme.accent;
 
     return Scaffold(
       backgroundColor: bg,
@@ -67,7 +67,8 @@ class _AboutScreenState extends State<AboutScreen> {
               icon: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.05),
+                  color: (isDark ? Colors.white : Colors.black)
+                      .withValues(alpha: 0.05),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(Iconsax.arrow_left, color: text, size: 18),
@@ -77,7 +78,7 @@ class _AboutScreenState extends State<AboutScreen> {
             flexibleSpace: FlexibleSpaceBar(
               background: Stack(
                 children: [
-                   // Abstract Background Circles
+                  // Abstract Background Circles
                   Positioned(
                     top: -60,
                     right: -40,
@@ -113,7 +114,9 @@ class _AboutScreenState extends State<AboutScreen> {
                             width: 80,
                             height: 80,
                             child: Image.asset(
-                              isDark ? 'assets/darkmode.png' : 'assets/lightmode.png',
+                              isDark
+                                  ? 'assets/darkmode.png'
+                                  : 'assets/lightmode.png',
                               width: 40,
                               height: 40,
                             ),
@@ -154,17 +157,14 @@ class _AboutScreenState extends State<AboutScreen> {
                 _buildSectionTitle('MISSION', subtext),
                 const SizedBox(height: 12),
                 _buildMissionCard(card, border, text, subtext),
-                
                 const SizedBox(height: 32),
                 _buildSectionTitle('DEVELOPMENT', subtext),
                 const SizedBox(height: 12),
                 _buildTeamCard(card, border, text, subtext, accent),
-                
                 const SizedBox(height: 32),
                 _buildSectionTitle('APP INFO', subtext),
                 const SizedBox(height: 12),
                 _buildInfoGrid(card, border, text, subtext, accent),
-                
                 const SizedBox(height: 48),
                 _buildSocialFooter(subtext, accent),
               ]),
@@ -187,7 +187,8 @@ class _AboutScreenState extends State<AboutScreen> {
     );
   }
 
-  Widget _buildMissionCard(Color card, Color border, Color text, Color subtext) {
+  Widget _buildMissionCard(
+      Color card, Color border, Color text, Color subtext) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -200,7 +201,8 @@ class _AboutScreenState extends State<AboutScreen> {
         children: [
           Text(
             'Empowering Students',
-            style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: text),
+            style: TextStyle(
+                fontSize: 17, fontWeight: FontWeight.bold, color: text),
           ),
           const SizedBox(height: 8),
           Text(
@@ -212,7 +214,8 @@ class _AboutScreenState extends State<AboutScreen> {
     );
   }
 
-  Widget _buildTeamCard(Color card, Color border, Color text, Color subtext, Color accent) {
+  Widget _buildTeamCard(
+      Color card, Color border, Color text, Color subtext, Color accent) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -237,7 +240,8 @@ class _AboutScreenState extends State<AboutScreen> {
               children: [
                 Text(
                   'Orbit Innovations',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: text),
+                  style: TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold, color: text),
                 ),
                 Text(
                   'Driving academic excellence through technology.',
@@ -251,19 +255,24 @@ class _AboutScreenState extends State<AboutScreen> {
     );
   }
 
-  Widget _buildInfoGrid(Color card, Color border, Color text, Color subtext, Color accent) {
+  Widget _buildInfoGrid(
+      Color card, Color border, Color text, Color subtext, Color accent) {
     return Column(
       children: [
-        _infoTile(Iconsax.info_circle, 'Version', '$_version.$_buildNumber', card, border, text, subtext, accent),
+        _infoTile(Iconsax.info_circle, 'Version', '$_version.$_buildNumber',
+            card, border, text, subtext, accent),
         const SizedBox(height: 12),
-        _infoTile(Iconsax.verify, 'Build Type', 'Production', card, border, text, subtext, accent),
+        _infoTile(Iconsax.verify, 'Build Type', 'Production', card, border,
+            text, subtext, accent),
         const SizedBox(height: 12),
-        _infoTile(Iconsax.calendar_1, 'Last Updated', 'March 2026', card, border, text, subtext, accent),
+        _infoTile(Iconsax.calendar_1, 'Last Updated', 'March 2026', card,
+            border, text, subtext, accent),
       ],
     );
   }
 
-  Widget _infoTile(IconData icon, String label, String value, Color card, Color border, Color text, Color subtext, Color accent) {
+  Widget _infoTile(IconData icon, String label, String value, Color card,
+      Color border, Color text, Color subtext, Color accent) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
       decoration: BoxDecoration(
@@ -275,9 +284,13 @@ class _AboutScreenState extends State<AboutScreen> {
         children: [
           Icon(icon, color: accent.withValues(alpha: 0.7), size: 18),
           const SizedBox(width: 14),
-          Text(label, style: TextStyle(fontSize: 14, color: subtext, fontWeight: FontWeight.w500)),
+          Text(label,
+              style: TextStyle(
+                  fontSize: 14, color: subtext, fontWeight: FontWeight.w500)),
           const Spacer(),
-          Text(value, style: TextStyle(fontSize: 14, color: text, fontWeight: FontWeight.bold)),
+          Text(value,
+              style: TextStyle(
+                  fontSize: 14, color: text, fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -299,7 +312,10 @@ class _AboutScreenState extends State<AboutScreen> {
         const SizedBox(height: 24),
         Text(
           'ScholarX © 2026 Orbit Innovations',
-          style: TextStyle(fontSize: 12, color: subtext.withValues(alpha: 0.5), fontWeight: FontWeight.w500),
+          style: TextStyle(
+              fontSize: 12,
+              color: subtext.withValues(alpha: 0.5),
+              fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 4),
         Text(

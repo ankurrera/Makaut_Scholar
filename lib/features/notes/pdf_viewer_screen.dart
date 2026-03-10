@@ -8,10 +8,10 @@ class PdfViewerScreen extends StatefulWidget {
   final String? url;
   final String? filePath;
   final String title;
-  
+
   const PdfViewerScreen({
-    super.key, 
-    this.url, 
+    super.key,
+    this.url,
     this.filePath,
     required this.title,
   }) : assert(url != null || filePath != null);
@@ -31,9 +31,11 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
   Color _bg(bool d) => d ? const Color(0xFF121512) : const Color(0xFFF8F6F1);
   Color _textP(bool d) => d ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E);
   Color _textS(bool d) => d ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
-  Color _accent(bool d) => d ? const Color(0xFF2D7A5E) : const Color(0xFF1E5240);
+  Color _accent(bool d) =>
+      d ? const Color(0xFFE5252A) : const Color(0xFFE5252A);
 
-  static const _secureChannel = MethodChannel('com.makaut_scholar/screen_security');
+  static const _secureChannel =
+      MethodChannel('com.makaut_scholar/screen_security');
 
   @override
   void initState() {
@@ -50,11 +52,15 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
   }
 
   Future<void> _enableSecure() async {
-    try { await _secureChannel.invokeMethod('enableSecure'); } catch (_) {}
+    try {
+      await _secureChannel.invokeMethod('enableSecure');
+    } catch (_) {}
   }
 
   Future<void> _disableSecure() async {
-    try { await _secureChannel.invokeMethod('disableSecure'); } catch (_) {}
+    try {
+      await _secureChannel.invokeMethod('disableSecure');
+    } catch (_) {}
   }
 
   @override
@@ -74,7 +80,8 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
         ),
         title: Text(
           widget.title,
-          style: TextStyle(color: _textP(isDark), fontSize: 16, fontWeight: FontWeight.w600),
+          style: TextStyle(
+              color: _textP(isDark), fontSize: 16, fontWeight: FontWeight.w600),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -85,14 +92,18 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
               child: Padding(
                 padding: const EdgeInsets.only(right: 16),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: accent.withValues(alpha: isDark ? 0.15 : 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     '${_currentPage} / $_totalPages',
-                    style: TextStyle(color: accent, fontSize: 12, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                        color: accent,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
@@ -104,62 +115,70 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Iconsax.warning_2, size: 44, color: Colors.redAccent.withValues(alpha: 0.6)),
+                  Icon(Iconsax.warning_2,
+                      size: 44, color: Colors.redAccent.withValues(alpha: 0.6)),
                   const SizedBox(height: 14),
                   Text('Failed to load PDF',
-                      style: TextStyle(color: _textP(isDark), fontSize: 15, fontWeight: FontWeight.w500)),
+                      style: TextStyle(
+                          color: _textP(isDark),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500)),
                   const SizedBox(height: 16),
                   TextButton.icon(
                     onPressed: () => setState(() => _hasError = false),
                     icon: Icon(Iconsax.refresh, size: 16, color: accent),
-                    label: Text('Retry', style: TextStyle(color: accent, fontWeight: FontWeight.w500)),
+                    label: Text('Retry',
+                        style: TextStyle(
+                            color: accent, fontWeight: FontWeight.w500)),
                   ),
                 ],
               ),
             )
-          : widget.filePath != null 
-            ? SfPdfViewer.file(
-                File(widget.filePath!),
-                key: _pdfViewerKey,
-                controller: _pdfController,
-                canShowScrollHead: true,
-                onDocumentLoaded: (details) {
-                  if (mounted) {
-                    setState(() {
-                      _totalPages = details.document.pages.count;
-                      _currentPage = 1;
-                    });
-                  }
-                },
-                onPageChanged: (details) {
-                  if (mounted) setState(() => _currentPage = details.newPageNumber);
-                },
-                onDocumentLoadFailed: (details) {
-                  if (mounted) setState(() => _hasError = true);
-                },
-              )
-            : SfPdfViewer.network(
-                widget.url!,
-                key: _pdfViewerKey,
-                controller: _pdfController,
-                canShowScrollHead: true,
-                onDocumentLoaded: (details) {
-                  if (mounted) {
-                    setState(() {
-                      _totalPages = details.document.pages.count;
-                      _currentPage = 1;
-                    });
-                  }
-                },
-                onPageChanged: (details) {
-                  if (mounted) setState(() => _currentPage = details.newPageNumber);
-                },
-                onDocumentLoadFailed: (details) {
-                  debugPrint('PDF Load Failed: ${details.error}');
-                  debugPrint('Raw URL: ${widget.url}');
-                  if (mounted) setState(() => _hasError = true);
-                },
-              ),
+          : widget.filePath != null
+              ? SfPdfViewer.file(
+                  File(widget.filePath!),
+                  key: _pdfViewerKey,
+                  controller: _pdfController,
+                  canShowScrollHead: true,
+                  onDocumentLoaded: (details) {
+                    if (mounted) {
+                      setState(() {
+                        _totalPages = details.document.pages.count;
+                        _currentPage = 1;
+                      });
+                    }
+                  },
+                  onPageChanged: (details) {
+                    if (mounted)
+                      setState(() => _currentPage = details.newPageNumber);
+                  },
+                  onDocumentLoadFailed: (details) {
+                    if (mounted) setState(() => _hasError = true);
+                  },
+                )
+              : SfPdfViewer.network(
+                  widget.url!,
+                  key: _pdfViewerKey,
+                  controller: _pdfController,
+                  canShowScrollHead: true,
+                  onDocumentLoaded: (details) {
+                    if (mounted) {
+                      setState(() {
+                        _totalPages = details.document.pages.count;
+                        _currentPage = 1;
+                      });
+                    }
+                  },
+                  onPageChanged: (details) {
+                    if (mounted)
+                      setState(() => _currentPage = details.newPageNumber);
+                  },
+                  onDocumentLoadFailed: (details) {
+                    debugPrint('PDF Load Failed: ${details.error}');
+                    debugPrint('Raw URL: ${widget.url}');
+                    if (mounted) setState(() => _hasError = true);
+                  },
+                ),
     );
   }
 }

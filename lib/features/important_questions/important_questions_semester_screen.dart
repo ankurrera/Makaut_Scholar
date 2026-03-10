@@ -21,9 +21,10 @@ class ImportantQuestionsSemesterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1),
+      backgroundColor:
+          isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1),
       body: SafeArea(
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(),
@@ -39,11 +40,17 @@ class ImportantQuestionsSemesterScreen extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF1C2020) : Colors.white,
+                          color:
+                              isDark ? const Color(0xFF1C2020) : Colors.white,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC)),
+                          border: Border.all(
+                              color: isDark
+                                  ? const Color(0xFF2A3030)
+                                  : const Color(0xFFE6E8EC)),
                         ),
-                        child: Icon(Iconsax.arrow_left_2, size: 20, color: isDark ? Colors.white : Colors.black),
+                        child: Icon(Iconsax.arrow_left_2,
+                            size: 20,
+                            color: isDark ? Colors.white : Colors.black),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -60,7 +67,9 @@ class ImportantQuestionsSemesterScreen extends StatelessWidget {
                       'Select any Semester to View Repeated Questions',
                       style: TextStyle(
                         fontSize: 16,
-                        color: isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93),
+                        color: isDark
+                            ? const Color(0xFF9AA0A6)
+                            : const Color(0xFF8E8E93),
                       ),
                     ),
                   ],
@@ -74,7 +83,7 @@ class ImportantQuestionsSemesterScreen extends StatelessWidget {
                   (context, index) {
                     final semester = index + 1;
                     final color = _folderColors[index % _folderColors.length];
-                    
+
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: Material(
@@ -93,10 +102,14 @@ class ImportantQuestionsSemesterScreen extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: isDark ? const Color(0xFF1C2020) : Colors.white,
+                              color: isDark
+                                  ? const Color(0xFF1C2020)
+                                  : Colors.white,
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC),
+                                color: isDark
+                                    ? const Color(0xFF2A3030)
+                                    : const Color(0xFFE6E8EC),
                               ),
                             ),
                             child: Row(
@@ -111,20 +124,25 @@ class ImportantQuestionsSemesterScreen extends StatelessWidget {
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Semester $semester',
                                         style: TextStyle(
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
-                                          color: isDark ? Colors.white : const Color(0xFF1E1E1E),
+                                          color: isDark
+                                              ? Colors.white
+                                              : const Color(0xFF1E1E1E),
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
-                                Icon(Iconsax.arrow_right_3, size: 18, color: color.withValues(alpha: 0.5)),
+                                Icon(Iconsax.arrow_right_3,
+                                    size: 18,
+                                    color: color.withValues(alpha: 0.5)),
                               ],
                             ),
                           ),

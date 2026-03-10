@@ -30,6 +30,7 @@ dependencies:
   package_info_plus: ^9.0.0
   firebase_core: ^4.5.0
   firebase_messaging: ^16.1.2
+  google_fonts: ^8.0.2
 
 dev_dependencies:
   flutter_test:
@@ -49,6 +50,11 @@ flutter:
     - assets/google_logo.png
     - assets/lightmode.png
     - assets/darkmode.png
+
+  fonts:
+    - family: NDOT
+      fonts:
+        - asset: assets/fonts/Ndot.ttf
 
 flutter_launcher_icons:
   android: true

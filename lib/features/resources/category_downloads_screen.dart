@@ -14,7 +14,8 @@ class CategoryDownloadsScreen extends StatefulWidget {
   });
 
   @override
-  State<CategoryDownloadsScreen> createState() => _CategoryDownloadsScreenState();
+  State<CategoryDownloadsScreen> createState() =>
+      _CategoryDownloadsScreenState();
 }
 
 class _CategoryDownloadsScreenState extends State<CategoryDownloadsScreen> {
@@ -37,7 +38,8 @@ class _CategoryDownloadsScreenState extends State<CategoryDownloadsScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1),
+      backgroundColor:
+          isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1),
       body: SafeArea(
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(),
@@ -53,11 +55,17 @@ class _CategoryDownloadsScreenState extends State<CategoryDownloadsScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF1C2020) : Colors.white,
+                          color:
+                              isDark ? const Color(0xFF1C2020) : Colors.white,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC)),
+                          border: Border.all(
+                              color: isDark
+                                  ? const Color(0xFF2A3030)
+                                  : const Color(0xFFE6E8EC)),
                         ),
-                        child: Icon(Iconsax.arrow_left_2, size: 20, color: isDark ? Colors.white : Colors.black),
+                        child: Icon(Iconsax.arrow_left_2,
+                            size: 20,
+                            color: isDark ? Colors.white : Colors.black),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -74,7 +82,9 @@ class _CategoryDownloadsScreenState extends State<CategoryDownloadsScreen> {
                       'Manage your local ${_downloads.length} file${_downloads.length == 1 ? '' : 's'}',
                       style: TextStyle(
                         fontSize: 16,
-                        color: isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93),
+                        color: isDark
+                            ? const Color(0xFF9AA0A6)
+                            : const Color(0xFF8E8E93),
                       ),
                     ),
                   ],
@@ -87,11 +97,14 @@ class _CategoryDownloadsScreenState extends State<CategoryDownloadsScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Iconsax.document_download, size: 48, color: isDark ? Colors.white24 : Colors.black12),
+                      Icon(Iconsax.document_download,
+                          size: 48,
+                          color: isDark ? Colors.white24 : Colors.black12),
                       const SizedBox(height: 16),
                       Text(
                         'No offline files here',
-                        style: TextStyle(color: isDark ? Colors.white54 : Colors.black45),
+                        style: TextStyle(
+                            color: isDark ? Colors.white54 : Colors.black45),
                       ),
                     ],
                   ),
@@ -140,7 +153,8 @@ class _DownloadTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1C2020) : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC)),
+        border: Border.all(
+            color: isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC)),
       ),
       child: Row(
         children: [
@@ -150,7 +164,8 @@ class _DownloadTile extends StatelessWidget {
               color: Theme.of(context).primaryColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(Iconsax.document_text_1, color: Theme.of(context).primaryColor, size: 24),
+            child: Icon(Iconsax.document_text_1,
+                color: Theme.of(context).primaryColor, size: 24),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -169,7 +184,9 @@ class _DownloadTile extends StatelessWidget {
                 ),
                 Text(
                   'Downloaded on ${resource.downloadedAt.day}/${resource.downloadedAt.month}/${resource.downloadedAt.year}',
-                  style: TextStyle(fontSize: 12, color: isDark ? Colors.white54 : Colors.black54),
+                  style: TextStyle(
+                      fontSize: 12,
+                      color: isDark ? Colors.white54 : Colors.black54),
                 ),
               ],
             ),
@@ -179,7 +196,8 @@ class _DownloadTile extends StatelessWidget {
             onPressed: onDelete,
           ),
           IconButton(
-            icon: Icon(Iconsax.arrow_right_3, color: isDark ? Colors.white24 : Colors.black12, size: 20),
+            icon: Icon(Iconsax.arrow_right_3,
+                color: isDark ? Colors.white24 : Colors.black12, size: 20),
             onPressed: () {
               Navigator.push(
                 context,

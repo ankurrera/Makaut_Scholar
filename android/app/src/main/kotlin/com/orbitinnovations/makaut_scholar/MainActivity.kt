@@ -3,10 +3,18 @@ package com.orbitinnovations.makaut_scholar
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import android.os.Bundle
 import android.view.WindowManager
+import androidx.core.view.WindowCompat
 
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "com.makaut_scholar/screen_security"
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        // Enforce Edge-to-Edge display on Android 15 (SDK 35) to fix Play Console warnings
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        super.onCreate(savedInstanceState)
+    }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:makaut_scholar/domain/repositories/billing_repository.dart';
+import 'package:makaut_scholar/core/widgets/dot_loading.dart';
 import 'package:provider/provider.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'dart:async';
@@ -28,7 +29,8 @@ class PremiumCheckoutScreen extends StatefulWidget {
 }
 
 class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
-  String _selectedMethod = 'GooglePlay'; // Will switch to Razorpay if product unavailable
+  String _selectedMethod =
+      'GooglePlay'; // Will switch to Razorpay if product unavailable
   bool _isLoading = true;
   bool _successHandled = false;
   late BillingRepository _billingRepository;
@@ -41,8 +43,11 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
     super.initState();
     _billingRepository = context.read<BillingRepository>();
     _loadProducts();
-    _purchaseSubscription = _billingRepository.purchaseStream.listen(_listenToPurchases);
-    _alternativePurchaseSubscription = _billingRepository.alternativePurchaseStream.listen(_listenToAlternativePurchases);
+    _purchaseSubscription =
+        _billingRepository.purchaseStream.listen(_listenToPurchases);
+    _alternativePurchaseSubscription = _billingRepository
+        .alternativePurchaseStream
+        .listen(_listenToAlternativePurchases);
   }
 
   @override
@@ -70,14 +75,18 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
       }
     } catch (e) {
       // Could not reach Play Console — do NOT fall back silently
-      if (mounted) setState(() { _isLoading = false; });
+      if (mounted)
+        setState(() {
+          _isLoading = false;
+        });
     }
   }
 
   void _listenToPurchases(List<PurchaseDetails> purchases) {
     for (var purchase in purchases) {
       // Standard IAP or UCB Google Play choice
-      if (purchase.status == PurchaseStatus.purchased || purchase.status == PurchaseStatus.restored) {
+      if (purchase.status == PurchaseStatus.purchased ||
+          purchase.status == PurchaseStatus.restored) {
         if (purchase.pendingCompletePurchase) {
           InAppPurchase.instance.completePurchase(purchase);
         }
@@ -96,7 +105,8 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
 
   Future<void> _handlePayment() async {
     if (_productDetails == null && _selectedMethod == 'GooglePlay') {
-      _handleError("Product not found in Google Play Console. Please try UPI instead.");
+      _handleError(
+          "Product not found in Google Play Console. Please try UPI instead.");
       return;
     }
 
@@ -114,7 +124,8 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
 
       if (_selectedMethod == 'GooglePlay') {
         // 2a. Launch Google Play with orderId for tracking
-        await _billingRepository.launchBillingFlow(_productDetails!, orderId: orderId);
+        await _billingRepository.launchBillingFlow(_productDetails!,
+            orderId: orderId);
       } else {
         // 2b. Launch Razorpay using the pre-created order data
         final String razorpayOrderId = orderData['razorpayOrderId'] ?? '';
@@ -167,11 +178,12 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark 
+              color: Theme.of(context).brightness == Brightness.dark
                   ? const Color(0xFF1A1D21).withOpacity(0.9)
                   : Colors.white.withOpacity(0.9),
               borderRadius: BorderRadius.circular(32),
-              border: Border.all(color: const Color(0xFF2D7A5E).withOpacity(0.3)),
+              border:
+                  Border.all(color: const Color(0xFFE5252A).withOpacity(0.3)),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -179,28 +191,35 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2D7A5E).withOpacity(0.1),
+                    color: const Color(0xFFE5252A).withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Iconsax.tick_circle_copy, color: Color(0xFF2D7A5E), size: 48),
+                  child: const Icon(Iconsax.tick_circle_copy,
+                      color: Color(0xFFE5252A), size: 48),
                 ),
                 const SizedBox(height: 24),
                 const Text(
                   "Unlock Successful! ✨",
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: -0.5),
+                  style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.5),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 12),
                 const Text(
                   "Your premium content is ready. We are preparing it for you now...",
-                  style: TextStyle(color: Colors.grey, fontSize: 14, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
                 const SizedBox(
-                  width: 40,
-                  height: 40,
-                  child: CircularProgressIndicator(strokeWidth: 3, color: Color(0xFF2D7A5E)),
+                  width: 24,
+                  height: 24,
+                  child: DotLoadingIndicator(color: Color(0xFFE5252A), size: 6),
                 ),
                 const SizedBox(height: 24),
               ],
@@ -215,23 +234,33 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
     if (mounted) {
       showModalBottomSheet(
         context: context,
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
         builder: (_) => Padding(
           padding: const EdgeInsets.all(28),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Error', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20)),
+              const Text('Error',
+                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20)),
               const SizedBox(height: 12),
-              Text(message, style: const TextStyle(fontSize: 15, color: Colors.black87)),
+              Text(message,
+                  style: const TextStyle(fontSize: 15, color: Colors.black87)),
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2D7A5E), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFE5252A),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16))),
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Got it', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                  child: const Text('Got it',
+                      style:
+                          TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
                 ),
               ),
               const SizedBox(height: 8),
@@ -245,14 +274,20 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
   @override
   Widget build(BuildContext context) {
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     // Theme-aware Color Palette
-    final Color bgColor = isDarkMode ? const Color(0xFF0B0D11) : const Color(0xFFF8F9FE);
-    final Color surfaceColor = isDarkMode ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03);
-    final Color borderColor = isDarkMode ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.08);
+    final Color bgColor =
+        isDarkMode ? const Color(0xFF0B0D11) : const Color(0xFFF8F9FE);
+    final Color surfaceColor = isDarkMode
+        ? Colors.white.withOpacity(0.05)
+        : Colors.black.withOpacity(0.03);
+    final Color borderColor = isDarkMode
+        ? Colors.white.withOpacity(0.1)
+        : Colors.black.withOpacity(0.08);
     final Color textColor = isDarkMode ? Colors.white : const Color(0xFF1A1D21);
-    final Color textDimColor = isDarkMode ? Colors.white70 : const Color(0xFF4A4D54);
-    final Color accentColor = const Color(0xFF2D7A5E); // Forest Green
+    final Color textDimColor =
+        isDarkMode ? Colors.white70 : const Color(0xFF4A4D54);
+    final Color accentColor = const Color(0xFFE5252A); // Forest Green
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -263,22 +298,25 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
             Positioned(
               top: -150,
               right: -100,
-              child: _AmbientGlow(color: accentColor.withOpacity(0.12), size: 400),
+              child:
+                  _AmbientGlow(color: accentColor.withOpacity(0.12), size: 400),
             ),
             Positioned(
               bottom: -150,
               left: -100,
-              child: _AmbientGlow(color: Colors.blue.withOpacity(0.08), size: 400),
+              child:
+                  _AmbientGlow(color: Colors.blue.withOpacity(0.08), size: 400),
             ),
           ],
-          
+
           SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildHeader(context, textColor),
                 const SizedBox(height: 12),
-                _buildOrderSummary(surfaceColor, borderColor, textColor, textDimColor, accentColor),
+                _buildOrderSummary(surfaceColor, borderColor, textColor,
+                    textDimColor, accentColor),
                 const SizedBox(height: 32),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -296,13 +334,19 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
                 _buildMethodOption(
                   id: 'GooglePlay',
                   name: 'Google Play Billing',
-                  subtitle: _productDetails != null 
-                    ? 'Recommended • Fast & Secure' 
-                    : _isLoading ? 'Checking availability...' : 'Currently unavailable for this item',
+                  subtitle: _productDetails != null
+                      ? 'Recommended • Fast & Secure'
+                      : _isLoading
+                          ? 'Checking availability...'
+                          : 'Currently unavailable for this item',
                   icon: FontAwesomeIcons.googlePlay,
-                  color: _productDetails != null ? const Color(0xFF34A853) : Colors.grey,
+                  color: _productDetails != null
+                      ? const Color(0xFF34A853)
+                      : Colors.grey,
                   isSelected: _selectedMethod == 'GooglePlay',
-                  onTap: _productDetails != null ? () => setState(() => _selectedMethod = 'GooglePlay') : null,
+                  onTap: _productDetails != null
+                      ? () => setState(() => _selectedMethod = 'GooglePlay')
+                      : null,
                   surfaceColor: surfaceColor,
                   borderColor: borderColor,
                   textColor: textColor,
@@ -330,12 +374,12 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
           ),
 
           _buildBottomBar(accentColor, bgColor, isDarkMode),
-          
+
           if (_isLoading)
             Container(
               color: isDarkMode ? Colors.black54 : Colors.white60,
               child: Center(
-                child: CircularProgressIndicator(color: accentColor, strokeWidth: 3),
+                child: DotLoadingIndicator(color: accentColor),
               ),
             ),
         ],
@@ -367,16 +411,20 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
     );
   }
 
-  Widget _buildOrderSummary(Color surface, Color border, Color text, Color textDim, Color accent) {
+  Widget _buildOrderSummary(
+      Color surface, Color border, Color text, Color textDim, Color accent) {
     final bool isBundle = widget.itemType == 'semester_bundle';
-    final Color itemAccent = isBundle ? const Color(0xFFFFB347) : accent; // Orange for bundle
+    final Color itemAccent =
+        isBundle ? const Color(0xFFFFB347) : accent; // Orange for bundle
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
       decoration: BoxDecoration(
         color: surface,
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: isBundle ? itemAccent.withValues(alpha: 0.5) : border, width: isBundle ? 1.5 : 1),
+        border: Border.all(
+            color: isBundle ? itemAccent.withValues(alpha: 0.5) : border,
+            width: isBundle ? 1.5 : 1),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(28),
@@ -390,7 +438,8 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
                 if (isBundle)
                   Container(
                     margin: const EdgeInsets.only(bottom: 16),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: itemAccent.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
@@ -400,7 +449,12 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
                       children: [
                         Icon(Iconsax.star_1, size: 14, color: itemAccent),
                         const SizedBox(width: 6),
-                        Text('RECOMMENDED UPGRADE', style: TextStyle(color: itemAccent, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
+                        Text('RECOMMENDED UPGRADE',
+                            style: TextStyle(
+                                color: itemAccent,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.5)),
                       ],
                     ),
                   ),
@@ -412,15 +466,31 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
                         color: itemAccent.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Icon(isBundle ? Iconsax.book_1 : Iconsax.document_text_copy, color: itemAccent, size: 20),
+                      child: Icon(
+                          isBundle
+                              ? Iconsax.book_1
+                              : Iconsax.document_text_copy,
+                          color: itemAccent,
+                          size: 20),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(isBundle ? "Complete Your Semester" : "Item Summary", style: TextStyle(color: textDim, fontSize: 12, fontWeight: FontWeight.bold)),
-                          Text(widget.itemName, style: TextStyle(color: text, fontSize: 16, fontWeight: FontWeight.w700)),
+                          Text(
+                              isBundle
+                                  ? "Complete Your Semester"
+                                  : "Item Summary",
+                              style: TextStyle(
+                                  color: textDim,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold)),
+                          Text(widget.itemName,
+                              style: TextStyle(
+                                  color: text,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700)),
                         ],
                       ),
                     ),
@@ -433,7 +503,11 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("Total Amount", style: TextStyle(color: text, fontSize: 17, fontWeight: FontWeight.w800)),
+                    Text("Total Amount",
+                        style: TextStyle(
+                            color: text,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w800)),
                     Text(
                       "₹${widget.price.toStringAsFixed(2)}",
                       style: TextStyle(
@@ -493,12 +567,21 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(name, style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w800)),
-                  Text(subtitle, style: TextStyle(color: textDimColor, fontSize: 12, fontWeight: FontWeight.w500)),
+                  Text(name,
+                      style: TextStyle(
+                          color: textColor,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800)),
+                  Text(subtitle,
+                      style: TextStyle(
+                          color: textDimColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500)),
                 ],
               ),
             ),
-            Icon(Iconsax.tick_circle_copy, color: isSelected ? color : Colors.transparent, size: 24),
+            Icon(Iconsax.tick_circle_copy,
+                color: isSelected ? color : Colors.transparent, size: 24),
           ],
         ),
       ),
@@ -515,7 +598,9 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
             children: [
               Icon(Iconsax.lock_copy, color: color, size: 14),
               const SizedBox(width: 6),
-              Text("256-bit SSL Secure Transaction", style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w600)),
+              Text("256-bit SSL Secure Transaction",
+                  style: TextStyle(
+                      color: color, fontSize: 12, fontWeight: FontWeight.w600)),
             ],
           ),
           const SizedBox(height: 12),
@@ -545,7 +630,11 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
         padding: const EdgeInsets.fromLTRB(24, 20, 24, 34),
         decoration: BoxDecoration(
           color: bg,
-          border: Border(top: BorderSide(color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05))),
+          border: Border(
+              top: BorderSide(
+                  color: isDarkMode
+                      ? Colors.white.withOpacity(0.05)
+                      : Colors.black.withOpacity(0.05))),
         ),
         child: ElevatedButton(
           onPressed: _isLoading ? null : _handlePayment,
@@ -553,14 +642,19 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
             backgroundColor: accent,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 20),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             elevation: 8,
             shadowColor: accent.withOpacity(0.4),
           ),
           child: const Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text("Authorize Payment", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+              Text("Authorize Payment",
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.5)),
               SizedBox(width: 10),
               Icon(Iconsax.arrow_right_3_copy, size: 20),
             ],
@@ -594,7 +688,8 @@ class _Badge extends StatelessWidget {
   final Color color;
   const _Badge({required this.icon, required this.color});
   @override
-  Widget build(BuildContext context) => Icon(icon, color: color.withOpacity(0.4), size: 18);
+  Widget build(BuildContext context) =>
+      Icon(icon, color: color.withOpacity(0.4), size: 18);
 }
 
 class _DottedDivider extends StatelessWidget {
@@ -607,7 +702,11 @@ class _DottedDivider extends StatelessWidget {
         30,
         (i) => Expanded(
           child: Container(
-            color: i % 2 == 0 ? (isDarkMode ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.1)) : Colors.transparent,
+            color: i % 2 == 0
+                ? (isDarkMode
+                    ? Colors.white.withOpacity(0.1)
+                    : Colors.black.withOpacity(0.1))
+                : Colors.transparent,
             height: 1,
           ),
         ),

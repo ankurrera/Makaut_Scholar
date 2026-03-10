@@ -42,48 +42,48 @@ class DefaultFirebaseOptions {
   }
 
   static FirebaseOptions get web => FirebaseOptions(
-    apiKey: dotenv.env['FIREBASE_API_KEY_WEB'] ?? '',
-    appId: '1:1003021617321:web:9a017a9e4022dfee7241b8',
-    messagingSenderId: '1003021617321',
-    projectId: 'makaut-scholar-cb82e',
-    authDomain: 'makaut-scholar-cb82e.firebaseapp.com',
-    storageBucket: 'makaut-scholar-cb82e.firebasestorage.app',
-    measurementId: 'G-MCSNQ00XCW',
-  );
+        apiKey: dotenv.env['FIREBASE_API_KEY_WEB'] ?? '',
+        appId: '1:1003021617321:web:9a017a9e4022dfee7241b8',
+        messagingSenderId: '1003021617321',
+        projectId: 'makaut-scholar-cb82e',
+        authDomain: 'makaut-scholar-cb82e.firebaseapp.com',
+        storageBucket: 'makaut-scholar-cb82e.firebasestorage.app',
+        measurementId: 'G-MCSNQ00XCW',
+      );
 
   static FirebaseOptions get android => FirebaseOptions(
-    apiKey: dotenv.env['FIREBASE_API_KEY_ANDROID'] ?? '',
-    appId: '1:1003021617321:android:42dd6501ffec831d7241b8',
-    messagingSenderId: '1003021617321',
-    projectId: 'makaut-scholar-cb82e',
-    storageBucket: 'makaut-scholar-cb82e.firebasestorage.app',
-  );
+        apiKey: dotenv.env['FIREBASE_API_KEY_ANDROID'] ?? '',
+        appId: '1:1003021617321:android:42dd6501ffec831d7241b8',
+        messagingSenderId: '1003021617321',
+        projectId: 'makaut-scholar-cb82e',
+        storageBucket: 'makaut-scholar-cb82e.firebasestorage.app',
+      );
 
   static FirebaseOptions get ios => FirebaseOptions(
-    apiKey: dotenv.env['FIREBASE_API_KEY_IOS'] ?? '',
-    appId: '1:1003021617321:ios:3b43a01400ce7e0b7241b8',
-    messagingSenderId: '1003021617321',
-    projectId: 'makaut-scholar-cb82e',
-    storageBucket: 'makaut-scholar-cb82e.firebasestorage.app',
-    iosBundleId: 'com.example.makautScholar',
-  );
+        apiKey: dotenv.env['FIREBASE_API_KEY_IOS'] ?? '',
+        appId: '1:1003021617321:ios:3b43a01400ce7e0b7241b8',
+        messagingSenderId: '1003021617321',
+        projectId: 'makaut-scholar-cb82e',
+        storageBucket: 'makaut-scholar-cb82e.firebasestorage.app',
+        iosBundleId: 'com.example.makautScholar',
+      );
 
   static FirebaseOptions get macos => FirebaseOptions(
-    apiKey: dotenv.env['FIREBASE_API_KEY_IOS'] ?? '',
-    appId: '1:1003021617321:ios:3b43a01400ce7e0b7241b8',
-    messagingSenderId: '1003021617321',
-    projectId: 'makaut-scholar-cb82e',
-    storageBucket: 'makaut-scholar-cb82e.firebasestorage.app',
-    iosBundleId: 'com.example.makautScholar',
-  );
+        apiKey: dotenv.env['FIREBASE_API_KEY_IOS'] ?? '',
+        appId: '1:1003021617321:ios:3b43a01400ce7e0b7241b8',
+        messagingSenderId: '1003021617321',
+        projectId: 'makaut-scholar-cb82e',
+        storageBucket: 'makaut-scholar-cb82e.firebasestorage.app',
+        iosBundleId: 'com.example.makautScholar',
+      );
 
   static FirebaseOptions get windows => FirebaseOptions(
-    apiKey: dotenv.env['FIREBASE_API_KEY_WEB'] ?? '',
-    appId: '1:1003021617321:web:1149c04cbf2ff7fc7241b8',
-    messagingSenderId: '1003021617321',
-    projectId: 'makaut-scholar-cb82e',
-    authDomain: 'makaut-scholar-cb82e.firebaseapp.com',
-    storageBucket: 'makaut-scholar-cb82e.firebasestorage.app',
-    measurementId: 'G-GC7PY1WKRE',
-  );
+        apiKey: dotenv.env['FIREBASE_API_KEY_WEB'] ?? '',
+        appId: '1:1003021617321:web:1149c04cbf2ff7fc7241b8',
+        messagingSenderId: '1003021617321',
+        projectId: 'makaut-scholar-cb82e',
+        authDomain: 'makaut-scholar-cb82e.firebaseapp.com',
+        storageBucket: 'makaut-scholar-cb82e.firebasestorage.app',
+        measurementId: 'G-GC7PY1WKRE',
+      );
 }

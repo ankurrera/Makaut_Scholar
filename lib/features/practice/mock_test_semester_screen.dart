@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../services/auth_service.dart';
+import '../../core/widgets/dot_loading.dart';
 import 'mock_test_subject_screen.dart';
 
 class MockTestSemesterScreen extends StatefulWidget {
@@ -19,7 +20,7 @@ class _MockTestSemesterScreenState extends State<MockTestSemesterScreen>
   String? _error;
   late String _userDepartment;
 
-  static const _accentColor = Color(0xFF2D7A5E);
+  static const _accentColor = Color(0xFFE5252A);
 
   @override
   void initState() {
@@ -60,8 +61,10 @@ class _MockTestSemesterScreenState extends State<MockTestSemesterScreen>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textPrimary = isDark ? Colors.white : const Color(0xFF1E1E1E);
-    final textSecondary = isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
-    final bgPrimary = isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1);
+    final textSecondary =
+        isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
+    final bgPrimary =
+        isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1);
     final cardBg = isDark ? const Color(0xFF1C2020) : Colors.white;
 
     return Scaffold(
@@ -79,7 +82,7 @@ class _MockTestSemesterScreenState extends State<MockTestSemesterScreen>
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: _accentColor))
+          ? const Center(child: DotLoadingIndicator(color: _accentColor))
           : _error != null
               ? _buildError(isDark, textPrimary, textSecondary)
               : _semesters.isEmpty
@@ -92,20 +95,23 @@ class _MockTestSemesterScreenState extends State<MockTestSemesterScreen>
                         itemCount: _semesters.length,
                         itemBuilder: (context, index) {
                           final semester = _semesters[index];
-                          return _buildSemesterCard(semester, isDark, textPrimary, textSecondary, cardBg);
+                          return _buildSemesterCard(semester, isDark,
+                              textPrimary, textSecondary, cardBg);
                         },
                       ),
                     ),
     );
   }
 
-  Widget _buildSemesterCard(int semester, bool isDark, Color textPrimary, Color textSecondary, Color cardBg) {
+  Widget _buildSemesterCard(int semester, bool isDark, Color textPrimary,
+      Color textSecondary, Color cardBg) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC)),
+        border: Border.all(
+            color: isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC)),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -119,9 +125,11 @@ class _MockTestSemesterScreenState extends State<MockTestSemesterScreen>
         ),
         title: Text(
           'Semester $semester',
-          style: TextStyle(color: textPrimary, fontWeight: FontWeight.bold, fontSize: 16),
+          style: TextStyle(
+              color: textPrimary, fontWeight: FontWeight.bold, fontSize: 16),
         ),
-        subtitle: Text('Select to view subjects', style: TextStyle(color: textSecondary, fontSize: 13)),
+        subtitle: Text('Select to view subjects',
+            style: TextStyle(color: textSecondary, fontSize: 13)),
         trailing: Icon(Iconsax.arrow_right_3, color: textSecondary, size: 18),
         onTap: () {
           Navigator.push(
@@ -143,11 +151,17 @@ class _MockTestSemesterScreenState extends State<MockTestSemesterScreen>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Iconsax.document_filter, size: 64, color: textSecondary.withValues(alpha: 0.3)),
+          Icon(Iconsax.document_filter,
+              size: 64, color: textSecondary.withValues(alpha: 0.3)),
           const SizedBox(height: 16),
-          Text('No quizzes available', style: TextStyle(color: textPrimary, fontSize: 18, fontWeight: FontWeight.bold)),
+          Text('No quizzes available',
+              style: TextStyle(
+                  color: textPrimary,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          Text('Try later for this department', style: TextStyle(color: textSecondary)),
+          Text('Try later for this department',
+              style: TextStyle(color: textSecondary)),
         ],
       ),
     );
@@ -160,9 +174,14 @@ class _MockTestSemesterScreenState extends State<MockTestSemesterScreen>
         children: [
           const Icon(Iconsax.warning_2, size: 48, color: Colors.redAccent),
           const SizedBox(height: 16),
-          Text('Failed to load quizzes', style: TextStyle(color: textPrimary, fontWeight: FontWeight.bold)),
+          Text('Failed to load quizzes',
+              style:
+                  TextStyle(color: textPrimary, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          TextButton(onPressed: _loadSemesters, child: const Text('Retry', style: TextStyle(color: _accentColor))),
+          TextButton(
+              onPressed: _loadSemesters,
+              child:
+                  const Text('Retry', style: TextStyle(color: _accentColor))),
         ],
       ),
     );

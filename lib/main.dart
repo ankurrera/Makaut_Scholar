@@ -24,7 +24,6 @@ import 'services/monetization_service.dart';
 import 'domain/repositories/billing_repository.dart';
 import 'data/repositories/billing_repository_impl.dart';
 
-
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // If you're going to use other Firebase services in the background, such as Firestore,
@@ -46,10 +45,10 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     ).timeout(const Duration(seconds: 10));
-    
+
     // Set background messaging handler
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-    
+
     debugPrint('Firebase initialized.');
   } catch (e) {
     debugPrint('Base Init Warning: $e');
@@ -61,8 +60,6 @@ void main() async {
     debugPrint('Supabase Early Init Failed: $e');
   });
   debugPrint('Supabase initialization finished.');
-
-
 
   runApp(
     MultiProvider(
@@ -80,7 +77,8 @@ void main() async {
   );
 }
 
-final GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> globalNavigatorKey =
+    GlobalKey<NavigatorState>();
 
 class MakautScholarApp extends StatelessWidget {
   const MakautScholarApp({super.key});
@@ -94,22 +92,24 @@ class MakautScholarApp extends StatelessWidget {
 
       // 4. Academic Themes (Light & Dark)
       themeMode: context.watch<ThemeProvider>().themeMode,
-      
+
       // Light Theme
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.light,
         fontFamily: '.SF Pro Text',
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF7C6FF6),
+          seedColor: const Color(0xFFE5252A),
           brightness: Brightness.light,
           surface: const Color(0xFFFFFFFF),
         ),
         scaffoldBackgroundColor: const Color(0xFFF4F5F7),
         textTheme: const TextTheme(
           // Headlines / Titles — Semibold (600)
-          headlineLarge: TextStyle(fontWeight: FontWeight.w600, letterSpacing: -0.5),
-          headlineMedium: TextStyle(fontWeight: FontWeight.w600, letterSpacing: -0.3),
+          headlineLarge:
+              TextStyle(fontWeight: FontWeight.w600, letterSpacing: -0.5),
+          headlineMedium:
+              TextStyle(fontWeight: FontWeight.w600, letterSpacing: -0.3),
           headlineSmall: TextStyle(fontWeight: FontWeight.w600),
           titleLarge: TextStyle(fontWeight: FontWeight.w600),
           titleMedium: TextStyle(fontWeight: FontWeight.w500),
@@ -143,16 +143,18 @@ class MakautScholarApp extends StatelessWidget {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF7C6FF6), width: 2),
+            borderSide: const BorderSide(color: Color(0xFFE5252A), width: 2),
           ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF7C6FF6),
+            backgroundColor: const Color(0xFFE5252A),
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            textStyle:
+                const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
         ),
       ),
@@ -163,15 +165,17 @@ class MakautScholarApp extends StatelessWidget {
         brightness: Brightness.dark,
         fontFamily: '.SF Pro Text',
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF8E82FF),
+          seedColor: const Color(0xFFE5252A),
           brightness: Brightness.dark,
-          surface: const Color(0xFF0F1115),
-          onSurface: const Color(0xFFF5F6FA),
+          surface: const Color(0xFF000000),
+          onSurface: const Color(0xFFFFFFFF),
         ),
-        scaffoldBackgroundColor: const Color(0xFF0F1115),
+        scaffoldBackgroundColor: const Color(0xFF000000),
         textTheme: const TextTheme(
-          headlineLarge: TextStyle(fontWeight: FontWeight.w600, letterSpacing: -0.5),
-          headlineMedium: TextStyle(fontWeight: FontWeight.w600, letterSpacing: -0.3),
+          headlineLarge:
+              TextStyle(fontWeight: FontWeight.w600, letterSpacing: -0.5),
+          headlineMedium:
+              TextStyle(fontWeight: FontWeight.w600, letterSpacing: -0.3),
           headlineSmall: TextStyle(fontWeight: FontWeight.w600),
           titleLarge: TextStyle(fontWeight: FontWeight.w600),
           titleMedium: TextStyle(fontWeight: FontWeight.w500),
@@ -184,14 +188,14 @@ class MakautScholarApp extends StatelessWidget {
           labelSmall: TextStyle(fontWeight: FontWeight.w500),
         ),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF171A21),
-          foregroundColor: Color(0xFFF5F6FA),
+          backgroundColor: Color(0xFF000000),
+          foregroundColor: Color(0xFFFFFFFF),
           elevation: 0,
           centerTitle: true,
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: const Color(0xFF171A21),
+          fillColor: const Color(0xFF121212),
           contentPadding: const EdgeInsets.all(16),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -199,20 +203,22 @@ class MakautScholarApp extends StatelessWidget {
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF2A2F3A)),
+            borderSide: const BorderSide(color: Color(0xFF222222)),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF8E82FF), width: 2),
+            borderSide: const BorderSide(color: Color(0xFFE5252A), width: 2),
           ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF8E82FF),
+            backgroundColor: const Color(0xFFE5252A),
             foregroundColor: const Color(0xFFF5F6FA),
             padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            textStyle:
+                const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
         ),
       ),
@@ -230,7 +236,8 @@ class MakautScholarApp extends StatelessWidget {
         '/about': (context) => const AboutScreen(),
         '/notices': (context) => const NoticeBoardScreen(),
         '/pdf_viewer': (context) {
-          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>?;
           return PdfViewerScreen(
             url: args?['pdfUrl'] ?? args?['url'] ?? '',
             title: args?['title'] ?? 'Notice',

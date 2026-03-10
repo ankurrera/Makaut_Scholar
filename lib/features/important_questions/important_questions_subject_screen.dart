@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../services/auth_service.dart';
 import '../../core/widgets/modern_folder.dart';
+import '../../core/widgets/dot_loading.dart';
 import 'important_questions_list_screen.dart';
 
 class ImportantQuestionsSubjectScreen extends StatefulWidget {
@@ -16,10 +17,12 @@ class ImportantQuestionsSubjectScreen extends StatefulWidget {
   });
 
   @override
-  State<ImportantQuestionsSubjectScreen> createState() => _ImportantQuestionsSubjectScreenState();
+  State<ImportantQuestionsSubjectScreen> createState() =>
+      _ImportantQuestionsSubjectScreenState();
 }
 
-class _ImportantQuestionsSubjectScreenState extends State<ImportantQuestionsSubjectScreen>
+class _ImportantQuestionsSubjectScreenState
+    extends State<ImportantQuestionsSubjectScreen>
     with SingleTickerProviderStateMixin {
   List<Map<String, dynamic>> _subjects = []; // Changed from List<String>
   Map<String, int> _impCounts = {};
@@ -85,7 +88,8 @@ class _ImportantQuestionsSubjectScreenState extends State<ImportantQuestionsSubj
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1),
+      backgroundColor:
+          isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1),
       body: SafeArea(
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(),
@@ -101,13 +105,18 @@ class _ImportantQuestionsSubjectScreenState extends State<ImportantQuestionsSubj
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF1C2020) : Colors.white,
+                          color:
+                              isDark ? const Color(0xFF1C2020) : Colors.white,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC),
+                            color: isDark
+                                ? const Color(0xFF2A3030)
+                                : const Color(0xFFE6E8EC),
                           ),
                         ),
-                        child: Icon(Iconsax.arrow_left_2, size: 20, color: isDark ? Colors.white : Colors.black),
+                        child: Icon(Iconsax.arrow_left_2,
+                            size: 20,
+                            color: isDark ? Colors.white : Colors.black),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -124,7 +133,9 @@ class _ImportantQuestionsSubjectScreenState extends State<ImportantQuestionsSubj
                       'Semester ${widget.semester} · ${widget.department}',
                       style: TextStyle(
                         fontSize: 16,
-                        color: isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93),
+                        color: isDark
+                            ? const Color(0xFF9AA0A6)
+                            : const Color(0xFF8E8E93),
                       ),
                     ),
                   ],
@@ -132,13 +143,16 @@ class _ImportantQuestionsSubjectScreenState extends State<ImportantQuestionsSubj
               ),
             ),
             if (_isLoading)
-              const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator()),
+              SliverFillRemaining(
+                child: Center(
+                  child: DotLoadingIndicator(color: Color(0xFFE5252A)),
+                ),
               )
             else if (_error != null)
               SliverFillRemaining(
                 child: Center(
-                  child: Text('Error: $_error', style: const TextStyle(color: Colors.red)),
+                  child: Text('Error: $_error',
+                      style: const TextStyle(color: Colors.red)),
                 ),
               )
             else if (_subjects.isEmpty)
@@ -161,7 +175,8 @@ class _ImportantQuestionsSubjectScreenState extends State<ImportantQuestionsSubj
                       return AnimatedBuilder(
                         animation: _staggerController,
                         builder: (context, child) {
-                          final v = interval.transform(_staggerController.value);
+                          final v =
+                              interval.transform(_staggerController.value);
                           return Transform.translate(
                             offset: Offset(0, 24 * (1 - v)),
                             child: Opacity(opacity: v, child: child),
@@ -180,7 +195,8 @@ class _ImportantQuestionsSubjectScreenState extends State<ImportantQuestionsSubj
     );
   }
 
-  Widget _subjectTile(Map<String, dynamic> subjectData, int index, bool isDark) {
+  Widget _subjectTile(
+      Map<String, dynamic> subjectData, int index, bool isDark) {
     final String subject = subjectData['subject'];
     final String? paperCode = subjectData['paper_code'];
     final color = _folderColors[index % _folderColors.length];
@@ -209,7 +225,8 @@ class _ImportantQuestionsSubjectScreenState extends State<ImportantQuestionsSubj
               color: isDark ? const Color(0xFF1C2020) : Colors.white,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC),
+                color:
+                    isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC),
               ),
             ),
             child: Row(
@@ -231,14 +248,16 @@ class _ImportantQuestionsSubjectScreenState extends State<ImportantQuestionsSubj
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.white : const Color(0xFF1E1E1E),
+                          color:
+                              isDark ? Colors.white : const Color(0xFF1E1E1E),
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 2),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
                           color: color.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(4),
@@ -256,7 +275,8 @@ class _ImportantQuestionsSubjectScreenState extends State<ImportantQuestionsSubj
                     ],
                   ),
                 ),
-                Icon(Iconsax.arrow_right_3, size: 18, color: color.withValues(alpha: 0.5)),
+                Icon(Iconsax.arrow_right_3,
+                    size: 18, color: color.withValues(alpha: 0.5)),
               ],
             ),
           ),

@@ -15,25 +15,13 @@ class SemesterScreen extends StatefulWidget {
 class _SemesterScreenState extends State<SemesterScreen> {
   late String _userDepartment;
 
-  static const _accentLight = Color(0xFF1E5240);
-  static const _accentDark = Color(0xFF2D7A5E);
+  static const _accentLight = Color(0xFFE5252A);
+  static const _accentDark = Color(0xFFE5252A);
 
-  Color _bg(bool d) => d ? const Color(0xFF121512) : const Color(0xFFF8F6F1);
-  Color _textP(bool d) => d ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E);
-  Color _textS(bool d) => d ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
+  Color _bg(bool d) => d ? const Color(0xFF000000) : const Color(0xFFFFFFFF);
+  Color _textP(bool d) => d ? const Color(0xFFFFFFFF) : const Color(0xFF000000);
+  Color _textS(bool d) => d ? const Color(0xFF999999) : const Color(0xFF666666);
   Color _accent(bool d) => d ? _accentDark : _accentLight;
-
-  // Each entry: [body, tab/back, bar]
-  static const _colors = [
-    [Color(0xFF7B6EF6), Color(0xFFB3ADFF), Color(0xFF6358E0)], // purple
-    [Color(0xFF5BAAEF), Color(0xFFA3D4FF), Color(0xFF4494DB)], // blue
-    [Color(0xFF4FC9A8), Color(0xFF96E8D4), Color(0xFF3BB393)], // mint
-    [Color(0xFFF28BAA), Color(0xFFFFBFD0), Color(0xFFDB7494)], // pink
-    [Color(0xFFF5B556), Color(0xFFFFD99A), Color(0xFFDB9D3E)], // amber
-    [Color(0xFF4FD1B0), Color(0xFF96E8D4), Color(0xFF3ABB9A)], // teal
-    [Color(0xFFA78BFA), Color(0xFFCFC0FF), Color(0xFF8F73E6)], // lavender
-    [Color(0xFFEF7B7B), Color(0xFFFFB3B3), Color(0xFFD8636B)], // coral
-  ];
 
   @override
   void initState() {
@@ -50,7 +38,7 @@ class _SemesterScreenState extends State<SemesterScreen> {
       final auth = Provider.of<AuthService>(context, listen: false);
       final profile = await auth.getProfile();
       final profileDept = profile?['department'] as String?;
-      
+
       if (profileDept != null && profileDept.isNotEmpty) {
         if (mounted) {
           setState(() {
@@ -81,10 +69,18 @@ class _SemesterScreenState extends State<SemesterScreen> {
         ),
         title: Column(
           children: [
-            Text('Academic Notes',
-                style: TextStyle(color: _textP(isDark), fontSize: 18, fontWeight: FontWeight.w600)),
+            Text('ACADEMIC NOTES',
+                style: TextStyle(
+                    fontFamily: 'NDOT',
+                    color: _textP(isDark),
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600)),
             Text(_userDepartment,
-                style: TextStyle(color: accent, fontSize: 12, fontWeight: FontWeight.w500)),
+                style: TextStyle(
+                    fontFamily: 'NDOT',
+                    color: accent,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500)),
           ],
         ),
         centerTitle: true,
@@ -94,8 +90,12 @@ class _SemesterScreenState extends State<SemesterScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Select Semester',
-                style: TextStyle(color: _textS(isDark), fontSize: 13, fontWeight: FontWeight.w500)),
+            Text('SELECT SEMESTER',
+                style: TextStyle(
+                    fontFamily: 'NDOT',
+                    color: _textS(isDark),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500)),
             const SizedBox(height: 20),
             Expanded(
               child: GridView.builder(
@@ -108,19 +108,38 @@ class _SemesterScreenState extends State<SemesterScreen> {
                 ),
                 itemBuilder: (context, i) {
                   final sem = i + 1;
-                  final pal = _colors[i];
+
+                  // Progress from 0.0 to 1.0 in PAIRS (Sem 1/2, 3/4, 5/6, 7/8)
+                  // i is 0 to 7. i ~/ 2 gives us 0, 1, 2, 3 for the four pairs.
+                  // Divide by 3.0 to get 0.0, 0.33, 0.66, 1.0
+                  final double t = (i ~/ 2) / 3.0;
+
+                  // Base color transitions from White (or Dark theme equivalent) to Nothing Red
+                  final Color startColor =
+                      isDark ? const Color(0xFFE0E0E0) : Colors.white;
+                  final Color blendedColor = Color.lerp(startColor, accent, t)!;
+
+                  final Color baseHighlight = Color.lerp(blendedColor,
+                      Colors.black, 0.15)!; // slightly darker for back tab
+                  final Color baseBody =
+                      blendedColor; // interpolated front body
+                  // High contrast bar based on the blended color to ensure it stands out
+                  final Color baseBar = (t > 0.5 || isDark)
+                      ? Colors.black.withValues(alpha: 0.3)
+                      : Colors.black.withValues(alpha: 0.1);
 
                   return GestureDetector(
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => SubjectScreen(department: _userDepartment, semester: sem),
+                        builder: (_) => SubjectScreen(
+                            department: _userDepartment, semester: sem),
                       ),
                     ),
                     child: _SemesterTile(
-                      bodyColor: pal[0],
-                      backColor: pal[1],
-                      barColor: pal[2],
+                      bodyColor: baseBody,
+                      backColor: baseHighlight,
+                      barColor: baseBar,
                       semester: sem,
                       isDark: isDark,
                       textP: _textP(isDark),
@@ -160,7 +179,7 @@ class _SemesterTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1C2020) : Colors.white,
+        color: isDark ? const Color(0xFF111111) : const Color(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(

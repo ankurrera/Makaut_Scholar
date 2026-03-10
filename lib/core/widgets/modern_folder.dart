@@ -21,7 +21,7 @@ class ModernFolder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return RepaintBoundary(
       child: GestureDetector(
         onTap: onTap,
@@ -55,7 +55,7 @@ class _FolderPainter extends CustomPainter {
   final bool showSpeckles;
 
   _FolderPainter({
-    required this.color, 
+    required this.color,
     required this.isDark,
     required this.showSpeckles,
   });
@@ -65,7 +65,7 @@ class _FolderPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
     final r = 16.0; // Sharp but smooth enough base radius
-    
+
     // 1. Back Sheet (Tab B side) - Darker and softer
     final backPaint = Paint()
       ..shader = ui.Gradient.linear(
@@ -80,7 +80,7 @@ class _FolderPainter extends CustomPainter {
 
     // Use a simpler approach: Layered RRects + Wave
     final backBase = RRect.fromLTRBR(0, 4, w, h, Radius.circular(r));
-    
+
     // Path for the Back Tab "B"
     final backTabPath = Path();
     backTabPath.moveTo(w * 0.45, 12);
@@ -105,18 +105,19 @@ class _FolderPainter extends CustomPainter {
         ],
       )
       ..style = PaintingStyle.fill;
-    
+
     final shadowPaint = Paint()
       ..color = Colors.black.withValues(alpha: 0.25)
       ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 8);
-    
+
     // Front Sheet Path: Structured base + Tab A wave
     final frontPath = Path();
     // Start at mid-left
     frontPath.moveTo(0, r + 12);
     frontPath.quadraticBezierTo(0, 12, r, 12); // Corner
     frontPath.lineTo(w * 0.35, 12); // Top edge of tab base
-    frontPath.quadraticBezierTo(w * 0.45, 12, w * 0.55, 24); // Wave down transition
+    frontPath.quadraticBezierTo(
+        w * 0.45, 12, w * 0.55, 24); // Wave down transition
     frontPath.lineTo(w - r, 24);
     frontPath.quadraticBezierTo(w, 24, w, 24 + r);
     frontPath.lineTo(w, h - r);
@@ -132,18 +133,21 @@ class _FolderPainter extends CustomPainter {
     if (showSpeckles) {
       final random = math.Random(color.value);
       final specklePaint = Paint()
-        ..color = isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08)
+        ..color = isDark
+            ? Colors.white.withValues(alpha: 0.08)
+            : Colors.black.withValues(alpha: 0.08)
         ..style = PaintingStyle.fill;
-      
+
       for (int i = 0; i < 150; i++) {
         final x = random.nextDouble() * w;
         final y = random.nextDouble() * h;
         if (frontPath.contains(Offset(x, y))) {
-          canvas.drawCircle(Offset(x, y), random.nextDouble() * 1.5, specklePaint);
+          canvas.drawCircle(
+              Offset(x, y), random.nextDouble() * 1.5, specklePaint);
         }
       }
     }
-    
+
     // 4. Subtle Border/Rim light to define edges
     final rimPaint = Paint()
       ..color = Colors.white.withValues(alpha: 0.15)
@@ -153,6 +157,6 @@ class _FolderPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _FolderPainter oldDelegate) => 
+  bool shouldRepaint(covariant _FolderPainter oldDelegate) =>
       oldDelegate.color != color || oldDelegate.isDark != isDark;
 }

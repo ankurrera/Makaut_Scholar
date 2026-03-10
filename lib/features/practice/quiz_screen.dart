@@ -29,7 +29,9 @@ class _QuizScreenState extends State<QuizScreen> {
     _shuffledQuestions = widget.questions.map((q) {
       // Remove prefixes like A., B), (C), d. etc.
       String cleanOption(String opt) {
-        return opt.replaceAll(RegExp(r'^([A-Da-d][\.\)]|\([A-Da-d]\))\s*'), '').trim();
+        return opt
+            .replaceAll(RegExp(r'^([A-Da-d][\.\)]|\([A-Da-d]\))\s*'), '')
+            .trim();
       }
 
       final List<String> cleanOptions = q.options.map(cleanOption).toList();
@@ -100,7 +102,7 @@ class _QuizScreenState extends State<QuizScreen> {
     }
 
     final double percentage = (totalScore / _shuffledQuestions.length) * 100;
-    
+
     // Achievement Badge Logic
     IconData badgeIcon;
     Color badgeColor;
@@ -128,9 +130,9 @@ class _QuizScreenState extends State<QuizScreen> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        backgroundColor: Theme.of(context).brightness == Brightness.dark 
-          ? const Color(0xFF1C2020) 
-          : Colors.white,
+        backgroundColor: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF1C2020)
+            : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -148,7 +150,7 @@ class _QuizScreenState extends State<QuizScreen> {
             Text(
               badgeTitle,
               style: TextStyle(
-                fontSize: 24, 
+                fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: badgeColor,
               ),
@@ -179,9 +181,11 @@ class _QuizScreenState extends State<QuizScreen> {
                 backgroundColor: badgeColor,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
               ),
-              child: const Text('Return to Practice', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: const Text('Return to Practice',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ),
         ],
@@ -198,22 +202,26 @@ class _QuizScreenState extends State<QuizScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = isDark ? const Color(0xFF2D7A5E) : const Color(0xFF1E5240);
+    final primaryColor =
+        isDark ? const Color(0xFFE5252A) : const Color(0xFFE5252A);
     final currentQuestion = _shuffledQuestions[_currentIndex];
     final isAnswered = _selectedAnswers[_currentIndex] != null;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1),
+      backgroundColor:
+          isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Iconsax.close_circle, color: isDark ? Colors.white : Colors.black),
+          icon: Icon(Iconsax.close_circle,
+              color: isDark ? Colors.white : Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           widget.title,
-          style: TextStyle(color: isDark ? Colors.white : Colors.black, fontSize: 18),
+          style: TextStyle(
+              color: isDark ? Colors.white : Colors.black, fontSize: 18),
         ),
         actions: [
           Center(
@@ -222,7 +230,9 @@ class _QuizScreenState extends State<QuizScreen> {
               child: Text(
                 '${_remainingTimes[_currentIndex]} s',
                 style: TextStyle(
-                  color: _remainingTimes[_currentIndex] < 10 ? Colors.red : primaryColor,
+                  color: _remainingTimes[_currentIndex] < 10
+                      ? Colors.red
+                      : primaryColor,
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                 ),
@@ -252,7 +262,9 @@ class _QuizScreenState extends State<QuizScreen> {
                   const SizedBox(height: 32),
                   Text(
                     'Question ${_currentIndex + 1} of ${_shuffledQuestions.length}',
-                    style: TextStyle(color: isDark ? Colors.white70 : Colors.grey, fontSize: 14),
+                    style: TextStyle(
+                        color: isDark ? Colors.white70 : Colors.grey,
+                        fontSize: 14),
                   ),
                   const SizedBox(height: 12),
                   Text(
@@ -283,7 +295,11 @@ class _QuizScreenState extends State<QuizScreen> {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1C2020) : Colors.white,
-        border: Border(top: BorderSide(color: isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC))),
+        border: Border(
+            top: BorderSide(
+                color: isDark
+                    ? const Color(0xFF2A3030)
+                    : const Color(0xFFE6E8EC))),
       ),
       child: Row(
         children: [
@@ -297,7 +313,8 @@ class _QuizScreenState extends State<QuizScreen> {
                   foregroundColor: primaryColor,
                   side: BorderSide(color: primaryColor),
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
                 ),
               ),
             ),
@@ -305,13 +322,18 @@ class _QuizScreenState extends State<QuizScreen> {
           Expanded(
             child: ElevatedButton.icon(
               onPressed: _nextQuestion,
-              icon: Icon(_currentIndex == _shuffledQuestions.length - 1 ? Iconsax.tick_circle : Iconsax.arrow_right_3),
-              label: Text(_currentIndex == _shuffledQuestions.length - 1 ? 'Finish' : 'Next'),
+              icon: Icon(_currentIndex == _shuffledQuestions.length - 1
+                  ? Iconsax.tick_circle
+                  : Iconsax.arrow_right_3),
+              label: Text(_currentIndex == _shuffledQuestions.length - 1
+                  ? 'Finish'
+                  : 'Next'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryColor,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
               ),
             ),
           ),
@@ -325,8 +347,9 @@ class _QuizScreenState extends State<QuizScreen> {
     final isSelected = selectedAnswer == index;
     final isCorrect = index == _shuffledQuestions[_currentIndex].correctIndex;
     final isAnswered = selectedAnswer != null;
-    
-    Color borderColor = isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC);
+
+    Color borderColor =
+        isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC);
     Color? bgColor = isDark ? const Color(0xFF1C2020) : Colors.white;
 
     if (isAnswered) {
@@ -361,7 +384,8 @@ class _QuizScreenState extends State<QuizScreen> {
                   style: TextStyle(
                     fontSize: 16,
                     color: isDark ? Colors.white : Colors.black,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
               ),

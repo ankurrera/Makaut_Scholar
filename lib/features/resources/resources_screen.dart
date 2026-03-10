@@ -10,9 +10,10 @@ class ResourcesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1),
+      backgroundColor:
+          isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1),
       body: SafeArea(
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(),
@@ -36,7 +37,9 @@ class ResourcesScreen extends StatelessWidget {
                       'Access your downloaded offline files',
                       style: TextStyle(
                         fontSize: 16,
-                        color: isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93),
+                        color: isDark
+                            ? const Color(0xFF9AA0A6)
+                            : const Color(0xFF8E8E93),
                       ),
                     ),
                   ],
@@ -155,13 +158,16 @@ class _CategoryTile extends StatelessWidget {
                       'View Offline',
                       style: TextStyle(
                         fontSize: 12,
-                        color: isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93),
+                        color: isDark
+                            ? const Color(0xFF9AA0A6)
+                            : const Color(0xFF8E8E93),
                       ),
                     ),
                   ],
                 ),
               ),
-              Icon(Iconsax.arrow_right_3, size: 18, color: color.withValues(alpha: 0.5)),
+              Icon(Iconsax.arrow_right_3,
+                  size: 18, color: color.withValues(alpha: 0.5)),
             ],
           ),
         ),

@@ -5,12 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 
-enum ResourceCategory {
-  NOTES,
-  SYLLABUS,
-  PYQ,
-  EXAM_FOCUS
-}
+enum ResourceCategory { NOTES, SYLLABUS, PYQ, EXAM_FOCUS }
 
 class OfflineResource {
   final String id;
@@ -30,22 +25,24 @@ class OfflineResource {
   });
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'title': title,
-    'url': url,
-    'localPath': localPath,
-    'category': category.name,
-    'downloadedAt': downloadedAt.toIso8601String(),
-  };
+        'id': id,
+        'title': title,
+        'url': url,
+        'localPath': localPath,
+        'category': category.name,
+        'downloadedAt': downloadedAt.toIso8601String(),
+      };
 
-  factory OfflineResource.fromJson(Map<String, dynamic> json) => OfflineResource(
-    id: json['id'],
-    title: json['title'],
-    url: json['url'],
-    localPath: json['localPath'],
-    category: ResourceCategory.values.firstWhere((e) => e.name == json['category']),
-    downloadedAt: DateTime.parse(json['downloadedAt']),
-  );
+  factory OfflineResource.fromJson(Map<String, dynamic> json) =>
+      OfflineResource(
+        id: json['id'],
+        title: json['title'],
+        url: json['url'],
+        localPath: json['localPath'],
+        category: ResourceCategory.values
+            .firstWhere((e) => e.name == json['category']),
+        downloadedAt: DateTime.parse(json['downloadedAt']),
+      );
 }
 
 class OfflineService {
@@ -100,7 +97,8 @@ class OfflineService {
     if (isDownloaded(id)) return;
 
     final dir = await getApplicationDocumentsDirectory();
-    final fileName = '${category.name.toLowerCase()}_${id}_${DateTime.now().millisecondsSinceEpoch}.pdf';
+    final fileName =
+        '${category.name.toLowerCase()}_${id}_${DateTime.now().millisecondsSinceEpoch}.pdf';
     final savePath = '${dir.path}/$fileName';
 
     try {

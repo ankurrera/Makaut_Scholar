@@ -9,11 +9,12 @@ class SupabaseClientService {
 
   static SupabaseClient get client {
     if (!_initialized || _client == null) {
-      // If we attempt to access before init, we could return a placeholder 
+      // If we attempt to access before init, we could return a placeholder
       // or throw a more helpful error that suggests retrying.
       // For now, let's keep throwing but suggest the caller check isInitialized
       // or use a Service that handles the delay.
-      throw StateError('Supabase has not been initialized. Please ensure internet is available.');
+      throw StateError(
+          'Supabase has not been initialized. Please ensure internet is available.');
     }
     return _client!;
   }
@@ -31,7 +32,7 @@ class SupabaseClientService {
   static Future<void> _performInit() async {
     int attempts = 0;
     const maxAttempts = 3;
-    
+
     while (attempts < maxAttempts) {
       try {
         attempts++;

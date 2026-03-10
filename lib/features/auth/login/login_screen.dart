@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../services/auth_service.dart';
+import '../../../core/widgets/dot_loading.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Colour palette — single source of truth for both auth screens
@@ -41,7 +42,8 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
+class _LoginScreenState extends State<LoginScreen>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -55,7 +57,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
-    _fadeCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
+    _fadeCtrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 500));
     _fadeAnim = CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeOut);
     _fadeCtrl.forward();
   }
@@ -75,7 +78,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     final auth = Provider.of<AuthService>(context);
     if (auth.currentUser != null) {
       _isNavigating = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) => _checkProfileAndNavigate());
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => _checkProfileAndNavigate());
     }
   }
 
@@ -83,7 +87,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     final auth = Provider.of<AuthService>(context, listen: false);
     final profile = await auth.getProfile();
     if (!mounted) return;
-    if (profile != null && profile['college_name'] != null && profile['college_name'].toString().isNotEmpty) {
+    if (profile != null &&
+        profile['college_name'] != null &&
+        profile['college_name'].toString().isNotEmpty) {
       Navigator.pushReplacementNamed(context, '/home');
     } else {
       Navigator.pushReplacementNamed(context, '/create_profile');
@@ -108,7 +114,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
   void _showError(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(msg, style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w500)),
+      content: Text(msg,
+          style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w500)),
       backgroundColor: const Color(0xFFD94F4F),
       behavior: SnackBarBehavior.floating,
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -118,24 +125,29 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
   String _friendlyError(String raw) {
     final lower = raw.toLowerCase();
-    
+
     // Specifically handle the "Instance of 'NotInitializedError'" or related strings
-    if (lower.contains('notinitializederror') || lower.contains('not been initialized')) {
+    if (lower.contains('notinitializederror') ||
+        lower.contains('not been initialized')) {
       return 'Supabase is still initializing. Please check your internet and try again in a few seconds.';
     }
-    
+
     if (lower.contains('supabase') && lower.contains('initialization')) {
       return 'Supabase is still starting up. Please try again in a moment.';
     }
-    
-    if (lower.contains('invalid') || lower.contains('credentials') || lower.contains('password')) {
+
+    if (lower.contains('invalid') ||
+        lower.contains('credentials') ||
+        lower.contains('password')) {
       return 'Incorrect email or password.';
     }
-    
-    if (lower.contains('timed out') || lower.contains('socket') || lower.contains('network')) {
+
+    if (lower.contains('timed out') ||
+        lower.contains('socket') ||
+        lower.contains('network')) {
       return 'Network error. Check your connection or retry.';
     }
-    
+
     return raw.replaceAll('Exception:', '').trim();
   }
 
@@ -143,14 +155,16 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final bg      = isDark ? AuthTheme.darkBg      : AuthTheme.lightBg;
-    final text    = isDark ? AuthTheme.darkText     : AuthTheme.lightText;
-    final subtext = isDark ? AuthTheme.darkSubtext  : AuthTheme.lightSubtext;
+    final bg = isDark ? AuthTheme.darkBg : AuthTheme.lightBg;
+    final text = isDark ? AuthTheme.darkText : AuthTheme.lightText;
+    final subtext = isDark ? AuthTheme.darkSubtext : AuthTheme.lightSubtext;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: isDark
-          ? SystemUiOverlayStyle.light.copyWith(statusBarColor: Colors.transparent)
-          : SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
+          ? SystemUiOverlayStyle.light
+              .copyWith(statusBarColor: Colors.transparent)
+          : SystemUiOverlayStyle.dark
+              .copyWith(statusBarColor: Colors.transparent),
       child: Scaffold(
         backgroundColor: bg,
         body: SafeArea(
@@ -202,7 +216,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         icon: Iconsax.sms_copy,
                         isDark: isDark,
                         keyboardType: TextInputType.emailAddress,
-                        validator: (v) => v!.isEmpty ? 'Email is required' : null,
+                        validator: (v) =>
+                            v!.isEmpty ? 'Email is required' : null,
                       ),
                       const SizedBox(height: 18),
                       AuthField(
@@ -214,20 +229,27 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         obscureText: !_isPasswordVisible,
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _isPasswordVisible ? Iconsax.eye_slash_copy : Iconsax.eye_copy,
+                            _isPasswordVisible
+                                ? Iconsax.eye_slash_copy
+                                : Iconsax.eye_copy,
                             size: 18,
-                            color: isDark ? AuthTheme.darkHint : AuthTheme.lightHint,
+                            color: isDark
+                                ? AuthTheme.darkHint
+                                : AuthTheme.lightHint,
                           ),
-                          onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+                          onPressed: () => setState(
+                              () => _isPasswordVisible = !_isPasswordVisible),
                         ),
-                        validator: (v) => v!.isEmpty ? 'Password is required' : null,
+                        validator: (v) =>
+                            v!.isEmpty ? 'Password is required' : null,
                       ),
 
                       const SizedBox(height: 10),
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
-                          onPressed: () => _showError('Password reset coming soon'),
+                          onPressed: () =>
+                              _showError('Password reset coming soon'),
                           style: TextButton.styleFrom(
                             padding: EdgeInsets.zero,
                             minimumSize: Size.zero,
@@ -262,7 +284,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         isDark: isDark,
                         onTap: () async {
                           try {
-                            await Provider.of<AuthService>(context, listen: false).signInWithGoogle();
+                            await Provider.of<AuthService>(context,
+                                    listen: false)
+                                .signInWithGoogle();
                           } catch (e) {
                             if (!mounted) return;
                             _showError(e.toString());
@@ -281,7 +305,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             style: TextStyle(color: subtext, fontSize: 14),
                           ),
                           GestureDetector(
-                            onTap: () => Navigator.pushReplacementNamed(context, '/signup'),
+                            onTap: () => Navigator.pushReplacementNamed(
+                                context, '/signup'),
                             child: Text(
                               'Sign up',
                               style: TextStyle(
@@ -327,7 +352,8 @@ class _Logo extends StatelessWidget {
             color: AuthTheme.accent,
             borderRadius: BorderRadius.circular(11),
           ),
-          child: const Icon(Icons.school_rounded, color: Colors.white, size: 22),
+          child:
+              const Icon(Icons.school_rounded, color: Colors.white, size: 22),
         ),
         const SizedBox(width: 12),
         Column(
@@ -407,13 +433,19 @@ class _AuthFieldState extends State<AuthField> {
   @override
   Widget build(BuildContext context) {
     final borderColor = _isFocused
-        ? (widget.isDark ? AuthTheme.darkBorderFocus : AuthTheme.lightBorderFocus)
+        ? (widget.isDark
+            ? AuthTheme.darkBorderFocus
+            : AuthTheme.lightBorderFocus)
         : (widget.isDark ? AuthTheme.darkBorder : AuthTheme.lightBorder);
-    final fieldBg = widget.isDark ? AuthTheme.darkSurface : AuthTheme.lightSurface;
-    final labelColor = widget.isDark ? AuthTheme.darkSubtext : AuthTheme.lightSubtext;
+    final fieldBg =
+        widget.isDark ? AuthTheme.darkSurface : AuthTheme.lightSurface;
+    final labelColor =
+        widget.isDark ? AuthTheme.darkSubtext : AuthTheme.lightSubtext;
     final textColor = widget.isDark ? AuthTheme.darkText : AuthTheme.lightText;
     final hintColor = widget.isDark ? AuthTheme.darkHint : AuthTheme.lightHint;
-    final iconColor = _isFocused ? AuthTheme.accent : (widget.isDark ? AuthTheme.darkHint : AuthTheme.lightHint);
+    final iconColor = _isFocused
+        ? AuthTheme.accent
+        : (widget.isDark ? AuthTheme.darkHint : AuthTheme.lightHint);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -440,15 +472,20 @@ class _AuthFieldState extends State<AuthField> {
             focusNode: _node,
             obscureText: widget.obscureText,
             keyboardType: widget.keyboardType,
-            style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.w500),
+            style: TextStyle(
+                color: textColor, fontSize: 15, fontWeight: FontWeight.w500),
             validator: widget.validator,
             decoration: InputDecoration(
               hintText: widget.hint,
-              hintStyle: TextStyle(color: hintColor, fontSize: 14.5, fontWeight: FontWeight.w400),
+              hintStyle: TextStyle(
+                  color: hintColor,
+                  fontSize: 14.5,
+                  fontWeight: FontWeight.w400),
               prefixIcon: Icon(widget.icon, color: iconColor, size: 18),
               suffixIcon: widget.suffixIcon,
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
             ),
           ),
         ),
@@ -488,7 +525,7 @@ class AuthPrimaryButton extends StatelessWidget {
                 ? const SizedBox(
                     width: 20,
                     height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                    child: DotLoadingIndicator(color: Colors.white, size: 6),
                   )
                 : Text(
                     label,
@@ -523,7 +560,8 @@ class AuthDivider extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14),
           child: Text(
             'or continue with',
-            style: TextStyle(color: txtColor, fontSize: 12.5, fontWeight: FontWeight.w500),
+            style: TextStyle(
+                color: txtColor, fontSize: 12.5, fontWeight: FontWeight.w500),
           ),
         ),
         Expanded(child: Divider(color: divColor, thickness: 1, height: 1)),
@@ -536,7 +574,8 @@ class AuthDivider extends StatelessWidget {
 class AuthGoogleButton extends StatelessWidget {
   final bool isDark;
   final VoidCallback onTap;
-  const AuthGoogleButton({super.key, required this.isDark, required this.onTap});
+  const AuthGoogleButton(
+      {super.key, required this.isDark, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -567,8 +606,10 @@ class AuthGoogleButton extends StatelessWidget {
               child: Image.asset(
                 'assets/google_logo.png',
                 fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) =>
-                    const Icon(Icons.g_mobiledata_rounded, size: 18, color: Color(0xFF4285F4)),
+                errorBuilder: (_, __, ___) => const Icon(
+                    Icons.g_mobiledata_rounded,
+                    size: 18,
+                    color: Color(0xFF4285F4)),
               ),
             ),
             const SizedBox(width: 10),

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../services/offline_service.dart';
 import '../../services/auth_service.dart';
+import '../../core/widgets/dot_loading.dart';
 import '../notes/pdf_viewer_screen.dart';
 import '../premium/premium_checkout_screen.dart';
 
@@ -20,10 +21,12 @@ class ImportantQuestionsListScreen extends StatefulWidget {
   });
 
   @override
-  State<ImportantQuestionsListScreen> createState() => _ImportantQuestionsListScreenState();
+  State<ImportantQuestionsListScreen> createState() =>
+      _ImportantQuestionsListScreenState();
 }
 
-class _ImportantQuestionsListScreenState extends State<ImportantQuestionsListScreen>
+class _ImportantQuestionsListScreenState
+    extends State<ImportantQuestionsListScreen>
     with SingleTickerProviderStateMixin {
   List<Map<String, dynamic>> _questions = [];
   List<String> _purchasedItemIds = [];
@@ -59,11 +62,16 @@ class _ImportantQuestionsListScreenState extends State<ImportantQuestionsListScr
   }
 
   Future<void> _loadQuestions() async {
-    setState(() { _isLoading = true; _error = null; });
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
     try {
       final auth = Provider.of<AuthService>(context, listen: false);
       final results = await Future.wait([
-        auth.fetchImpQuestions(widget.department, widget.semester, widget.subject, paperCode: widget.paperCode),
+        auth.fetchImpQuestions(
+            widget.department, widget.semester, widget.subject,
+            paperCode: widget.paperCode),
         auth.fetchUserPurchases('important_questions'),
       ]);
 
@@ -88,7 +96,8 @@ class _ImportantQuestionsListScreenState extends State<ImportantQuestionsListScr
   void _openPdf(String url, String title) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => PdfViewerScreen(url: url, title: title)),
+      MaterialPageRoute(
+          builder: (_) => PdfViewerScreen(url: url, title: title)),
     );
   }
 
@@ -112,7 +121,7 @@ class _ImportantQuestionsListScreenState extends State<ImportantQuestionsListScr
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Unlock Successful! ✨ Preparing your content...'),
-              backgroundColor: Color(0xFF2D7A5E),
+              backgroundColor: Color(0xFFE5252A),
               duration: Duration(seconds: 2),
             ),
           );
@@ -131,20 +140,26 @@ class _ImportantQuestionsListScreenState extends State<ImportantQuestionsListScr
     final accent = isDark ? const Color(0xFFFF708D) : const Color(0xFFFF4D6D);
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1),
+      backgroundColor:
+          isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: DotLoadingIndicator(color: Color(0xFFE5252A)))
           : _error != null
-              ? Center(child: Text('Error: $_error', style: const TextStyle(color: Colors.red)))
+              ? Center(
+                  child: Text('Error: $_error',
+                      style: const TextStyle(color: Colors.red)))
               : _questions.isEmpty
                   ? _buildEmpty(isDark, accent)
                   : RefreshIndicator(
                       onRefresh: _loadQuestions,
                       child: CustomScrollView(
-                        physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                        physics: const BouncingScrollPhysics(
+                            parent: AlwaysScrollableScrollPhysics()),
                         slivers: [
                           SliverAppBar(
-                            backgroundColor: isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1),
+                            backgroundColor: isDark
+                                ? const Color(0xFF121512)
+                                : const Color(0xFFF8F6F1),
                             elevation: 0,
                             pinned: true,
                             expandedHeight: 180,
@@ -152,24 +167,34 @@ class _ImportantQuestionsListScreenState extends State<ImportantQuestionsListScr
                               icon: Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: isDark ? const Color(0xFF1C2020) : Colors.white,
+                                  color: isDark
+                                      ? const Color(0xFF1C2020)
+                                      : Colors.white,
                                   borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC)),
+                                  border: Border.all(
+                                      color: isDark
+                                          ? const Color(0xFF2A3030)
+                                          : const Color(0xFFE6E8EC)),
                                 ),
-                                child: Icon(Iconsax.arrow_left, color: isDark ? Colors.white : Colors.black, size: 18),
+                                child: Icon(Iconsax.arrow_left,
+                                    color: isDark ? Colors.white : Colors.black,
+                                    size: 18),
                               ),
                               onPressed: () => Navigator.pop(context),
                             ),
                             flexibleSpace: FlexibleSpaceBar(
                               background: Padding(
-                                padding: const EdgeInsets.fromLTRB(20, 100, 20, 0),
+                                padding:
+                                    const EdgeInsets.fromLTRB(20, 100, 20, 0),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       widget.subject,
                                       style: TextStyle(
-                                        color: isDark ? Colors.white : const Color(0xFF1E1E1E),
+                                        color: isDark
+                                            ? Colors.white
+                                            : const Color(0xFF1E1E1E),
                                         fontSize: 24,
                                         fontWeight: FontWeight.bold,
                                         letterSpacing: -0.5,
@@ -181,7 +206,9 @@ class _ImportantQuestionsListScreenState extends State<ImportantQuestionsListScr
                                     Text(
                                       '${_questions.length} targeting sets available',
                                       style: TextStyle(
-                                        color: isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93),
+                                        color: isDark
+                                            ? const Color(0xFF9AA0A6)
+                                            : const Color(0xFF8E8E93),
                                         fontSize: 14,
                                       ),
                                     ),
@@ -203,15 +230,19 @@ class _ImportantQuestionsListScreenState extends State<ImportantQuestionsListScr
                                   return AnimatedBuilder(
                                     animation: _staggerController,
                                     builder: (context, child) {
-                                      final v = interval.transform(_staggerController.value);
+                                      final v = interval
+                                          .transform(_staggerController.value);
                                       return Transform.translate(
                                         offset: Offset(0, 20 * (1 - v)),
-                                        child: Opacity(opacity: v, child: child),
+                                        child:
+                                            Opacity(opacity: v, child: child),
                                       );
                                     },
                                     child: Padding(
-                                      padding: const EdgeInsets.only(bottom: 12),
-                                      child: _questionTile(_questions[i], i, isDark),
+                                      padding:
+                                          const EdgeInsets.only(bottom: 12),
+                                      child: _questionTile(
+                                          _questions[i], i, isDark),
                                     ),
                                   );
                                 },
@@ -267,17 +298,14 @@ class _ImportantQuestionsListScreenState extends State<ImportantQuestionsListScr
                 width: 40,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: isLocked 
+                  color: isLocked
                       ? Colors.orange.withAlpha(25)
                       : grad[0].withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Center(
-                  child: Icon(
-                    isLocked ? Iconsax.lock : Iconsax.document_text_1, 
-                    color: isLocked ? Colors.orange : grad[0], 
-                    size: 20
-                  ),
+                  child: Icon(isLocked ? Iconsax.lock : Iconsax.document_text_1,
+                      color: isLocked ? Colors.orange : grad[0], size: 20),
                 ),
               ),
               const SizedBox(width: 16),
@@ -291,7 +319,9 @@ class _ImportantQuestionsListScreenState extends State<ImportantQuestionsListScr
                           child: Text(
                             title,
                             style: TextStyle(
-                              color: isDark ? Colors.white : const Color(0xFF1E1E1E),
+                              color: isDark
+                                  ? Colors.white
+                                  : const Color(0xFF1E1E1E),
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
                             ),
@@ -302,7 +332,8 @@ class _ImportantQuestionsListScreenState extends State<ImportantQuestionsListScr
                         if (isLocked) ...[
                           const SizedBox(width: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
                               color: Colors.orange.withAlpha(25),
                               borderRadius: BorderRadius.circular(4),
@@ -323,7 +354,9 @@ class _ImportantQuestionsListScreenState extends State<ImportantQuestionsListScr
                     Text(
                       'PDF Document · ${DateTime.now().year}',
                       style: TextStyle(
-                        color: isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93),
+                        color: isDark
+                            ? const Color(0xFF9AA0A6)
+                            : const Color(0xFF8E8E93),
                         fontSize: 12,
                       ),
                     ),
@@ -332,30 +365,46 @@ class _ImportantQuestionsListScreenState extends State<ImportantQuestionsListScr
               ),
               IconButton(
                 icon: Icon(
-                  isLocked 
-                      ? Iconsax.lock 
-                      : (isDownloaded ? Iconsax.tick_circle : Iconsax.document_download),
-                  color: isLocked 
+                  isLocked
+                      ? Iconsax.lock
+                      : (isDownloaded
+                          ? Iconsax.tick_circle
+                          : Iconsax.document_download),
+                  color: isLocked
                       ? Colors.orange.withAlpha(150)
-                      : (isDownloaded ? Colors.green : (isDark ? const Color(0xFF3A3F4B) : const Color(0xFFE0E0E0))),
+                      : (isDownloaded
+                          ? Colors.green
+                          : (isDark
+                              ? const Color(0xFF3A3F4B)
+                              : const Color(0xFFE0E0E0))),
                   size: 20,
                 ),
-                onPressed: isLocked ? () => _openCheckout(item) : (isDownloaded ? null : () async {
-                  try {
-                    await OfflineService().downloadResource(
-                      id: id,
-                      title: title,
-                      url: fileUrl,
-                      category: ResourceCategory.EXAM_FOCUS,
-                    );
-                    if (mounted) setState(() {});
-                  } catch (e) {
-                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
-                  }
-                }),
+                onPressed: isLocked
+                    ? () => _openCheckout(item)
+                    : (isDownloaded
+                        ? null
+                        : () async {
+                            try {
+                              await OfflineService().downloadResource(
+                                id: id,
+                                title: title,
+                                url: fileUrl,
+                                category: ResourceCategory.EXAM_FOCUS,
+                              );
+                              if (mounted) setState(() {});
+                            } catch (e) {
+                              if (mounted)
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(e.toString())));
+                            }
+                          }),
               ),
               const SizedBox(width: 8),
-              Icon(Iconsax.arrow_right_3, color: isDark ? const Color(0xFF3A3F4B) : const Color(0xFFE0E0E0), size: 16),
+              Icon(Iconsax.arrow_right_3,
+                  color: isDark
+                      ? const Color(0xFF3A3F4B)
+                      : const Color(0xFFE0E0E0),
+                  size: 16),
             ],
           ),
         ),

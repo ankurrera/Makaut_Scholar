@@ -53,6 +53,10 @@ class AuthService extends ChangeNotifier {
     try {
       await _ensureInitialized();
       _initAuthStateListener();
+      // If user is already logged in, setup notifications
+      if (currentUser != null) {
+        setupPushNotifications();
+      }
     } catch (e) {
       debugPrint('AuthService: Failed to async initialize: $e');
     }
@@ -102,7 +106,8 @@ class AuthService extends ChangeNotifier {
         email: email,
         password: password,
         data: {'name': name},
-        emailRedirectTo: 'https://nikvdsulxvinkvxstxol.supabase.co/functions/v1/email-confirmed',
+        emailRedirectTo:
+            'https://nikvdsulxvinkvxstxol.supabase.co/functions/v1/email-confirmed',
       );
 
       final user = response.user;
@@ -165,7 +170,7 @@ class AuthService extends ChangeNotifier {
   Future<void> deleteAccount() async {
     try {
       final session = _client.auth.currentSession;
-      
+
       if (session == null) {
         throw Exception('No active session found. Please log in again.');
       }
@@ -187,16 +192,18 @@ class AuthService extends ChangeNotifier {
         },
         body: jsonEncode({'userToken': session.accessToken}),
       );
-      
+
       if (response.statusCode != 200) {
-        throw Exception('Deletion failed: \${response.statusCode} - \${response.body}');
+        throw Exception(
+            'Deletion failed: \${response.statusCode} - \${response.body}');
       }
-      
+
       // 3. Local clean up
       await signOut();
     } on FunctionException catch (e) {
       if (e.status == 401) {
-        throw Exception('Session expired or unauthorized. Please log out and back in. Details: ${e.details}');
+        throw Exception(
+            'Session expired or unauthorized. Please log out and back in. Details: ${e.details}');
       }
       throw Exception('Function error: ${e.details}');
     } catch (e) {
@@ -205,27 +212,28 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  Future<List<Map<String, dynamic>>> fetchDepartmentSubjects(String department, int semester) async {
+  Future<List<Map<String, dynamic>>> fetchDepartmentSubjects(
+      String department, int semester) async {
     await _ensureInitialized();
     final data = await _client
         .from('subjects_bundle')
         .select('subject, paper_code')
         .eq('department', department)
         .eq('semester', semester);
-    
+
     final subjects = (data as List)
         .map((row) => {
-          'subject': row['subject'] as String,
-          'paper_code': row['paper_code'] as String?,
-        })
+              'subject': row['subject'] as String,
+              'paper_code': row['paper_code'] as String?,
+            })
         .where((item) {
-          final s = item['subject'] as String;
-          final low = s.toLowerCase();
-          return !low.contains('laboratory') && !RegExp(r'\blab\b').hasMatch(low);
-        })
-        .toList();
-    
-    subjects.sort((a, b) => (a['subject'] as String).compareTo(b['subject'] as String));
+      final s = item['subject'] as String;
+      final low = s.toLowerCase();
+      return !low.contains('laboratory') && !RegExp(r'\blab\b').hasMatch(low);
+    }).toList();
+
+    subjects.sort(
+        (a, b) => (a['subject'] as String).compareTo(b['subject'] as String));
     return subjects;
   }
 
@@ -235,10 +243,15 @@ class AuthService extends ChangeNotifier {
       if (!SupabaseClientService.isInitialized) return null;
       final user = currentUser;
       if (user == null) return null;
-      final data = await _client.from('profiles').select().eq('id', user.id).maybeSingle();
+      final data = await _client
+          .from('profiles')
+          .select()
+          .eq('id', user.id)
+          .maybeSingle();
       return data;
     } catch (e) {
-      if (e.toString().contains('SocketException') || e.toString().contains('Failed host lookup')) {
+      if (e.toString().contains('SocketException') ||
+          e.toString().contains('Failed host lookup')) {
         throw NetworkException('You are currently offline.');
       }
       debugPrint('Error fetching profile: $e');
@@ -263,30 +276,33 @@ class AuthService extends ChangeNotifier {
   }
 
   /// Fetches unique unit counts for all subjects in a department + semester
-  Future<Map<String, int>> fetchSubjectUnitCounts(String department, int semester) async {
+  Future<Map<String, int>> fetchSubjectUnitCounts(
+      String department, int semester) async {
     await _ensureInitialized();
     final data = await _client
         .from('notes')
         .select('subject, unit')
         .eq('department', department)
         .eq('semester', semester);
-    
+
     final Map<String, Set<int>> subjectUnits = {};
     for (final row in (data as List)) {
       final sub = row['subject'] as String;
       final unit = row['unit'] as int;
       subjectUnits.putIfAbsent(sub, () => {}).add(unit);
     }
-    
+
     return subjectUnits.map((sub, units) => MapEntry(sub, units.length));
   }
 
   /// Fetches notes for a department + semester + subject, ordered by unit
   Future<List<Map<String, dynamic>>> fetchNotes(
-      String department, int semester, String subject, {String? paperCode}) async {
+      String department, int semester, String subject,
+      {String? paperCode}) async {
     try {
       await _ensureInitialized();
-      final data = await _client.from('notes')
+      final data = await _client
+          .from('notes')
           .select()
           .eq('department', department)
           .eq('semester', semester)
@@ -315,30 +331,34 @@ class AuthService extends ChangeNotifier {
   }
 
   /// Fetches distinct subjects that have syllabus for a department + semester
-  Future<List<Map<String, dynamic>>> fetchSyllabusSubjects(String department, int semester) async {
+  Future<List<Map<String, dynamic>>> fetchSyllabusSubjects(
+      String department, int semester) async {
     await _ensureInitialized();
     final data = await _client
         .from('subjects_bundle')
         .select('subject, paper_code')
         .eq('department', department)
         .eq('semester', semester);
-    
+
     final subjects = (data as List)
         .map((row) => {
-          'subject': row['subject'] as String,
-          'paper_code': row['paper_code'] as String?,
-        })
+              'subject': row['subject'] as String,
+              'paper_code': row['paper_code'] as String?,
+            })
         .toList();
-    
-    subjects.sort((a, b) => (a['subject'] as String).compareTo(b['subject'] as String));
+
+    subjects.sort(
+        (a, b) => (a['subject'] as String).compareTo(b['subject'] as String));
     return subjects;
   }
 
   /// Fetches syllabus entries for a department + semester + subject
   Future<List<Map<String, dynamic>>> fetchSyllabus(
-      String department, int semester, String subject, {String? paperCode}) async {
+      String department, int semester, String subject,
+      {String? paperCode}) async {
     await _ensureInitialized();
-    final data = await _client.from('syllabus')
+    final data = await _client
+        .from('syllabus')
         .select()
         .eq('department', department)
         .eq('semester', semester)
@@ -348,7 +368,8 @@ class AuthService extends ChangeNotifier {
   }
 
   /// Checks if the current user has premium access to a specific item
-  Future<bool> checkPremiumAccess(String itemType, String itemId, {String? department}) async {
+  Future<bool> checkPremiumAccess(String itemType, String itemId,
+      {String? department}) async {
     final user = _client.auth.currentUser;
     if (user == null) return false;
 
@@ -371,7 +392,7 @@ class AuthService extends ChangeNotifier {
         .select('item_id')
         .eq('user_id', user.id)
         .eq('item_type', itemType);
-    
+
     return (data as List).map((row) => row['item_id'] as String).toList();
   }
 
@@ -409,26 +430,28 @@ class AuthService extends ChangeNotifier {
   }
 
   /// Fetches unique paper (year) counts for all subjects in a department + semester
-  Future<Map<String, int>> fetchSubjectPyqCounts(String department, int semester) async {
+  Future<Map<String, int>> fetchSubjectPyqCounts(
+      String department, int semester) async {
     await _ensureInitialized();
     final data = await _client
         .from('pyq')
         .select('subject, year')
         .eq('department', department)
         .eq('semester', semester);
-    
+
     final Map<String, Set<String>> subjectYears = {};
     for (final row in (data as List)) {
       final sub = row['subject'] as String;
       final year = row['year'].toString();
       subjectYears.putIfAbsent(sub, () => {}).add(year);
     }
-    
+
     return subjectYears.map((sub, years) => MapEntry(sub, years.length));
   }
 
   /// Fetches unique important questions count for all subjects in a department + semester
-  Future<Map<String, int>> fetchSubjectImpCounts(String department, int semester) async {
+  Future<Map<String, int>> fetchSubjectImpCounts(
+      String department, int semester) async {
     await _ensureInitialized();
     final data = await _client
         .from('important_questions')
@@ -446,9 +469,11 @@ class AuthService extends ChangeNotifier {
 
   /// Fetches Important Questions for a department + semester + subject
   Future<List<Map<String, dynamic>>> fetchImpQuestions(
-      String department, int semester, String subject, {String? paperCode}) async {
+      String department, int semester, String subject,
+      {String? paperCode}) async {
     await _ensureInitialized();
-    final data = await _client.from('important_questions')
+    final data = await _client
+        .from('important_questions')
         .select()
         .eq('department', department)
         .eq('semester', semester)
@@ -459,9 +484,11 @@ class AuthService extends ChangeNotifier {
 
   /// Fetches PYQ papers for a department + semester + subject, ordered by year desc
   Future<List<Map<String, dynamic>>> fetchPyqPapers(
-      String department, int semester, String subject, {String? paperCode}) async {
+      String department, int semester, String subject,
+      {String? paperCode}) async {
     await _ensureInitialized();
-    final data = await _client.from('pyq')
+    final data = await _client
+        .from('pyq')
         .select()
         .eq('department', department)
         .eq('semester', semester)
@@ -486,19 +513,21 @@ class AuthService extends ChangeNotifier {
   }
 
   /// Fetches all subjects for a department + semester from the master bundle
-  Future<List<String>> fetchMockTestSubjects(String department, int semester) async {
+  Future<List<String>> fetchMockTestSubjects(
+      String department, int semester) async {
     await _ensureInitialized();
     final data = await _client
         .from('subjects_bundle')
         .select('subject')
         .eq('department', department)
         .eq('semester', semester);
-    
+
     final subjects = (data as List)
         .map((row) => row['subject'] as String)
         .where((s) {
           final low = s.toLowerCase();
-          return !low.contains('laboratory') && !RegExp(r'\blab\b').hasMatch(low);
+          return !low.contains('laboratory') &&
+              !RegExp(r'\blab\b').hasMatch(low);
         })
         .toSet()
         .toList()
@@ -507,14 +536,15 @@ class AuthService extends ChangeNotifier {
   }
 
   /// Fetches unique question counts for all subjects in a department + semester
-  Future<Map<String, int>> fetchSubjectMockTestCounts(String department, int semester) async {
+  Future<Map<String, int>> fetchSubjectMockTestCounts(
+      String department, int semester) async {
     await _ensureInitialized();
     final data = await _client
         .from('mock_test_questions')
         .select('subject')
         .eq('department', department)
         .eq('semester', semester);
-    
+
     final counts = <String, int>{};
     for (var row in (data as List)) {
       final sub = row['subject'] as String;
@@ -533,8 +563,9 @@ class AuthService extends ChangeNotifier {
         .eq('department', department)
         .eq('semester', semester)
         .eq('subject', subject);
-    
-    final List<Map<String, dynamic>> questions = List<Map<String, dynamic>>.from(data);
+
+    final List<Map<String, dynamic>> questions =
+        List<Map<String, dynamic>>.from(data);
     questions.shuffle(); // Randomize the list
     return questions.take(20).toList(); // Return only first 20
   }
@@ -572,10 +603,10 @@ class AuthService extends ChangeNotifier {
 
     // Upload (upsert to overwrite existing)
     await _client.storage.from('avatars').upload(
-      storagePath,
-      File(filePath),
-      fileOptions: const FileOptions(upsert: true),
-    );
+          storagePath,
+          File(filePath),
+          fileOptions: const FileOptions(upsert: true),
+        );
 
     // Get public URL
     final url = _client.storage.from('avatars').getPublicUrl(storagePath);
@@ -599,7 +630,7 @@ class AuthService extends ChangeNotifier {
     // Get current avatar path from profile
     final profile = await getProfile();
     final avatarUrl = profile?['avatar_url'] as String?;
-    
+
     if (avatarUrl != null && avatarUrl.isNotEmpty) {
       // Extract storage path from URL
       final uri = Uri.parse(avatarUrl);
@@ -631,7 +662,8 @@ class AuthService extends ChangeNotifier {
       switch (error.code) {
         case 'over_email_send_rate_limit':
           // Extract wait time from message if possible
-          final match = RegExp(r'after (\d+) seconds').firstMatch(error.message);
+          final match =
+              RegExp(r'after (\d+) seconds').firstMatch(error.message);
           final seconds = match?.group(1) ?? 'a few';
           return 'Too many attempts. Please wait $seconds seconds before trying again.';
         case 'user_already_exists':
@@ -670,9 +702,9 @@ class AuthService extends ChangeNotifier {
 
     try {
       if (kIsWeb) return; // Push not supported on web for now in this app
-      
+
       final messaging = FirebaseMessaging.instance;
-      
+
       // Request permission (Required for iOS, ignored on Android)
       final settings = await messaging.requestPermission(
         alert: true,
@@ -708,40 +740,35 @@ class AuthService extends ChangeNotifier {
           if (message.notification != null) {
             final context = main_file.globalNavigatorKey.currentContext;
             if (context != null) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    '${message.notification?.title ?? "Notification"}\n${message.notification?.body ?? ""}',
-                    style: const TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  duration: const Duration(seconds: 4),
-                  behavior: SnackBarBehavior.floating,
-                  margin: const EdgeInsets.all(16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  backgroundColor: const Color(0xFF1E5240),
-                  action: SnackBarAction(
-                    label: 'View',
-                    textColor: Colors.white,
-                    onPressed: () {
-                      // Attempt to route if payload is present
-                      if (message.data['url'] != null) {
-                        Navigator.pushNamed(
-                          context, 
-                          '/pdf_viewer', 
-                          arguments: {
-                            'pdfUrl': message.data['url'],
-                            'title': message.notification?.title ?? 'Notice'
-                          }
-                        );
-                      } else if (message.data['route'] != null) {
-                        Navigator.pushNamed(context, message.data['route']);
-                      } else if (message.data['click_action'] != null) {
-                         Navigator.pushNamed(context, '/notices'); 
-                      }
-                    },
-                  ),
-                )
-              );
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text(
+                  '${message.notification?.title ?? "Notification"}\n${message.notification?.body ?? ""}',
+                  style: const TextStyle(fontWeight: FontWeight.w500),
+                ),
+                duration: const Duration(seconds: 4),
+                behavior: SnackBarBehavior.floating,
+                margin: const EdgeInsets.all(16),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+                backgroundColor: const Color(0xFFE5252A),
+                action: SnackBarAction(
+                  label: 'View',
+                  textColor: Colors.white,
+                  onPressed: () {
+                    // Attempt to route if payload is present
+                    if (message.data['url'] != null) {
+                      Navigator.pushNamed(context, '/pdf_viewer', arguments: {
+                        'pdfUrl': message.data['url'],
+                        'title': message.notification?.title ?? 'Notice'
+                      });
+                    } else if (message.data['route'] != null) {
+                      Navigator.pushNamed(context, message.data['route']);
+                    } else if (message.data['click_action'] != null) {
+                      Navigator.pushNamed(context, '/notices');
+                    }
+                  },
+                ),
+              ));
             }
           }
         });
@@ -755,8 +782,10 @@ class AuthService extends ChangeNotifier {
   Future<void> _saveDeviceToken(String userId, String token) async {
     try {
       await _ensureInitialized();
-      final platform = kIsWeb ? 'web' : (defaultTargetPlatform == TargetPlatform.iOS ? 'ios' : 'android');
-      
+      final platform = kIsWeb
+          ? 'web'
+          : (defaultTargetPlatform == TargetPlatform.iOS ? 'ios' : 'android');
+
       // Upsert the token
       await _client.from('fcm_tokens').upsert({
         'user_id': userId,
@@ -764,7 +793,6 @@ class AuthService extends ChangeNotifier {
         'platform': platform,
         'updated_at': DateTime.now().toIso8601String(),
       }, onConflict: 'token');
-      
     } catch (e) {
       if (kDebugMode) print('Error saving device token: $e');
     }
@@ -776,10 +804,14 @@ class AuthService extends ChangeNotifier {
       await _ensureInitialized();
       final user = currentUser;
       if (user == null || kIsWeb) return;
-      
+
       final token = await FirebaseMessaging.instance.getToken();
       if (token != null) {
-        await _client.from('fcm_tokens').delete().eq('token', token).eq('user_id', user.id);
+        await _client
+            .from('fcm_tokens')
+            .delete()
+            .eq('token', token)
+            .eq('user_id', user.id);
       }
     } catch (e) {
       if (kDebugMode) print('Error removing device token: $e');

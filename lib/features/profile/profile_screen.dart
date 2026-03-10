@@ -4,6 +4,7 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../services/auth_service.dart';
 import '../../providers/theme_provider.dart';
+import '../../core/widgets/dot_loading.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -12,7 +13,8 @@ class ProfileScreen extends StatefulWidget {
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProviderStateMixin {
+class _ProfileScreenState extends State<ProfileScreen>
+    with SingleTickerProviderStateMixin {
   Map<String, dynamic>? _profile;
   bool _isLoading = true;
   bool _isEditing = false;
@@ -31,14 +33,15 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   final _picker = ImagePicker();
 
   // ── Palette ──
-  static const _accentLight = Color(0xFF1E5240);
-  static const _accentDark = Color(0xFF2D7A5E);
+  static const _accentLight = Color(0xFFE5252A);
+  static const _accentDark = Color(0xFFE5252A);
 
-  Color _bg(bool d) => d ? const Color(0xFF121512) : const Color(0xFFF8F6F1);
-  Color _card(bool d) => d ? const Color(0xFF1C2020) : Colors.white;
-  Color _textP(bool d) => d ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E);
-  Color _textS(bool d) => d ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
-  Color _border(bool d) => d ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC);
+  Color _bg(bool d) => d ? const Color(0xFF000000) : const Color(0xFFFFFFFF);
+  Color _card(bool d) => d ? const Color(0xFF111111) : const Color(0xFFF5F5F5);
+  Color _textP(bool d) => d ? const Color(0xFFFFFFFF) : const Color(0xFF000000);
+  Color _textS(bool d) => d ? const Color(0xFF999999) : const Color(0xFF666666);
+  Color _border(bool d) =>
+      d ? const Color(0xFF222222) : const Color(0xFFE0E0E0);
   Color _accent(bool d) => d ? _accentDark : _accentLight;
 
   @override
@@ -48,7 +51,8 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-    _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic);
+    _fadeAnim =
+        CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic);
     _loadProfile();
   }
 
@@ -95,17 +99,20 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => _PhotoSourceSheet(isDark: isDark, accent: _accent(isDark)),
+      builder: (ctx) =>
+          _PhotoSourceSheet(isDark: isDark, accent: _accent(isDark)),
     );
     if (source == null) return;
 
-    final picked = await _picker.pickImage(source: source, maxWidth: 512, maxHeight: 512, imageQuality: 80);
+    final picked = await _picker.pickImage(
+        source: source, maxWidth: 512, maxHeight: 512, imageQuality: 80);
     if (picked == null) return;
 
     setState(() => _isUploadingPhoto = true);
     try {
       if (!mounted) return;
-      await Provider.of<AuthService>(context, listen: false).uploadAvatar(picked.path);
+      await Provider.of<AuthService>(context, listen: false)
+          .uploadAvatar(picked.path);
       await _loadProfile();
       if (mounted) _showSnack('Photo updated', isSuccess: true);
     } catch (e) {
@@ -146,14 +153,16 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       context: context,
       builder: (ctx) => _DeleteAccountDialog(isDark: isDark),
     );
-    
+
     if (confirmed == true && mounted) {
       setState(() => _isLoading = true);
       try {
         await Provider.of<AuthService>(context, listen: false).deleteAccount();
         if (mounted) {
           Navigator.pushReplacementNamed(context, '/login');
-          _showSnack('Account deleted successfully. We\'re sorry to see you go.', isSuccess: true);
+          _showSnack(
+              'Account deleted successfully. We\'re sorry to see you go.',
+              isSuccess: true);
         }
       } catch (e) {
         if (mounted) {
@@ -166,8 +175,12 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
 
   void _showSnack(String msg, {bool isSuccess = false}) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(msg, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
-      backgroundColor: isSuccess ? _accent(Theme.of(context).brightness == Brightness.dark) : Colors.redAccent,
+      content: Text(msg,
+          style: const TextStyle(
+              color: Colors.white, fontWeight: FontWeight.w500)),
+      backgroundColor: isSuccess
+          ? _accent(Theme.of(context).brightness == Brightness.dark)
+          : Colors.redAccent,
       behavior: SnackBarBehavior.floating,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -186,12 +199,13 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final accent = _accent(isDark);
-    final email = Provider.of<AuthService>(context, listen: false).currentUser?.email ?? '';
+    final email =
+        Provider.of<AuthService>(context, listen: false).currentUser?.email ??
+            '';
 
     return Scaffold(
-      backgroundColor: _bg(isDark),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator(color: accent))
+          ? Center(child: DotLoadingIndicator(color: accent))
           : CustomScrollView(
               slivers: [
                 // ── Header ──
@@ -205,10 +219,12 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                           icon: Container(
                             padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(
-                              color: (isDark ? Colors.black : Colors.white).withValues(alpha: 0.5),
+                              color: (isDark ? Colors.black : Colors.white)
+                                  .withValues(alpha: 0.5),
                               shape: BoxShape.circle,
                             ),
-                            child: Icon(Iconsax.arrow_left, color: _textP(isDark), size: 20),
+                            child: Icon(Iconsax.arrow_left,
+                                color: _textP(isDark), size: 20),
                           ),
                           onPressed: () => Navigator.pop(context),
                         )
@@ -218,7 +234,8 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                       icon: Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: (isDark ? Colors.black : Colors.white).withValues(alpha: 0.5),
+                          color: (isDark ? Colors.black : Colors.white)
+                              .withValues(alpha: 0.5),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -231,7 +248,8 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                         _isEditing = !_isEditing;
                         if (!_isEditing && _profile != null) {
                           _nameController.text = _profile!['name'] ?? '';
-                          _collegeController.text = _profile!['college_name'] ?? '';
+                          _collegeController.text =
+                              _profile!['college_name'] ?? '';
                           _selectedDepartment = _profile!['department'];
                         }
                       }),
@@ -289,7 +307,8 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           if (_isUploadingPhoto)
             Container(
               color: isDark ? const Color(0xFF1C2020) : Colors.grey[200],
-              child: Center(child: CircularProgressIndicator(color: accent, strokeWidth: 2.5)),
+              child: Center(
+                  child: DotLoadingIndicator(color: Colors.white, size: 6)),
             )
           else if (hasPhoto)
             Image.network(
@@ -302,7 +321,9 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
 
           // ── Bottom gradient scrim for text readability ──
           Positioned(
-            left: 0, right: 0, bottom: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
             height: 160,
             child: DecoratedBox(
               decoration: BoxDecoration(
@@ -322,7 +343,6 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
 
           // ── Overlaid user info ──
           Positioned(
-            left: 24, right: 24, bottom: 20,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -330,11 +350,12 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                 Text(
                   name,
                   style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
+                    fontFamily: 'NDOT',
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
                     color: Colors.white,
-                    letterSpacing: -0.3,
-                    shadows: [Shadow(color: Colors.black26, blurRadius: 6)],
+                    letterSpacing: 1.0,
+                    shadows: [Shadow(color: Colors.black54, blurRadius: 4)],
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -345,7 +366,10 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                     Flexible(
                       child: Text(
                         email,
-                        style: const TextStyle(fontSize: 13, color: Colors.white70),
+                        style: const TextStyle(
+                            fontFamily: 'NDOT',
+                            fontSize: 13,
+                            color: Colors.white70),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -354,18 +378,22 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                 if (dept != null && dept.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.18),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
+                      border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.25)),
                     ),
                     child: Text(
                       dept,
                       style: const TextStyle(
+                        fontFamily: 'NDOT',
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
+                        letterSpacing: 1.0,
                       ),
                     ),
                   ),
@@ -384,7 +412,6 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               decoration: BoxDecoration(
                 color: accent,
                 borderRadius: BorderRadius.circular(12),
-
               ),
               child: const Icon(Iconsax.camera, size: 16, color: Colors.white),
             ),
@@ -402,8 +429,16 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: isDark
-              ? [const Color(0xFF2D1B69), const Color(0xFF1A1530), const Color(0xFF121512)]
-              : [const Color(0xFF4A9E7C), const Color(0xFF1E5240), const Color(0xFFEDE9FE)],
+              ? [
+                  const Color(0xFF33080A),
+                  const Color(0xFF1A0505),
+                  const Color(0xFF000000)
+                ]
+              : [
+                  const Color(0xFFff6b6b),
+                  const Color(0xFFE5252A),
+                  const Color(0xFFcccccc)
+                ],
         ),
       ),
       child: Center(
@@ -422,7 +457,8 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   // ──────────────────────────── DETAILS VIEW ────────────────────────────
   Widget _buildDetailSection(bool isDark, Color accent) {
     return _GlassCard(
-      isDark: isDark,
+      color: _card(isDark),
+      borderColor: _border(isDark),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -431,26 +467,30 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
             child: Text(
               'PERSONAL INFORMATION',
               style: TextStyle(
-                fontSize: 11,
+                fontFamily: 'NDOT',
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: _textS(isDark),
+                color: _textP(isDark),
                 letterSpacing: 1.2,
               ),
             ),
           ),
-          _detailRow(Iconsax.user, 'Full Name', _profile?['name'] ?? '—', isDark, accent),
-
+          _detailRow(Iconsax.user, 'Full Name', _profile?['name'] ?? '—',
+              isDark, accent),
           _divider(isDark),
-          _detailRow(Iconsax.teacher, 'College', _profile?['college_name'] ?? '—', isDark, accent),
+          _detailRow(Iconsax.teacher, 'College',
+              _profile?['college_name'] ?? '—', isDark, accent),
           _divider(isDark),
-          _detailRow(Iconsax.book_1, 'Department', _profile?['department'] ?? '—', isDark, accent),
+          _detailRow(Iconsax.book_1, 'Department',
+              _profile?['department'] ?? '—', isDark, accent),
           const SizedBox(height: 6),
         ],
       ),
     );
   }
 
-  Widget _detailRow(IconData icon, String label, String value, bool isDark, Color accent) {
+  Widget _detailRow(
+      IconData icon, String label, String value, bool isDark, Color accent) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       child: Row(
@@ -469,9 +509,20 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: TextStyle(fontSize: 11, color: _textS(isDark), fontWeight: FontWeight.w500)),
+                Text(label,
+                    style: TextStyle(
+                        fontFamily: 'NDOT',
+                        fontSize: 11,
+                        color: _textS(isDark),
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 0.5)),
                 const SizedBox(height: 2),
-                Text(value, style: TextStyle(fontSize: 15, color: _textP(isDark), fontWeight: FontWeight.w500)),
+                Text(value,
+                    style: TextStyle(
+                        fontFamily: 'NDOT',
+                        fontSize: 16,
+                        color: _textP(isDark),
+                        fontWeight: FontWeight.bold)),
               ],
             ),
           ),
@@ -480,12 +531,14 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     );
   }
 
-  Widget _divider(bool isDark) => Divider(height: 1, indent: 72, color: _border(isDark).withValues(alpha: 0.35));
+  Widget _divider(bool isDark) => Divider(
+      height: 1, indent: 72, color: _border(isDark).withValues(alpha: 0.35));
 
   // ──────────────────────────── EDIT FORM ────────────────────────────
   Widget _buildEditForm(bool isDark, Color accent) {
     return _GlassCard(
-      isDark: isDark,
+      color: _card(isDark),
+      borderColor: _border(isDark),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Form(
@@ -496,26 +549,31 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               Text(
                 'EDIT PROFILE',
                 style: TextStyle(
-                  fontSize: 11,
+                  fontFamily: 'NDOT',
+                  fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: _textS(isDark),
+                  color: _textP(isDark),
                   letterSpacing: 1.2,
                 ),
               ),
               const SizedBox(height: 18),
               _field(_nameController, 'Full Name', Iconsax.user, isDark, accent,
                   validator: (v) => v!.isEmpty ? 'Name is required' : null),
-
               const SizedBox(height: 14),
-              _field(_collegeController, 'College Name', Iconsax.teacher, isDark, accent),
+              _field(_collegeController, 'College Name', Iconsax.teacher,
+                  isDark, accent),
               const SizedBox(height: 14),
               DropdownButtonFormField<String>(
                 initialValue: _selectedDepartment,
                 dropdownColor: _card(isDark),
                 style: TextStyle(color: _textP(isDark), fontSize: 14),
-                icon: Icon(Iconsax.arrow_down_1, color: _textS(isDark), size: 16),
-                decoration: _inputDeco('Department', Iconsax.book_1, isDark, accent),
-                items: _departments.map((d) => DropdownMenuItem(value: d, child: Text(d))).toList(),
+                icon:
+                    Icon(Iconsax.arrow_down_1, color: _textS(isDark), size: 16),
+                decoration:
+                    _inputDeco('Department', Iconsax.book_1, isDark, accent),
+                items: _departments
+                    .map((d) => DropdownMenuItem(value: d, child: Text(d)))
+                    .toList(),
                 onChanged: (v) => setState(() => _selectedDepartment = v),
               ),
               const SizedBox(height: 22),
@@ -527,14 +585,22 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   style: ElevatedButton.styleFrom(
                     backgroundColor: accent,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
                     elevation: 0,
                   ),
                   child: _isSaving
-                      ? const SizedBox(width: 22, height: 22,
-                          child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
-                      : const Text('Save Changes',
-                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child:
+                              DotLoadingIndicator(color: Colors.white, size: 6))
+                      : const Text('SAVE CHANGES',
+                          style: TextStyle(
+                              fontFamily: 'NDOT',
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.0)),
                 ),
               ),
             ],
@@ -544,7 +610,8 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     );
   }
 
-  Widget _field(TextEditingController c, String label, IconData icon, bool isDark, Color accent,
+  Widget _field(TextEditingController c, String label, IconData icon,
+      bool isDark, Color accent,
       {TextInputType? keyboardType, String? Function(String?)? validator}) {
     return TextFormField(
       controller: c,
@@ -555,13 +622,16 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     );
   }
 
-  InputDecoration _inputDeco(String label, IconData icon, bool isDark, Color accent) {
+  InputDecoration _inputDeco(
+      String label, IconData icon, bool isDark, Color accent) {
     return InputDecoration(
       labelText: label,
       labelStyle: TextStyle(color: _textS(isDark), fontSize: 13),
       prefixIcon: Icon(icon, color: _textS(isDark), size: 18),
       filled: true,
-      fillColor: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.black.withValues(alpha: 0.02),
+      fillColor: isDark
+          ? Colors.white.withValues(alpha: 0.04)
+          : Colors.black.withValues(alpha: 0.02),
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -581,7 +651,8 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   // ──────────────────────────── SETTINGS ────────────────────────────
   Widget _buildSettingsSection(bool isDark, Color accent) {
     return _GlassCard(
-      isDark: isDark,
+      color: _card(isDark),
+      borderColor: _border(isDark),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -590,15 +661,17 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
             child: Text(
               'PREFERENCES',
               style: TextStyle(
-                fontSize: 11,
+                fontFamily: 'NDOT',
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: _textS(isDark),
+                color: _textP(isDark),
                 letterSpacing: 1.2,
               ),
             ),
           ),
-          
-          _settingsTile(Iconsax.notification, 'Notifications', 'Enabled', isDark, accent),
+
+          _settingsTile(
+              Iconsax.notification, 'Notifications', 'Enabled', isDark, accent),
           _divider(isDark),
           // ── Appearance Selection ────────────────────────────────────────
           _settingsTile(
@@ -610,17 +683,21 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
             onTap: () => _showThemeSelection(context),
           ),
           _divider(isDark),
-          _settingsTile(Iconsax.info_circle, 'About', 'v1.0.0', isDark, accent, onTap: () => Navigator.pushNamed(context, '/about')),
+          _settingsTile(Iconsax.info_circle, 'About', 'v1.0.0', isDark, accent,
+              onTap: () => Navigator.pushNamed(context, '/about')),
           _divider(isDark),
-          _settingsTile(Iconsax.shield_tick, 'Privacy Policy', 'View', isDark, accent, onTap: () => Navigator.pushNamed(context, '/privacy')),
+          _settingsTile(
+              Iconsax.shield_tick, 'Privacy Policy', 'View', isDark, accent,
+              onTap: () => Navigator.pushNamed(context, '/privacy')),
           const SizedBox(height: 6),
-
         ],
       ),
     );
   }
 
-  Widget _settingsTile(IconData icon, String title, String subtitle, bool isDark, Color accent, {VoidCallback? onTap}) {
+  Widget _settingsTile(
+      IconData icon, String title, String subtitle, bool isDark, Color accent,
+      {VoidCallback? onTap}) {
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -638,9 +715,16 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
             ),
             const SizedBox(width: 14),
             Expanded(
-              child: Text(title, style: TextStyle(fontSize: 15, color: _textP(isDark), fontWeight: FontWeight.w500)),
+              child: Text(title,
+                  style: TextStyle(
+                      fontFamily: 'NDOT',
+                      fontSize: 16,
+                      color: _textP(isDark),
+                      fontWeight: FontWeight.bold)),
             ),
-            Text(subtitle, style: TextStyle(fontSize: 13, color: _textS(isDark))),
+            Text(subtitle,
+                style: TextStyle(
+                    fontFamily: 'NDOT', fontSize: 12, color: _textS(isDark))),
             const SizedBox(width: 4),
             Icon(Iconsax.arrow_right_3, size: 16, color: _textS(isDark)),
           ],
@@ -658,12 +742,18 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
         onPressed: _signOut,
         icon: const Icon(Iconsax.logout, size: 18, color: Colors.redAccent),
         label: const Text(
-          'Sign Out',
-          style: TextStyle(color: Colors.redAccent, fontSize: 15, fontWeight: FontWeight.w500),
+          'SIGN OUT',
+          style: TextStyle(
+              fontFamily: 'NDOT',
+              color: Colors.redAccent,
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.0),
         ),
         style: OutlinedButton.styleFrom(
           side: BorderSide(color: Colors.redAccent.withValues(alpha: 0.25)),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         ),
       ),
     );
@@ -679,19 +769,23 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
         style: OutlinedButton.styleFrom(
           foregroundColor: Colors.redAccent,
           side: BorderSide(color: Colors.redAccent.withValues(alpha: 0.25)),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         ),
         child: const Text(
-          'Delete My Account',
+          'DELETE MY ACCOUNT',
           style: TextStyle(
+            fontFamily: 'NDOT',
             fontSize: 15,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.0,
             // removed underline for professional look
           ),
         ),
       ),
     );
   }
+
   // Helper to get label for current theme mode
   String _themeModeLabel(BuildContext context) {
     final mode = Provider.of<ThemeProvider>(context, listen: false).themeMode;
@@ -750,32 +844,33 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       },
     );
   }
-
 }
 
 // ────────────────────────── REUSABLE GLASS CARD ──────────────────────────
 class _GlassCard extends StatelessWidget {
-  final bool isDark;
+  final Color color;
+  final Color borderColor;
   final Widget child;
 
-  const _GlassCard({required this.isDark, required this.child});
+  const _GlassCard({
+    required this.color,
+    required this.borderColor,
+    required this.child,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        color: color,
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.08)
-              : Colors.black.withValues(alpha: 0.04),
+          color: borderColor,
           width: 0.5,
         ),
-
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         child: child,
       ),
     );
@@ -796,43 +891,55 @@ class _PhotoSourceSheet extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1C2028) : Colors.white,
         borderRadius: BorderRadius.circular(24),
-
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           const SizedBox(height: 12),
-          Container(width: 36, height: 4, decoration: BoxDecoration(
-            color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(2),
-          )),
+          Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: (isDark ? Colors.white : Colors.black)
+                    .withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(2),
+              )),
           const SizedBox(height: 20),
           Text('Change Photo',
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600,
-                  color: isDark ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E))),
+              style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  color: isDark
+                      ? const Color(0xFFF5F6FA)
+                      : const Color(0xFF1E1E1E))),
           const SizedBox(height: 16),
-          _sheetOption(context, Iconsax.camera, 'Take Photo', ImageSource.camera, isDark),
-          _sheetOption(context, Iconsax.gallery, 'Choose from Gallery', ImageSource.gallery, isDark),
+          _sheetOption(context, Iconsax.camera, 'Take Photo',
+              ImageSource.camera, isDark),
+          _sheetOption(context, Iconsax.gallery, 'Choose from Gallery',
+              ImageSource.gallery, isDark),
           const SizedBox(height: 12),
         ],
       ),
     );
   }
 
-  Widget _sheetOption(BuildContext context, IconData icon, String label, ImageSource source, bool isDark) {
+  Widget _sheetOption(BuildContext context, IconData icon, String label,
+      ImageSource source, bool isDark) {
     return ListTile(
       leading: Container(
-        width: 40, height: 40,
+        width: 40,
+        height: 40,
         decoration: BoxDecoration(
           color: accent.withValues(alpha: isDark ? 0.12 : 0.08),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Icon(icon, color: accent, size: 20),
       ),
-      title: Text(label, style: TextStyle(
-        color: isDark ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E),
-        fontWeight: FontWeight.w500,
-      )),
+      title: Text(label,
+          style: TextStyle(
+            color: isDark ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E),
+            fontWeight: FontWeight.w500,
+          )),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       onTap: () => Navigator.pop(context, source),
     );
@@ -851,23 +958,33 @@ class _SignOutDialog extends StatelessWidget {
       backgroundColor: isDark ? const Color(0xFF1C2028) : Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
       title: Text('Sign Out',
-          style: TextStyle(color: isDark ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E), fontWeight: FontWeight.w600)),
+          style: TextStyle(
+              color: isDark ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E),
+              fontWeight: FontWeight.w600)),
       content: Text(
         'Are you sure you want to sign out?',
-        style: TextStyle(color: isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93)),
+        style: TextStyle(
+            color: isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93)),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, false),
-          child: Text('Cancel', style: TextStyle(color: isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93))),
+          child: Text('Cancel',
+              style: TextStyle(
+                  color: isDark
+                      ? const Color(0xFF9AA0A6)
+                      : const Color(0xFF8E8E93))),
         ),
         TextButton(
           onPressed: () => Navigator.pop(context, true),
           style: TextButton.styleFrom(
             backgroundColor: Colors.redAccent.withValues(alpha: 0.1),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
-          child: const Text('Sign Out', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600)),
+          child: const Text('Sign Out',
+              style: TextStyle(
+                  color: Colors.redAccent, fontWeight: FontWeight.w600)),
         ),
       ],
     );
@@ -882,7 +999,8 @@ class _DeleteAccountDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textColor = isDark ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E);
+    final textColor =
+        isDark ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E);
 
     return AlertDialog(
       backgroundColor: isDark ? const Color(0xFF1C2028) : Colors.white,
@@ -901,7 +1019,8 @@ class _DeleteAccountDialog extends StatelessWidget {
         children: [
           Text(
             'This action is permanent and cannot be undone.',
-            style: TextStyle(color: textColor, fontWeight: FontWeight.w600, fontSize: 14),
+            style: TextStyle(
+                color: textColor, fontWeight: FontWeight.w600, fontSize: 14),
           ),
           const SizedBox(height: 12),
           Text(
@@ -920,14 +1039,18 @@ class _DeleteAccountDialog extends StatelessWidget {
         TextButton(
           onPressed: () => Navigator.pop(context, false),
           child: Text('Keep Account',
-              style: TextStyle(color: isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93))),
+              style: TextStyle(
+                  color: isDark
+                      ? const Color(0xFF9AA0A6)
+                      : const Color(0xFF8E8E93))),
         ),
         TextButton(
           onPressed: () => Navigator.pop(context, true),
           style: TextButton.styleFrom(
             backgroundColor: Colors.redAccent,
             foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             padding: const EdgeInsets.symmetric(horizontal: 16),
           ),
           child: const Text('Delete permanently',
