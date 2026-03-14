@@ -15,7 +15,7 @@ class ModernFolder extends StatelessWidget {
     required this.color,
     this.label,
     this.onTap,
-    this.showSpeckles = true,
+    this.showSpeckles = false,
   });
 
   @override

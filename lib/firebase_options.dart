@@ -3,7 +3,7 @@
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+// import 'package:flutter_dotenv/flutter_dotenv.dart'; // Removed for security
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
@@ -42,7 +42,7 @@ class DefaultFirebaseOptions {
   }
 
   static FirebaseOptions get web => FirebaseOptions(
-        apiKey: dotenv.env['FIREBASE_API_KEY_WEB'] ?? '',
+        apiKey: const String.fromEnvironment('FIREBASE_API_KEY_WEB', defaultValue: ''),
         appId: '1:1003021617321:web:9a017a9e4022dfee7241b8',
         messagingSenderId: '1003021617321',
         projectId: 'makaut-scholar-cb82e',
@@ -52,7 +52,7 @@ class DefaultFirebaseOptions {
       );
 
   static FirebaseOptions get android => FirebaseOptions(
-        apiKey: dotenv.env['FIREBASE_API_KEY_ANDROID'] ?? '',
+        apiKey: const String.fromEnvironment('FIREBASE_API_KEY_ANDROID', defaultValue: ''),
         appId: '1:1003021617321:android:42dd6501ffec831d7241b8',
         messagingSenderId: '1003021617321',
         projectId: 'makaut-scholar-cb82e',
@@ -60,7 +60,7 @@ class DefaultFirebaseOptions {
       );
 
   static FirebaseOptions get ios => FirebaseOptions(
-        apiKey: dotenv.env['FIREBASE_API_KEY_IOS'] ?? '',
+        apiKey: const String.fromEnvironment('FIREBASE_API_KEY_IOS', defaultValue: ''),
         appId: '1:1003021617321:ios:3b43a01400ce7e0b7241b8',
         messagingSenderId: '1003021617321',
         projectId: 'makaut-scholar-cb82e',
@@ -69,7 +69,7 @@ class DefaultFirebaseOptions {
       );
 
   static FirebaseOptions get macos => FirebaseOptions(
-        apiKey: dotenv.env['FIREBASE_API_KEY_IOS'] ?? '',
+        apiKey: const String.fromEnvironment('FIREBASE_API_KEY_IOS', defaultValue: ''),
         appId: '1:1003021617321:ios:3b43a01400ce7e0b7241b8',
         messagingSenderId: '1003021617321',
         projectId: 'makaut-scholar-cb82e',
@@ -78,7 +78,7 @@ class DefaultFirebaseOptions {
       );
 
   static FirebaseOptions get windows => FirebaseOptions(
-        apiKey: dotenv.env['FIREBASE_API_KEY_WEB'] ?? '',
+        apiKey: const String.fromEnvironment('FIREBASE_API_KEY_WEB', defaultValue: ''),
         appId: '1:1003021617321:web:1149c04cbf2ff7fc7241b8',
         messagingSenderId: '1003021617321',
         projectId: 'makaut-scholar-cb82e',

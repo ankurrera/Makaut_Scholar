@@ -1,30 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
-import '../../core/widgets/modern_folder.dart';
+import '../../core/widgets/solid_folder.dart';
 import 'important_questions_subject_screen.dart';
 
 class ImportantQuestionsSemesterScreen extends StatelessWidget {
   final String department;
   const ImportantQuestionsSemesterScreen({super.key, required this.department});
 
-  static const _folderColors = [
-    Color(0xFF8B7CF6), // Purple
-    Color(0xFF5BAAEF), // Blue
-    Color(0xFF34A875), // Green
-    Color(0xFFFF708D), // Pink
-    Color(0xFFF0A850), // Amber
-    Color(0xFF6BBAFF), // Sky
-    Color(0xFFE88AA0), // Rose
-    Color(0xFFA07EF0), // Violet
-  ];
-
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor:
-          isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1),
+      backgroundColor: isDark ? Colors.black : const Color(0xFFF8F6F1),
       body: SafeArea(
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(),
@@ -33,40 +21,69 @@ class ImportantQuestionsSemesterScreen extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color:
-                              isDark ? const Color(0xFF1C2020) : Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                              color: isDark
-                                  ? const Color(0xFF2A3030)
-                                  : const Color(0xFFE6E8EC)),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color:
+                                isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                                color: isDark
+                                    ? const Color(0xFF2C2C2E)
+                                    : const Color(0xFFE6E8EC)),
+                          ),
+                          child: Icon(Iconsax.arrow_left_2,
+                              size: 20,
+                              color: isDark ? Colors.white : Colors.black),
                         ),
-                        child: Icon(Iconsax.arrow_left_2,
-                            size: 20,
-                            color: isDark ? Colors.white : Colors.black),
                       ),
                     ),
                     const SizedBox(height: 24),
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? const Color(0xFF2C2C2E)
+                              : const Color(0xFFE6E8EC),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          department,
+                          style: TextStyle(
+                            color: isDark
+                                ? const Color(0xFF9AA0A6)
+                                : const Color(0xFF8E8E93),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
                     Text(
                       'Exam Focus',
+                      textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                         color: isDark ? Colors.white : const Color(0xFF1E1E1E),
                         letterSpacing: -0.5,
+                        fontFamily: 'NDOT',
                       ),
                     ),
                     Text(
-                      'Select any Semester to View Repeated Questions',
+                      'High-yield topics curated for exam prep',
+                      textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 14,
                         color: isDark
                             ? const Color(0xFF9AA0A6)
                             : const Color(0xFF8E8E93),
@@ -82,7 +99,6 @@ class ImportantQuestionsSemesterScreen extends StatelessWidget {
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
                     final semester = index + 1;
-                    final color = _folderColors[index % _folderColors.length];
 
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
@@ -103,12 +119,12 @@ class ImportantQuestionsSemesterScreen extends StatelessWidget {
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               color: isDark
-                                  ? const Color(0xFF1C2020)
+                                  ? const Color(0xFF1C1C1E)
                                   : Colors.white,
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
                                 color: isDark
-                                    ? const Color(0xFF2A3030)
+                                    ? const Color(0xFF2C2C2E)
                                     : const Color(0xFFE6E8EC),
                               ),
                             ),
@@ -117,8 +133,13 @@ class ImportantQuestionsSemesterScreen extends StatelessWidget {
                                 SizedBox(
                                   width: 64,
                                   height: 52,
-                                  child: ModernFolder(
-                                    color: color,
+                                  child: SolidFolder(
+                                    color: isDark
+                                        ? Colors.white
+                                        : const Color(0xFFF2F0EF),
+                                    borderColor: isDark
+                                        ? Colors.transparent
+                                        : const Color(0xFFE5E5EA),
                                   ),
                                 ),
                                 const SizedBox(width: 16),
@@ -140,9 +161,6 @@ class ImportantQuestionsSemesterScreen extends StatelessWidget {
                                     ],
                                   ),
                                 ),
-                                Icon(Iconsax.arrow_right_3,
-                                    size: 18,
-                                    color: color.withValues(alpha: 0.5)),
                               ],
                             ),
                           ),

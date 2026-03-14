@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+// import 'package:flutter_dotenv/flutter_dotenv.dart'; // Removed for security
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -37,10 +37,6 @@ void main() async {
 
   // 1. Critical Base Initializations (Sequential for debugging)
   try {
-    debugPrint('Starting Dotenv initialization...');
-    await dotenv.load(fileName: ".env").timeout(const Duration(seconds: 5));
-    debugPrint('Dotenv initialized.');
-
     debugPrint('Starting Firebase initialization...');
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -97,7 +93,7 @@ class MakautScholarApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.light,
-        fontFamily: '.SF Pro Text',
+        fontFamily: 'CallingCode',
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFFE5252A),
           brightness: Brightness.light,
@@ -107,13 +103,13 @@ class MakautScholarApp extends StatelessWidget {
         textTheme: const TextTheme(
           // Headlines / Titles — Semibold (600)
           headlineLarge:
-              TextStyle(fontWeight: FontWeight.w600, letterSpacing: -0.5),
+              TextStyle(fontFamily: 'NDOT', fontWeight: FontWeight.w600, letterSpacing: -0.5),
           headlineMedium:
-              TextStyle(fontWeight: FontWeight.w600, letterSpacing: -0.3),
-          headlineSmall: TextStyle(fontWeight: FontWeight.w600),
-          titleLarge: TextStyle(fontWeight: FontWeight.w600),
-          titleMedium: TextStyle(fontWeight: FontWeight.w500),
-          titleSmall: TextStyle(fontWeight: FontWeight.w500),
+              TextStyle(fontFamily: 'NDOT', fontWeight: FontWeight.w600, letterSpacing: -0.3),
+          headlineSmall: TextStyle(fontFamily: 'NDOT', fontWeight: FontWeight.w600),
+          titleLarge: TextStyle(fontFamily: 'NDOT', fontWeight: FontWeight.w600),
+          titleMedium: TextStyle(fontFamily: 'NDOT', fontWeight: FontWeight.w500),
+          titleSmall: TextStyle(fontFamily: 'NDOT', fontWeight: FontWeight.w500),
           // Body — Regular (400) & Medium (500)
           bodyLarge: TextStyle(fontWeight: FontWeight.w400),
           bodyMedium: TextStyle(fontWeight: FontWeight.w400),
@@ -163,7 +159,7 @@ class MakautScholarApp extends StatelessWidget {
       darkTheme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
-        fontFamily: '.SF Pro Text',
+        fontFamily: 'CallingCode',
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFFE5252A),
           brightness: Brightness.dark,
@@ -173,13 +169,13 @@ class MakautScholarApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color(0xFF000000),
         textTheme: const TextTheme(
           headlineLarge:
-              TextStyle(fontWeight: FontWeight.w600, letterSpacing: -0.5),
+              TextStyle(fontFamily: 'NDOT', fontWeight: FontWeight.w600, letterSpacing: -0.5),
           headlineMedium:
-              TextStyle(fontWeight: FontWeight.w600, letterSpacing: -0.3),
-          headlineSmall: TextStyle(fontWeight: FontWeight.w600),
-          titleLarge: TextStyle(fontWeight: FontWeight.w600),
-          titleMedium: TextStyle(fontWeight: FontWeight.w500),
-          titleSmall: TextStyle(fontWeight: FontWeight.w500),
+              TextStyle(fontFamily: 'NDOT', fontWeight: FontWeight.w600, letterSpacing: -0.3),
+          headlineSmall: TextStyle(fontFamily: 'NDOT', fontWeight: FontWeight.w600),
+          titleLarge: TextStyle(fontFamily: 'NDOT', fontWeight: FontWeight.w600),
+          titleMedium: TextStyle(fontFamily: 'NDOT', fontWeight: FontWeight.w500),
+          titleSmall: TextStyle(fontFamily: 'NDOT', fontWeight: FontWeight.w500),
           bodyLarge: TextStyle(fontWeight: FontWeight.w400),
           bodyMedium: TextStyle(fontWeight: FontWeight.w400),
           bodySmall: TextStyle(fontWeight: FontWeight.w400),

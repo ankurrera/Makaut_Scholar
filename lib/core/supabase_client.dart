@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+// import 'package:flutter_dotenv/flutter_dotenv.dart'; // Removed for security
 
 class SupabaseClientService {
   static SupabaseClient? _client;
@@ -9,10 +9,6 @@ class SupabaseClientService {
 
   static SupabaseClient get client {
     if (!_initialized || _client == null) {
-      // If we attempt to access before init, we could return a placeholder
-      // or throw a more helpful error that suggests retrying.
-      // For now, let's keep throwing but suggest the caller check isInitialized
-      // or use a Service that handles the delay.
       throw StateError(
           'Supabase has not been initialized. Please ensure internet is available.');
     }
@@ -36,11 +32,12 @@ class SupabaseClientService {
     while (attempts < maxAttempts) {
       try {
         attempts++;
-        final url = dotenv.env['SUPABASE_URL'];
-        final anonKey = dotenv.env['SUPABASE_ANON_KEY'];
+        // Replaced dotenv with flutter compile-time variables
+        const url = String.fromEnvironment('SUPABASE_URL', defaultValue: '');
+        const anonKey = String.fromEnvironment('SUPABASE_ANON_KEY', defaultValue: '');
 
-        if (url == null || anonKey == null) {
-          throw Exception('Supabase credentials missing in .env');
+        if (url.isEmpty || anonKey.isEmpty) {
+          throw Exception('Supabase credentials missing. Compile with --dart-define');
         }
 
         final supabase = await Supabase.initialize(

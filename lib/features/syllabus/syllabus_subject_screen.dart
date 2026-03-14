@@ -4,6 +4,10 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../services/auth_service.dart';
 import '../../services/offline_service.dart';
 import '../../core/widgets/dot_loading.dart';
+import '../../core/widgets/solid_folder.dart';
+import '../../core/widgets/shimmer_skeleton.dart';
+import '../../core/widgets/premium_route.dart';
+import '../../services/cache_service.dart';
 import '../notes/pdf_viewer_screen.dart';
 
 class SyllabusSubjectScreen extends StatefulWidget {
@@ -22,27 +26,14 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
   bool _isLoading = true;
   String? _error;
 
-  static const _accentLight = Color(0xFF34A875);
-  static const _accentDark = Color(0xFF4FC9A8);
+  static const _accentLight = Color(0xFF111111); // Monochrome Black
+  static const _accentDark = Color(0xFFF5F6FA); // Monochrome White
 
-  Color _bg(bool d) => d ? const Color(0xFF121512) : const Color(0xFFF8F6F1);
-  Color _card(bool d) => d ? const Color(0xFF181B22) : Colors.white;
-  Color _textP(bool d) => d ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E);
-  Color _textS(bool d) => d ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
+  Color _bg(bool d) => d ? Colors.black : const Color(0xFFF9F9FB);
+  Color _card(bool d) => d ? const Color(0xFF1C1C1E) : Colors.white;
+  Color _textP(bool d) => d ? const Color(0xFFF5F6FA) : const Color(0xFF111111);
+  Color _textS(bool d) => d ? const Color(0xFF8E8E93) : const Color(0xFF888888);
   Color _accent(bool d) => d ? _accentDark : _accentLight;
-
-  static const _gradients = [
-    [Color(0xFF34A875), Color(0xFF5BCC9A)],
-    [Color(0xFF5BAAEF), Color(0xFF7BC4FF)],
-    [Color(0xFF8B7CF6), Color(0xFFA78BFA)],
-    [Color(0xFFE88AA0), Color(0xFFF5A0B4)],
-    [Color(0xFFF0A850), Color(0xFFFFBE6A)],
-    [Color(0xFF58C9B0), Color(0xFF76E4CA)],
-    [Color(0xFFA07EF0), Color(0xFFB898FF)],
-    [Color(0xFFE87878), Color(0xFFFF9A9A)],
-    [Color(0xFF6CB4F0), Color(0xFF90CCFF)],
-    [Color(0xFF8DD4A8), Color(0xFFA8ECC0)],
-  ];
 
   late AnimationController _staggerController;
 
@@ -64,11 +55,24 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
 
   Future<void> _loadSyllabus() async {
     setState(() {
-      _isLoading = true;
       _error = null;
     });
     try {
       final auth = Provider.of<AuthService>(context, listen: false);
+
+      // Try to load from cache first
+      final cacheKey = 'syllabus_all_entries_${widget.department}_${widget.semester}';
+      final cachedData = CacheService().get(cacheKey);
+
+      if (cachedData != null && cachedData is List) {
+        setState(() {
+          _syllabusEntries = List<Map<String, dynamic>>.from(cachedData);
+          _isLoading = false;
+        });
+        _staggerController.forward(from: 0);
+      } else {
+        setState(() => _isLoading = true);
+      }
       // Fetch all subjects, then for each get syllabus entries
       final subjects =
           await auth.fetchSyllabusSubjects(widget.department, widget.semester);
@@ -87,6 +91,10 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
           _isLoading = false;
         });
         _staggerController.forward(from: 0);
+        
+        // Cache the processed entries
+        final cacheKey = 'syllabus_all_entries_${widget.department}_${widget.semester}';
+        CacheService().set(cacheKey, allEntries);
       }
     } catch (e) {
       if (mounted)
@@ -100,9 +108,8 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
   void _openPdf({String? url, String? filePath, required String title}) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) =>
-            PdfViewerScreen(url: url, filePath: filePath, title: title),
+      PremiumPageRoute(
+        page: PdfViewerScreen(url: url, filePath: filePath, title: title),
       ),
     );
   }
@@ -128,18 +135,8 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
 
     return Scaffold(
       backgroundColor: _bg(isDark),
-      body: _isLoading
-          ? Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  DotLoadingIndicator(color: accent),
-                  const SizedBox(height: 16),
-                  Text('Loading syllabus...',
-                      style: TextStyle(color: _textS(isDark), fontSize: 13)),
-                ],
-              ),
-            )
+      body: _isLoading && _syllabusEntries.isEmpty
+          ? _buildLoadingSkeleton(isDark)
           : _error != null
               ? _buildError(isDark, accent)
               : _syllabusEntries.isEmpty
@@ -165,6 +162,11 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
                                 decoration: BoxDecoration(
                                   color: _card(isDark),
                                   borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: isDark
+                                        ? const Color(0xFF2C2C2E)
+                                        : const Color(0xFFF2F2F2),
+                                  ),
                                 ),
                                 child: Icon(Iconsax.arrow_left,
                                     color: _textP(isDark), size: 18),
@@ -181,39 +183,47 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
                                     20,
                                     0),
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 5),
-                                      decoration: BoxDecoration(
-                                        color: accent.withValues(
-                                            alpha: isDark ? 0.15 : 0.1),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Text(
-                                        'Sem ${widget.semester} · ${widget.department}',
-                                        style: TextStyle(
-                                            color: accent,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w600),
+                                    Center(
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 10, vertical: 5),
+                                        decoration: BoxDecoration(
+                                          color: accent.withValues(
+                                              alpha: isDark ? 0.15 : 0.1),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Text(
+                                          'Sem ${widget.semester} · ${widget.department}',
+                                          style: TextStyle(
+                                              color: accent,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600),
+                                        ),
                                       ),
                                     ),
                                     const SizedBox(height: 10),
                                     Text(
                                       'Syllabus',
+                                      textAlign: TextAlign.center,
                                       style: TextStyle(
                                         color: _textP(isDark),
                                         fontSize: 28,
                                         fontWeight: FontWeight.w700,
                                         letterSpacing: -0.5,
+                                        fontFamily: 'NDOT',
                                       ),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
                                       '${_syllabusEntries.length} subject${_syllabusEntries.length != 1 ? 's' : ''} available',
+                                      textAlign: TextAlign.center,
                                       style: TextStyle(
-                                          color: _textS(isDark), fontSize: 14),
+                                        color: _textS(isDark),
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -266,20 +276,25 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
           children: [
             Icon(icon, size: 18, color: _accent(isDark)),
             const SizedBox(width: 8),
-            Text(
-              title,
-              style: TextStyle(
-                color: _textP(isDark),
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.2,
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: _textP(isDark),
+                  fontFamily: 'Ndot',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.2,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             const SizedBox(width: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: _accent(isDark).withValues(alpha: isDark ? 0.15 : 0.1),
+                color: _accent(isDark).withValues(alpha: isDark ? 0.12 : 0.08),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -287,6 +302,7 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
                 style: TextStyle(
                     color: _accent(isDark),
                     fontSize: 11,
+                    fontFamily: 'Ndot',
                     fontWeight: FontWeight.w600),
               ),
             ),
@@ -320,108 +336,98 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
   }
 
   Widget _subjectTile(Map<String, dynamic> entry, int index, bool isDark) {
-    final grad = _gradients[index % _gradients.length];
+    final tileBg = isDark ? const Color(0xFF1C1C1E) : Colors.white;
+    final tileBorder =
+        isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F2);
+    final textPrimary = _textP(isDark);
+    final textSecondary = _textS(isDark);
+
+    final accentClr = _accent(isDark);
+
+    // Folder icon colors - Proper white for dark mode, off-white for light mode
+    final folderClr = isDark ? Colors.white : const Color(0xFFF2F0EF);
+    final folderBorder = isDark ? Colors.transparent : const Color(0xFFE5E5EA);
+
     final subject = entry['subject'] as String;
     final title = entry['title'] as String;
     final fileUrl = entry['file_url'] as String;
     final id = entry['id'].toString();
     final isDownloaded = OfflineService().isDownloaded(id);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: _card(isDark),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            if (isDownloaded) {
-              final resource = OfflineService().getResource(id);
-              _openPdf(
-                  filePath: resource!.localPath, title: '$subject Syllabus');
-            } else {
-              _openPdf(url: fileUrl, title: '$subject Syllabus');
-            }
-          },
+    return PressableWidget(
+      onTap: () {
+        if (isDownloaded) {
+          final resource = OfflineService().getResource(id);
+          _openPdf(
+              filePath: resource!.localPath, title: '$subject Syllabus');
+        } else {
+          _openPdf(url: fileUrl, title: '$subject Syllabus');
+        }
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: tileBg,
           borderRadius: BorderRadius.circular(20),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
+          border: Border.all(color: tileBorder, width: 1.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            // 1. Solid White Folder Icon
+            SizedBox(
+              width: 52,
+              height: 48,
+              child: SolidFolder(
+                color: folderClr,
+                borderColor: folderBorder,
+                tabHeight: 8,
+              ),
+            ),
+            const SizedBox(width: 16),
+
+            // 2. Text
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    subject,
+                    style: TextStyle(
+                      color: textPrimary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.2,
+                      height: 1.2,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+
+            // 3. Download/Action
+            Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // Gradient icon
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: grad,
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Center(
-                    child: Text(
-                      '${index + 1}',
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-
-                // Text
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        subject,
-                        style: TextStyle(
-                          color: _textP(isDark),
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: -0.1,
-                          height: 1.3,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Icon(Iconsax.document_text, size: 12, color: grad[0]),
-                          const SizedBox(width: 5),
-                          Expanded(
-                            child: Text(
-                              isDownloaded ? 'Offline Access Enabled' : title,
-                              style: TextStyle(
-                                  color: isDownloaded
-                                      ? Colors.green
-                                      : _textS(isDark),
-                                  fontSize: 11),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Download Toggle
                 IconButton(
-                  icon: Icon(
-                    isDownloaded
-                        ? Iconsax.tick_circle
-                        : Iconsax.document_download,
-                    color: isDownloaded ? Colors.green : grad[0],
-                    size: 20,
-                  ),
+                  icon: isDownloaded
+                      ? const Icon(Iconsax.tick_circle,
+                          color: Colors.green, size: 19)
+                      : Image.asset(
+                          'assets/icons/down_to_line.png',
+                          width: 19,
+                          height: 19,
+                          color: isDark ? Colors.white : Colors.black,
+                        ),
                   onPressed: isDownloaded
                       ? null
                       : () async {
@@ -440,21 +446,9 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
                           }
                         },
                 ),
-                const SizedBox(width: 4),
-
-                // Arrow
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: grad[0].withValues(alpha: isDark ? 0.12 : 0.08),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(Iconsax.arrow_right_3, color: grad[0], size: 16),
-                ),
               ],
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -535,6 +529,47 @@ class _SyllabusSubjectScreenState extends State<SyllabusSubjectScreen>
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildLoadingSkeleton(bool isDark) {
+    return CustomScrollView(
+      slivers: [
+        SliverAppBar(
+          backgroundColor: _bg(isDark),
+          elevation: 0,
+          pinned: true,
+          expandedHeight: MediaQuery.of(context).padding.top + kToolbarHeight + 80,
+          leading: IconButton(
+            icon: const Icon(Iconsax.arrow_left),
+            onPressed: () => Navigator.pop(context),
+          ),
+          flexibleSpace: FlexibleSpaceBar(
+            background: Padding(
+              padding: EdgeInsets.fromLTRB(20, MediaQuery.of(context).padding.top + kToolbarHeight + 8, 20, 0),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Center(child: ShimmerSkeleton(width: 120, height: 20)),
+                  SizedBox(height: 10),
+                  ShimmerSkeleton(width: 180, height: 28, isNdot: true),
+                  SizedBox(height: 8),
+                  ShimmerSkeleton(width: 140, height: 14),
+                ],
+              ),
+            ),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, i) => ShimmerSkeleton.listTile(isDark: isDark),
+              childCount: 6,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

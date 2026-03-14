@@ -282,8 +282,11 @@ class _FloatingDockState extends State<_FloatingDock>
                             children: List.generate(_icons.length, (index) {
                               final isActive = widget.currentIndex == index;
                               return GestureDetector(
-                                onTap: () => widget.onTap(index),
-                                behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    HapticFeedback.mediumImpact();
+                                    widget.onTap(index);
+                                  },
+                                  behavior: HitTestBehavior.opaque,
                                 child: SizedBox(
                                   width: itemWidth,
                                   height: _dockHeight,

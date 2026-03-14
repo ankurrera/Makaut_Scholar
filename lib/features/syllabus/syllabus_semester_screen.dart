@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+
 import '../../services/auth_service.dart';
 import '../../core/widgets/dot_loading.dart';
+import '../../core/widgets/solid_folder.dart';
+import '../../core/widgets/shimmer_skeleton.dart';
 import 'syllabus_subject_screen.dart';
 
 class SyllabusSemesterScreen extends StatefulWidget {
@@ -22,25 +25,14 @@ class _SyllabusSemesterScreenState extends State<SyllabusSemesterScreen>
   /// The department fetched from the user's profile; overrides widget.department.
   late String _userDepartment;
 
-  static const _accentLight = Color(0xFF34A875);
-  static const _accentDark = Color(0xFF4FC9A8);
+  static const _accentLight = Color(0xFFFF3B30); // iOS Red
+  static const _accentDark = Color(0xFFFF453A); // iOS Dark Red
 
-  Color _bg(bool d) => d ? const Color(0xFF121512) : const Color(0xFFF8F6F1);
-  Color _card(bool d) => d ? const Color(0xFF181B22) : Colors.white;
+  Color _bg(bool d) => d ? Colors.black : const Color(0xFFF8F6F1);
+  Color _card(bool d) => d ? const Color(0xFF1C1C1E) : Colors.white;
   Color _textP(bool d) => d ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E);
   Color _textS(bool d) => d ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
   Color _accent(bool d) => d ? _accentDark : _accentLight;
-
-  static const _gradients = [
-    [Color(0xFF34A875), Color(0xFF5BCC9A)], // green
-    [Color(0xFF5BAAEF), Color(0xFF7BC4FF)], // blue
-    [Color(0xFF8B7CF6), Color(0xFFA78BFA)], // purple
-    [Color(0xFFE88AA0), Color(0xFFF5A0B4)], // rose
-    [Color(0xFFF0A850), Color(0xFFFFBE6A)], // amber
-    [Color(0xFF58C9B0), Color(0xFF76E4CA)], // teal
-    [Color(0xFFA07EF0), Color(0xFFB898FF)], // lavender
-    [Color(0xFFE87878), Color(0xFFFF9A9A)], // coral
-  ];
 
   late AnimationController _staggerController;
 
@@ -100,20 +92,8 @@ class _SyllabusSemesterScreenState extends State<SyllabusSemesterScreen>
 
     return Scaffold(
       backgroundColor: _bg(isDark),
-      body: _isLoading
-          ? Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Center(
-                    child: DotLoadingIndicator(color: accent),
-                  ),
-                  const SizedBox(height: 16),
-                  Text('Loading semesters...',
-                      style: TextStyle(color: _textS(isDark), fontSize: 13)),
-                ],
-              ),
-            )
+      body: _isLoading && _semesters.isEmpty
+          ? _buildLoadingSkeleton(isDark)
           : _error != null
               ? _buildError(isDark, accent)
               : _semesters.isEmpty
@@ -139,6 +119,11 @@ class _SyllabusSemesterScreenState extends State<SyllabusSemesterScreen>
                                 decoration: BoxDecoration(
                                   color: _card(isDark),
                                   borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: isDark
+                                        ? const Color(0xFF2C2C2E)
+                                        : const Color(0xFFF2F2F2),
+                                  ),
                                 ),
                                 child: Icon(Iconsax.arrow_left,
                                     color: _textP(isDark), size: 18),
@@ -155,37 +140,43 @@ class _SyllabusSemesterScreenState extends State<SyllabusSemesterScreen>
                                     20,
                                     0),
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 5),
-                                      decoration: BoxDecoration(
-                                        color: accent.withValues(
-                                            alpha: isDark ? 0.15 : 0.1),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Text(
-                                        _userDepartment,
-                                        style: TextStyle(
-                                            color: accent,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w600),
+                                    Center(
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 10, vertical: 5),
+                                        decoration: BoxDecoration(
+                                          color: isDark
+                                              ? const Color(0xFF2C2C2E)
+                                              : const Color(0xFFE6E8EC),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Text(
+                                          _userDepartment,
+                                          style: TextStyle(
+                                              color: _textS(isDark),
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600),
+                                        ),
                                       ),
                                     ),
                                     const SizedBox(height: 10),
                                     Text(
                                       'Syllabus',
+                                      textAlign: TextAlign.center,
                                       style: TextStyle(
                                         color: _textP(isDark),
                                         fontSize: 28,
                                         fontWeight: FontWeight.w700,
                                         letterSpacing: -0.5,
+                                        fontFamily: 'NDOT',
                                       ),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      'Select a semester',
+                                      'Course outline & topics by semester',
+                                      textAlign: TextAlign.center,
                                       style: TextStyle(
                                           color: _textS(isDark), fontSize: 14),
                                     ),
@@ -196,38 +187,28 @@ class _SyllabusSemesterScreenState extends State<SyllabusSemesterScreen>
                           ),
                           SliverPadding(
                             padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
-                            sliver: SliverGrid(
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                mainAxisSpacing: 16,
-                                crossAxisSpacing: 16,
-                                childAspectRatio: 1.1,
-                              ),
-                              delegate: SliverChildBuilderDelegate(
-                                (context, i) {
-                                  final interval = Interval(
-                                    (i * 0.1).clamp(0.0, 0.5),
-                                    ((i * 0.1) + 0.5).clamp(0.0, 1.0),
-                                    curve: Curves.easeOutCubic,
-                                  );
-                                  return AnimatedBuilder(
-                                    animation: _staggerController,
-                                    builder: (context, child) {
-                                      final v = interval
-                                          .transform(_staggerController.value);
-                                      return Transform.translate(
-                                        offset: Offset(0, 24 * (1 - v)),
-                                        child:
-                                            Opacity(opacity: v, child: child),
-                                      );
-                                    },
-                                    child:
-                                        _semesterTile(_semesters[i], i, isDark),
-                                  );
-                                },
-                                childCount: _semesters.length,
-                              ),
+                            sliver: SliverList.builder(
+                              itemCount: _semesters.length,
+                              itemBuilder: (context, i) {
+                                final interval = Interval(
+                                  (i * 0.1).clamp(0.0, 0.5),
+                                  ((i * 0.1) + 0.5).clamp(0.0, 1.0),
+                                  curve: Curves.easeOutCubic,
+                                );
+                                return AnimatedBuilder(
+                                  animation: _staggerController,
+                                  builder: (context, child) {
+                                    final v = interval
+                                        .transform(_staggerController.value);
+                                    return Transform.translate(
+                                      offset: Offset(0, 24 * (1 - v)),
+                                      child: Opacity(opacity: v, child: child),
+                                    );
+                                  },
+                                  child:
+                                      _semesterTile(_semesters[i], i, isDark),
+                                );
+                              },
                             ),
                           ),
                         ],
@@ -237,62 +218,78 @@ class _SyllabusSemesterScreenState extends State<SyllabusSemesterScreen>
   }
 
   Widget _semesterTile(int semester, int index, bool isDark) {
-    final grad = _gradients[index % _gradients.length];
-    return Container(
-      decoration: BoxDecoration(
-        color: _card(isDark),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => SyllabusSubjectScreen(
-                department: _userDepartment,
-                semester: semester,
-              ),
+    final tileBg = isDark ? const Color(0xFF1C1C1E) : Colors.white;
+    final tileBorder =
+        isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F2);
+    final textPrimary = isDark ? Colors.white : const Color(0xFF111111);
+    final textSecondary =
+        isDark ? const Color(0xFF8E8E93) : const Color(0xFF888888);
+
+    // Arrow colors matching 1st pic but in Red theme
+    final arrowBg = isDark ? const Color(0xFF3A2A2A) : const Color(0xFFFFE5E5);
+    final arrowColor =
+        isDark ? const Color(0xFFFF6961) : const Color(0xFFFF3B30);
+
+    // Folder icon colors - Proper white for dark mode, off-white for light mode
+    final folderClr = isDark ? Colors.white : const Color(0xFFF2F0EF);
+    final folderBorder = isDark ? Colors.transparent : const Color(0xFFE5E5EA);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: GestureDetector(
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => SyllabusSubjectScreen(
+              department: _userDepartment,
+              semester: semester,
             ),
           ),
-          borderRadius: BorderRadius.circular(24),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: grad,
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: tileBg,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: tileBorder, width: 1.0),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(isDark ? 0.3 : 0.03),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 60,
+                height: 52,
+                child: SolidFolder(
+                  color: folderClr,
+                  borderColor: folderBorder,
+                  tabHeight: 10,
+                ),
+              ),
+              const SizedBox(width: 20),
+              // 2. Texts
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Semester $semester',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: textPrimary,
+                        letterSpacing: -0.2,
+                      ),
                     ),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: const Center(
-                    child: Icon(Iconsax.book_1, color: Colors.white, size: 22),
-                  ),
+                  ],
                 ),
-                const Spacer(),
-                Text(
-                  'Semester $semester',
-                  style: TextStyle(
-                    color: _textP(isDark),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: -0.2,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'View syllabus',
-                  style: TextStyle(color: _textS(isDark), fontSize: 12),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -308,11 +305,11 @@ class _SyllabusSemesterScreenState extends State<SyllabusSemesterScreen>
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: _accent(isDark).withValues(alpha: 0.08),
+              color: _accent(isDark).withOpacity(0.08),
               borderRadius: BorderRadius.circular(24),
             ),
             child: Icon(Iconsax.book_1,
-                size: 36, color: _accent(isDark).withValues(alpha: 0.4)),
+                size: 36, color: _accent(isDark).withOpacity(0.4)),
           ),
           const SizedBox(height: 20),
           Text('No syllabus available',
@@ -337,11 +334,11 @@ class _SyllabusSemesterScreenState extends State<SyllabusSemesterScreen>
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: Colors.redAccent.withValues(alpha: 0.08),
+              color: Colors.redAccent.withOpacity(0.08),
               borderRadius: BorderRadius.circular(24),
             ),
             child: Icon(Iconsax.warning_2,
-                size: 36, color: Colors.redAccent.withValues(alpha: 0.5)),
+                size: 36, color: Colors.redAccent.withOpacity(0.5)),
           ),
           const SizedBox(height: 20),
           Text('Something went wrong',
@@ -355,7 +352,7 @@ class _SyllabusSemesterScreenState extends State<SyllabusSemesterScreen>
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               decoration: BoxDecoration(
-                color: accent.withValues(alpha: isDark ? 0.15 : 0.1),
+                color: accent.withOpacity(isDark ? 0.15 : 0.1),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Row(
@@ -374,6 +371,49 @@ class _SyllabusSemesterScreenState extends State<SyllabusSemesterScreen>
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildLoadingSkeleton(bool isDark) {
+    return CustomScrollView(
+      slivers: [
+        SliverAppBar(
+          backgroundColor: _bg(isDark),
+          elevation: 0,
+          pinned: true,
+          expandedHeight:
+              MediaQuery.of(context).padding.top + kToolbarHeight + 80,
+          leading: IconButton(
+            icon: const Icon(Iconsax.arrow_left),
+            onPressed: () => Navigator.pop(context),
+          ),
+          flexibleSpace: FlexibleSpaceBar(
+            background: Padding(
+              padding: EdgeInsets.fromLTRB(
+                  20, MediaQuery.of(context).padding.top + kToolbarHeight + 8, 20, 0),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Center(child: ShimmerSkeleton(width: 120, height: 20)),
+                  SizedBox(height: 10),
+                  ShimmerSkeleton(width: 180, height: 28, isNdot: true),
+                  SizedBox(height: 8),
+                  ShimmerSkeleton(width: 220, height: 14),
+                ],
+              ),
+            ),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, i) => ShimmerSkeleton.listTile(isDark: isDark),
+              childCount: 6,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

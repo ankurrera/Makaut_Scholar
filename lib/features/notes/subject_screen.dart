@@ -3,7 +3,11 @@ import 'dart:ui';
 import 'package:provider/provider.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../core/widgets/dot_loading.dart';
+import '../../core/widgets/solid_folder.dart';
+import '../../core/widgets/shimmer_skeleton.dart';
+import '../../core/widgets/premium_route.dart';
 import '../../services/auth_service.dart';
+import '../../services/cache_service.dart';
 import '../../services/monetization_service.dart';
 import 'notes_viewer_screen.dart';
 import '../premium/premium_checkout_screen.dart';
@@ -28,28 +32,14 @@ class _SubjectScreenState extends State<SubjectScreen>
   String? _error;
 
   // ── Palette ──
-  static const _accentLight = Color(0xFFE5252A);
-  static const _accentDark = Color(0xFFE5252A);
+  static const _accentLight = Color(0xFF111111);
+  static const _accentDark = Colors.white;
 
-  Color _bg(bool d) => d ? const Color(0xFF121512) : const Color(0xFFF8F6F1);
+  Color _bg(bool d) => d ? const Color(0xFF000000) : const Color(0xFFF8F6F1);
   Color _card(bool d) => d ? const Color(0xFF181B22) : Colors.white;
   Color _textP(bool d) => d ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E);
   Color _textS(bool d) => d ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
   Color _accent(bool d) => d ? _accentDark : _accentLight;
-
-  // Gradient pairs per subject — vibrant in both modes
-  static const _gradients = [
-    [Color(0xFF8B7CF6), Color(0xFFA78BFA)], // purple
-    [Color(0xFF5BAAEF), Color(0xFF7BC4FF)], // blue
-    [Color(0xFF4FC9A8), Color(0xFF6DE8C8)], // mint
-    [Color(0xFFE88AA0), Color(0xFFF5A0B4)], // rose
-    [Color(0xFFF0A850), Color(0xFFFFBE6A)], // amber
-    [Color(0xFF58C9B0), Color(0xFF76E4CA)], // teal
-    [Color(0xFFA07EF0), Color(0xFFB898FF)], // lavender
-    [Color(0xFFE87878), Color(0xFFFF9A9A)], // coral
-    [Color(0xFF6CB4F0), Color(0xFF90CCFF)], // sky
-    [Color(0xFF8DD4A8), Color(0xFFA8ECC0)], // sage
-  ];
 
   late AnimationController _staggerController;
 
@@ -71,12 +61,29 @@ class _SubjectScreenState extends State<SubjectScreen>
 
   Future<void> _loadSubjects() async {
     setState(() {
-      _isLoading = true;
       _error = null;
     });
     try {
       final auth = Provider.of<AuthService>(context, listen: false);
       final mon = Provider.of<MonetizationService>(context, listen: false);
+
+      // 1. Try to load from cache first
+      final subjKey = 'subjects_${widget.department}_${widget.semester}';
+      final countsKey = 'unit_counts_${widget.department}_${widget.semester}';
+      
+      final cachedSubjs = CacheService().get(subjKey);
+      final cachedCounts = CacheService().get(countsKey);
+
+      if (cachedSubjs != null && cachedSubjs is List && cachedCounts != null && cachedCounts is Map) {
+        setState(() {
+          _subjects = List<Map<String, dynamic>>.from(cachedSubjs);
+          _unitCounts = Map<String, int>.from(cachedCounts);
+          _isLoading = false;
+        });
+        _staggerController.forward(from: 0);
+      } else {
+        setState(() => _isLoading = true);
+      }
 
       // Fetch subjects, unit counts, and bundle info in parallel
       final results = await Future.wait([
@@ -110,18 +117,8 @@ class _SubjectScreenState extends State<SubjectScreen>
 
     return Scaffold(
       backgroundColor: _bg(isDark),
-      body: _isLoading
-          ? Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  DotLoadingIndicator(color: accent),
-                  const SizedBox(height: 16),
-                  Text('Loading subjects...',
-                      style: TextStyle(color: _textS(isDark), fontSize: 13)),
-                ],
-              ),
-            )
+      body: _isLoading && _subjects.isEmpty
+          ? _buildLoadingSkeleton(isDark)
           : _error != null
               ? _buildError(isDark, accent)
               : _subjects.isEmpty
@@ -168,28 +165,31 @@ class _SubjectScreenState extends State<SubjectScreen>
                                         0),
                                     child: Column(
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                          CrossAxisAlignment.center,
                                       children: [
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 10, vertical: 5),
-                                          decoration: BoxDecoration(
-                                            color: accent.withValues(
-                                                alpha: isDark ? 0.15 : 0.1),
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                          ),
-                                          child: Text(
-                                            'Sem ${widget.semester} · ${widget.department}',
-                                            style: TextStyle(
-                                                color: accent,
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w600),
+                                        Center(
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 10, vertical: 5),
+                                            decoration: BoxDecoration(
+                                              color: accent.withValues(
+                                                  alpha: isDark ? 0.15 : 0.1),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            child: Text(
+                                              'Sem ${widget.semester} · ${widget.department}',
+                                              style: TextStyle(
+                                                  color: accent,
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w600),
+                                            ),
                                           ),
                                         ),
                                         const SizedBox(height: 10),
                                         Text(
                                           'Subjects',
+                                          textAlign: TextAlign.center,
                                           style: TextStyle(
                                             color: _textP(isDark),
                                             fontSize: 28,
@@ -200,6 +200,7 @@ class _SubjectScreenState extends State<SubjectScreen>
                                         const SizedBox(height: 4),
                                         Text(
                                           '${_subjects.length} subject${_subjects.length != 1 ? 's' : ''} available',
+                                          textAlign: TextAlign.center,
                                           style: TextStyle(
                                               color: _textS(isDark),
                                               fontSize: 14),
@@ -267,131 +268,95 @@ class _SubjectScreenState extends State<SubjectScreen>
       Map<String, dynamic> subjectData, int index, bool isDark, Color accent) {
     final String subject = subjectData['subject'];
     final String? paperCode = subjectData['paper_code'];
-    final grad = _gradients[index % _gradients.length];
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => NotesViewerScreen(
-              department: widget.department,
-              semester: widget.semester,
-              subject: subject,
-              paperCode: paperCode,
-            ),
+    return PressableWidget(
+      onTap: () => Navigator.push(
+        context,
+        PremiumPageRoute(
+          page: NotesViewerScreen(
+            department: widget.department,
+            semester: widget.semester,
+            subject: subject,
+            paperCode: paperCode,
           ),
         ),
-        borderRadius: BorderRadius.circular(20),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: _card(isDark),
-            borderRadius: BorderRadius.circular(20),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFE6E8EC),
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                // ── Gradient icon container ──
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: grad,
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Center(
-                    child: Text(
-                      '${index + 1}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
+        ),
+        child: Row(
+          children: [
+            // ── Solid Folder Icon ──
+            SizedBox(
+              width: 64,
+              height: 52,
+              child: SolidFolder(
+                color: isDark ? Colors.white : const Color(0xFFF2F0EF),
+                borderColor:
+                    isDark ? Colors.transparent : const Color(0xFFE5E5EA),
+                tabHeight: 8,
+              ),
+            ),
+            const SizedBox(width: 16),
 
-                // ── Subject text ──
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            // ── Subject text ──
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    subject,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : const Color(0xFF1E1E1E),
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
                     children: [
+                      Icon(Iconsax.archive_book,
+                          size: 10,
+                          color: isDark
+                              ? const Color(0xFF9AA0A6)
+                              : const Color(0xFF8E8E93)),
+                      const SizedBox(width: 4),
                       Text(
-                        subject,
+                        '${_unitCounts[subject] ?? 0} Units',
                         style: TextStyle(
-                          color: _textP(isDark),
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: -0.1,
-                          height: 1.3,
+                          fontSize: 11,
+                          color: isDark
+                              ? const Color(0xFF9AA0A6)
+                              : const Color(0xFF8E8E93),
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Container(
-                            width: 6,
-                            height: 6,
-                            decoration: BoxDecoration(
-                              color: grad[0],
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            '${_unitCounts[subject] ?? 0} Units',
-                            style:
-                                TextStyle(color: _textS(isDark), fontSize: 12),
-                          ),
-                        ],
                       ),
                     ],
                   ),
-                ),
-
-                // ── Arrow ──
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? grad[0].withValues(alpha: 0.12)
-                        : grad[0].withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Iconsax.arrow_right_3,
-                    color: grad[0],
-                    size: 16,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildFrostedBundleBar(bool isDark) {
-    const Color orangeAccent = Color(0xFFFFB347);
+    final Color brandRed = const Color(0xFFE5252A);
     final double price = _bundleInfo['bundle_price'] as double;
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
 
     return ClipRRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
         child: Container(
-          padding: EdgeInsets.fromLTRB(24, 16, 24, 16 + bottomPadding),
           decoration: BoxDecoration(
             color: isDark
                 ? const Color(0xFF1E1E1E).withValues(alpha: 0.7)
@@ -405,98 +370,98 @@ class _SubjectScreenState extends State<SubjectScreen>
               ),
             ),
           ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: orangeAccent.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                ),
-                child:
-                    const Icon(Iconsax.star_1, color: orangeAccent, size: 24),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Semester Bundle",
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.2,
-                      ),
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: brandRed.withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
                     ),
-                    Text(
-                      "Unlock all subjects instantly",
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: _textS(isDark),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              ScaleButton(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => PremiumCheckoutScreen(
-                        itemId:
-                            'bundle_${widget.department}_${widget.semester}',
-                        itemType: 'semester_bundle',
-                        itemName: 'Sem ${widget.semester} Complete Bundle',
-                        price: price,
-                      ),
-                    ),
-                  ).then((result) {
-                    if (result != null &&
-                        result is Map &&
-                        result['success'] == true) {
-                      _loadSubjects(); // Reload to hide bar if purchase successful
-                    }
-                  });
-                },
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFFFB347), Color(0xFFFFCC33)],
-                    ),
-                    borderRadius: BorderRadius.circular(14),
-                    boxShadow: [
-                      BoxShadow(
-                        color: orangeAccent.withValues(alpha: 0.3),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+                    child: Icon(Iconsax.star_1, color: brandRed, size: 24),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        "₹${price.toStringAsFixed(0)}",
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w800,
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Semester Bundle",
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.2,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 6),
-                      const Icon(Iconsax.arrow_right_3,
-                          color: Colors.white, size: 14),
-                    ],
+                        Text(
+                          "Unlock all subjects instantly",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: _textS(isDark),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 12),
+                   PressableWidget(
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        PremiumPageRoute(
+                          page: PremiumCheckoutScreen(
+                            itemId:
+                                'bundle_${widget.department}_${widget.semester}',
+                            itemType: 'semester_bundle',
+                            itemName: 'Sem ${widget.semester} Complete Bundle',
+                            price: price,
+                          ),
+                        ),
+                      );
+                      if (mounted) _loadSubjects();
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFE5252A), Color(0xFFFF4D4D)],
+                        ),
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: [
+                          BoxShadow(
+                            color: brandRed.withValues(alpha: 0.3),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            "₹${price.toStringAsFixed(0)}",
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          const Icon(Iconsax.arrow_right_3,
+                              color: Colors.white, size: 14),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -580,50 +545,45 @@ class _SubjectScreenState extends State<SubjectScreen>
       ),
     );
   }
-}
 
-class ScaleButton extends StatefulWidget {
-  final Widget child;
-  final VoidCallback onTap;
-
-  const ScaleButton({super.key, required this.child, required this.onTap});
-
-  @override
-  State<ScaleButton> createState() => _ScaleButtonState();
-}
-
-class _ScaleButtonState extends State<ScaleButton>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 100));
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapDown: (_) => _controller.forward(),
-      onTapUp: (_) {
-        _controller.reverse();
-        widget.onTap();
-      },
-      onTapCancel: () => _controller.reverse(),
-      child: ScaleTransition(scale: _scaleAnimation, child: widget.child),
+  Widget _buildLoadingSkeleton(bool isDark) {
+    return CustomScrollView(
+      slivers: [
+        SliverAppBar(
+          backgroundColor: _bg(isDark),
+          elevation: 0,
+          pinned: true,
+          expandedHeight: MediaQuery.of(context).padding.top + kToolbarHeight + 80,
+          leading: IconButton(
+            icon: const Icon(Iconsax.arrow_left),
+            onPressed: () => Navigator.pop(context),
+          ),
+          flexibleSpace: FlexibleSpaceBar(
+            background: Padding(
+              padding: EdgeInsets.fromLTRB(20, MediaQuery.of(context).padding.top + kToolbarHeight + 8, 20, 0),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ShimmerSkeleton(width: 100, height: 20),
+                  SizedBox(height: 10),
+                  ShimmerSkeleton(width: 180, height: 28),
+                  SizedBox(height: 8),
+                  ShimmerSkeleton(width: 140, height: 14),
+                ],
+              ),
+            ),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, i) => ShimmerSkeleton.listTile(isDark: isDark),
+              childCount: 6,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

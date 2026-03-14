@@ -3,11 +3,12 @@ import 'package:flutter/foundation.dart';
 import 'dart:io' show File;
 import 'dart:convert' show jsonEncode;
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/supabase_client.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import '../main.dart' as main_file;
+import 'cache_service.dart';
 
 class NetworkException implements Exception {
   final String message;
@@ -180,9 +181,11 @@ class AuthService extends ChangeNotifier {
       // and the API Gateway automatically validates it before reaching the function.
       // If the JWT is stale (even slightly out of sync computationally), it fails 401.
       // To bypass, we hit it raw with the anon key and pass the user token in the body.
-      final urlStr = dotenv.env['SUPABASE_URL']!;
+      final urlStr = const String.fromEnvironment('SUPABASE_URL',
+          defaultValue: '');
       final url = Uri.parse('$urlStr/functions/v1/delete-user-account');
-      final anonKey = dotenv.env['SUPABASE_ANON_KEY']!;
+      final anonKey = const String.fromEnvironment('SUPABASE_ANON_KEY',
+          defaultValue: '');
 
       final response = await http.post(
         url,
@@ -234,6 +237,11 @@ class AuthService extends ChangeNotifier {
 
     subjects.sort(
         (a, b) => (a['subject'] as String).compareTo(b['subject'] as String));
+    
+    // Background cache update
+    final cacheKey = 'subjects_${department}_$semester';
+    CacheService().set(cacheKey, subjects);
+
     return subjects;
   }
 
@@ -349,6 +357,11 @@ class AuthService extends ChangeNotifier {
 
     subjects.sort(
         (a, b) => (a['subject'] as String).compareTo(b['subject'] as String));
+    
+    // Background cache update
+    final cacheKey = 'syllabus_subjects_${department}_$semester';
+    CacheService().set(cacheKey, subjects);
+    
     return subjects;
   }
 
@@ -364,7 +377,13 @@ class AuthService extends ChangeNotifier {
         .eq('semester', semester)
         .eq('subject', subject)
         .order('uploaded_at', ascending: false);
-    return List<Map<String, dynamic>>.from(data);
+    final List<Map<String, dynamic>> entries = List<Map<String, dynamic>>.from(data);
+    
+    // Background cache update
+    final cacheKey = 'syllabus_${department}_${semester}_$subject';
+    CacheService().set(cacheKey, entries);
+    
+    return entries;
   }
 
   /// Checks if the current user has premium access to a specific item
@@ -446,7 +465,13 @@ class AuthService extends ChangeNotifier {
       subjectYears.putIfAbsent(sub, () => {}).add(year);
     }
 
-    return subjectYears.map((sub, years) => MapEntry(sub, years.length));
+    final counts = subjectYears.map((sub, years) => MapEntry(sub, years.length));
+    
+    // Background cache update
+    final cacheKey = 'pyq_unit_counts_${department}_$semester';
+    CacheService().set(cacheKey, counts);
+    
+    return counts;
   }
 
   /// Fetches unique important questions count for all subjects in a department + semester
@@ -479,7 +504,13 @@ class AuthService extends ChangeNotifier {
         .eq('semester', semester)
         .eq('subject', subject)
         .order('uploaded_at', ascending: false);
-    return List<Map<String, dynamic>>.from(data);
+    final List<Map<String, dynamic>> papers = List<Map<String, dynamic>>.from(data);
+    
+    // Background cache update
+    final cacheKey = 'imp_questions_${department}_${semester}_$subject';
+    CacheService().set(cacheKey, papers);
+    
+    return papers;
   }
 
   /// Fetches PYQ papers for a department + semester + subject, ordered by year desc
@@ -494,7 +525,14 @@ class AuthService extends ChangeNotifier {
         .eq('semester', semester)
         .eq('subject', subject)
         .order('year', ascending: false);
-    return List<Map<String, dynamic>>.from(data);
+        
+    final List<Map<String, dynamic>> papers = List<Map<String, dynamic>>.from(data);
+    
+    // Background cache update
+    final cacheKey = 'pyq_papers_${department}_${semester}_$subject';
+    CacheService().set(cacheKey, papers);
+    
+    return papers;
   }
 
   /// Fetches distinct semesters that have subjects defined for a department
@@ -532,6 +570,11 @@ class AuthService extends ChangeNotifier {
         .toSet()
         .toList()
       ..sort();
+      
+    // Background cache update
+    final cacheKey = 'mock_test_subjects_${department}_$semester';
+    CacheService().set(cacheKey, subjects);
+    
     return subjects;
   }
 

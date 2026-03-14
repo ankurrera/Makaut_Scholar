@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../services/auth_service.dart';
-import '../../core/widgets/modern_folder.dart';
+import '../../services/cache_service.dart';
+import '../../core/widgets/solid_folder.dart';
 import '../../core/widgets/dot_loading.dart';
+import '../../core/widgets/shimmer_skeleton.dart';
 import 'important_questions_list_screen.dart';
 
 class ImportantQuestionsSubjectScreen extends StatefulWidget {
@@ -30,17 +32,6 @@ class _ImportantQuestionsSubjectScreenState
   String? _error;
   late AnimationController _staggerController;
 
-  static const _folderColors = [
-    Color(0xFF8B7CF6), // Purple
-    Color(0xFF5BAAEF), // Blue
-    Color(0xFF34A875), // Green
-    Color(0xFFFF708D), // Pink
-    Color(0xFFF0A850), // Amber
-    Color(0xFF6BBAFF), // Sky
-    Color(0xFFE88AA0), // Rose
-    Color(0xFFA07EF0), // Violet
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -58,8 +49,30 @@ class _ImportantQuestionsSubjectScreenState
   }
 
   Future<void> _loadData() async {
+    setState(() {
+      _error = null;
+    });
     try {
       final auth = Provider.of<AuthService>(context, listen: false);
+
+      // 1. Try to load from cache
+      final subjKey = 'imp_subjects_${widget.department}_${widget.semester}';
+      final countsKey = 'imp_unit_counts_${widget.department}_${widget.semester}';
+      
+      final cachedSubjs = CacheService().get(subjKey);
+      final cachedCounts = CacheService().get(countsKey);
+
+      if (cachedSubjs != null && cachedSubjs is List && cachedCounts != null && cachedCounts is Map) {
+        setState(() {
+          _subjects = List<Map<String, dynamic>>.from(cachedSubjs);
+          _impCounts = Map<String, int>.from(cachedCounts);
+          _isLoading = false;
+        });
+        _staggerController.forward();
+      } else {
+        setState(() => _isLoading = true);
+      }
+
       final results = await Future.wait([
         auth.fetchDepartmentSubjects(widget.department, widget.semester),
         auth.fetchSubjectImpCounts(widget.department, widget.semester),
@@ -72,6 +85,10 @@ class _ImportantQuestionsSubjectScreenState
           _isLoading = false;
         });
         _staggerController.forward();
+        
+        // Update cache
+        CacheService().set(subjKey, results[0]);
+        CacheService().set(countsKey, results[1]);
       }
     } catch (e) {
       if (mounted) {
@@ -88,83 +105,91 @@ class _ImportantQuestionsSubjectScreenState
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor:
-          isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1),
-      body: SafeArea(
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color:
-                              isDark ? const Color(0xFF1C2020) : Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isDark
-                                ? const Color(0xFF2A3030)
-                                : const Color(0xFFE6E8EC),
+      backgroundColor: isDark ? Colors.black : const Color(0xFFF8F6F1),
+      body: _isLoading && _subjects.isEmpty
+          ? _buildLoadingSkeleton(isDark)
+          : SafeArea(
+              child: CustomScrollView(
+                physics: const BouncingScrollPhysics(),
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Row(
+                            children: [
+                              GestureDetector(
+                                onTap: () => Navigator.pop(context),
+                                child: Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? const Color(0xFF1C1C1E)
+                                        : Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: isDark
+                                          ? const Color(0xFF2C2C2E)
+                                          : const Color(0xFFE6E8EC),
+                                    ),
+                                  ),
+                                  child: Icon(Iconsax.arrow_left_2,
+                                      size: 20,
+                                      color:
+                                          isDark ? Colors.white : Colors.black),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        child: Icon(Iconsax.arrow_left_2,
-                            size: 20,
-                            color: isDark ? Colors.white : Colors.black),
+                          const SizedBox(height: 24),
+                          Text(
+                            'Exam Focus',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: isDark
+                                  ? Colors.white
+                                  : const Color(0xFF1E1E1E),
+                              letterSpacing: -0.5,
+                              fontFamily: 'NDOT',
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Semester ${widget.semester} · ${widget.department}',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontFamily: 'NDOT',
+                              color: isDark
+                                  ? const Color(0xFF9AA0A6)
+                                  : const Color(0xFF8E8E93),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 24),
-                    Text(
-                      'Subjects',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : const Color(0xFF1E1E1E),
-                        letterSpacing: -0.5,
+                  ),
+                  if (_error != null)
+                    SliverFillRemaining(
+                      child: Center(
+                        child: Text('Error: $_error',
+                            style: const TextStyle(color: Colors.red)),
                       ),
-                    ),
-                    Text(
-                      'Semester ${widget.semester} · ${widget.department}',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: isDark
-                            ? const Color(0xFF9AA0A6)
-                            : const Color(0xFF8E8E93),
+                    )
+                  else if (_subjects.isEmpty)
+                    const SliverFillRemaining(
+                      child: Center(
+                        child: Text('No subjects found'),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            if (_isLoading)
-              SliverFillRemaining(
-                child: Center(
-                  child: DotLoadingIndicator(color: Color(0xFFE5252A)),
-                ),
-              )
-            else if (_error != null)
-              SliverFillRemaining(
-                child: Center(
-                  child: Text('Error: $_error',
-                      style: const TextStyle(color: Colors.red)),
-                ),
-              )
-            else if (_subjects.isEmpty)
-              const SliverFillRemaining(
-                child: Center(
-                  child: Text('No subjects found'),
-                ),
-              )
-            else
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                sliver: SliverList(
+                    )
+                  else
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, i) {
                       final interval = Interval(
@@ -199,7 +224,6 @@ class _ImportantQuestionsSubjectScreenState
       Map<String, dynamic> subjectData, int index, bool isDark) {
     final String subject = subjectData['subject'];
     final String? paperCode = subjectData['paper_code'];
-    final color = _folderColors[index % _folderColors.length];
     final count = _impCounts[subject] ?? 0;
 
     return Padding(
@@ -222,11 +246,11 @@ class _ImportantQuestionsSubjectScreenState
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF1C2020) : Colors.white,
+              color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color:
-                    isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC),
+                    isDark ? const Color(0xFF2C2C2E) : const Color(0xFFE6E8EC),
               ),
             ),
             child: Row(
@@ -234,8 +258,10 @@ class _ImportantQuestionsSubjectScreenState
                 SizedBox(
                   width: 56,
                   height: 48,
-                  child: ModernFolder(
-                    color: color,
+                  child: SolidFolder(
+                    color: isDark ? Colors.white : const Color(0xFFF2F0EF),
+                    borderColor:
+                        isDark ? Colors.transparent : const Color(0xFFE5E5EA),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -255,33 +281,61 @@ class _ImportantQuestionsSubjectScreenState
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 2),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: color.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          '$count Focus Unit${count == 1 ? '' : 's'}',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w900,
-                            color: color,
-                            letterSpacing: 0.5,
-                          ),
+                      Text(
+                        '$count Focus Unit${count == 1 ? '' : 's'}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark
+                              ? const Color(0xFF9AA0A6)
+                              : const Color(0xFF8E8E93),
                         ),
                       ),
                     ],
                   ),
                 ),
-                Icon(Iconsax.arrow_right_3,
-                    size: 18, color: color.withValues(alpha: 0.5)),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildLoadingSkeleton(bool isDark) {
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Iconsax.arrow_left),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                const ShimmerSkeleton(width: 180, height: 28, isNdot: true),
+                const SizedBox(height: 8),
+                const ShimmerSkeleton(width: 140, height: 14),
+              ],
+            ),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, i) => ShimmerSkeleton.listTile(isDark: isDark),
+              childCount: 6,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -211,15 +211,17 @@ class _CgpaCalculatorScreenState extends State<CgpaCalculatorScreen>
           const SizedBox(width: 8),
         ],
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
+      body: Column(
+        children: [
+          Expanded(
+            child: SafeArea(
+              bottom: _hasCalculated,
               child: _buildMainContent(isDark),
             ),
-            if (!_hasCalculated) _buildNumpad(isDark),
-          ],
-        ),
+          ),
+          if (!_hasCalculated)
+            _buildNumpad(isDark),
+        ],
       ),
     );
   }
@@ -390,14 +392,17 @@ class _CgpaCalculatorScreenState extends State<CgpaCalculatorScreen>
                     letterSpacing: 2),
               ),
               const SizedBox(height: 16),
-              Text(
-                _result.toStringAsFixed(2),
-                style: TextStyle(
-                    fontFamily: 'NDOT',
-                    color: isDark ? Colors.white : Colors.black,
-                    fontSize: 72,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 2),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  _result.toStringAsFixed(2),
+                  style: TextStyle(
+                      fontFamily: 'NDOT',
+                      color: isDark ? Colors.white : Colors.black,
+                      fontSize: 72,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 2),
+                ),
               ),
               const SizedBox(height: 32),
               Divider(
@@ -545,127 +550,129 @@ class _CgpaCalculatorScreenState extends State<CgpaCalculatorScreen>
     Color dividerColor = isDark ? Colors.white24 : Colors.black12;
 
     return Container(
-      child: Stack(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Title
-          Positioned(
-            top: 24,
-            left: 24,
-            child: Text(title,
-                style: TextStyle(
-                    fontFamily: 'NDOT',
-                    color: secondaryColor,
-                    fontSize: 16,
-                    letterSpacing: 1.5)),
-          ),
-
-          Column(
-            children: [
-              Expanded(
-                child: GestureDetector(
-                  onTap: () => setState(() => _activeFieldId = topId),
-                  behavior: HitTestBehavior.opaque,
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 32),
-                    alignment: Alignment.centerRight,
-                    child: Row(
+          Text(title,
+              style: TextStyle(
+                  fontFamily: 'NDOT',
+                  color: secondaryColor,
+                  fontSize: 14,
+                  letterSpacing: 1.5)),
+          const Spacer(flex: 1),
+          // SGPA / YGPA Section
+          GestureDetector(
+            onTap: () => setState(() => _activeFieldId = topId),
+            behavior: HitTestBehavior.opaque,
+            child: Container(
+              width: double.infinity,
+              alignment: Alignment.centerRight,
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(topVal.isEmpty ? "0.00" : topVal,
+                          style: TextStyle(
+                            fontFamily: 'NDOT',
+                            fontSize: isTopActive ? 64 : 52,
+                            color: isTopActive ? primaryColor : secondaryColor,
+                            height: 1.0,
+                            letterSpacing: 2.0,
+                          )),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Column(
                       mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(topVal.isEmpty ? "0.00" : topVal,
+                        if (isTopActive)
+                          Icon(Iconsax.arrow_up_2,
+                              color: primaryColor, size: 12),
+                        if (isTopActive)
+                          Icon(Iconsax.arrow_down_1,
+                              color: primaryColor, size: 12),
+                        const SizedBox(height: 2),
+                        Text(isDegree ? "YGPA" : "SGPA",
                             style: TextStyle(
-                              fontFamily: 'NDOT',
-                              fontSize: isTopActive ? 64 : 52,
-                              color:
-                                  isTopActive ? primaryColor : secondaryColor,
-                              height: 1.0,
-                              letterSpacing: 2.0,
-                            )),
-                        const SizedBox(width: 12),
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 6),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              if (isTopActive)
-                                Icon(Iconsax.arrow_up_2,
-                                    color: primaryColor, size: 12),
-                              if (isTopActive)
-                                Icon(Iconsax.arrow_down_1,
-                                    color: primaryColor, size: 12),
-                              const SizedBox(height: 2),
-                              Text(isDegree ? "YGPA" : "SGPA",
-                                  style: TextStyle(
-                                      fontFamily: 'NDOT',
-                                      fontSize: 14,
-                                      color: isTopActive
-                                          ? primaryColor
-                                          : secondaryColor)),
-                            ],
-                          ),
-                        ),
+                                fontFamily: 'NDOT',
+                                fontSize: 12,
+                                color:
+                                    isTopActive ? primaryColor : secondaryColor)),
                       ],
                     ),
                   ),
-                ),
+                ],
               ),
-              if (!isDegree) ...[
-                // The faint split line
-                Container(height: 1, color: dividerColor),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => setState(() => _activeFieldId = bottomId),
-                    behavior: HitTestBehavior.opaque,
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 32),
-                      alignment: Alignment.centerRight,
-                      child: Row(
+            ),
+          ),
+          if (!isDegree) ...[
+            const Spacer(flex: 1),
+            // The faint split line
+            Container(height: 1, color: dividerColor),
+            const Spacer(flex: 1),
+            // Credits Section
+            GestureDetector(
+              onTap: () => setState(() => _activeFieldId = bottomId),
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                width: double.infinity,
+                alignment: Alignment.centerRight,
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(bottomVal.isEmpty ? "0" : bottomVal,
+                            style: TextStyle(
+                              fontFamily: 'NDOT',
+                              fontSize: isBottomActive ? 64 : 52,
+                              color:
+                                  isBottomActive ? primaryColor : secondaryColor,
+                              height: 1.0,
+                              letterSpacing: 2.0,
+                            )),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Column(
                         mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text(bottomVal.isEmpty ? "0" : bottomVal,
+                          if (isBottomActive)
+                            Icon(Iconsax.arrow_up_2,
+                                color: primaryColor, size: 12),
+                          if (isBottomActive)
+                            Icon(Iconsax.arrow_down_1,
+                                color: primaryColor, size: 12),
+                          const SizedBox(height: 2),
+                          Text("CRD",
                               style: TextStyle(
-                                fontFamily: 'NDOT',
-                                fontSize: isBottomActive ? 64 : 52,
-                                color: isBottomActive
-                                    ? primaryColor
-                                    : secondaryColor,
-                                height: 1.0,
-                                letterSpacing: 2.0,
-                              )),
-                          const SizedBox(width: 12),
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 6),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (isBottomActive)
-                                  Icon(Iconsax.arrow_up_2,
-                                      color: primaryColor, size: 12),
-                                if (isBottomActive)
-                                  Icon(Iconsax.arrow_down_1,
-                                      color: primaryColor, size: 12),
-                                const SizedBox(height: 2),
-                                Text("CRD",
-                                    style: TextStyle(
-                                        fontFamily: 'NDOT',
-                                        fontSize: 14,
-                                        color: isBottomActive
-                                            ? primaryColor
-                                            : secondaryColor)),
-                              ],
-                            ),
-                          ),
+                                  fontFamily: 'NDOT',
+                                  fontSize: 12,
+                                  color: isBottomActive
+                                      ? primaryColor
+                                      : secondaryColor)),
                         ],
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ],
-          ),
+              ),
+            ),
+          ],
+          const Spacer(flex: 2),
         ],
       ),
     );
@@ -686,67 +693,78 @@ class _CgpaCalculatorScreenState extends State<CgpaCalculatorScreen>
 
   Widget _buildNumpad(bool isDark) {
     return Container(
-        padding:
-            const EdgeInsets.only(left: 24, right: 24, top: 20, bottom: 24),
-        decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF0D0D0D) : const Color(0xFFF9F9FB),
-            border: Border(
-                top: BorderSide(
-                    color: isDark
-                        ? const Color(0xFF222222)
-                        : const Color(0xFFE6E8EC),
-                    width: 1.5))),
-        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Expanded(
-              flex: 3,
-              child: Column(children: [
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _buildNumBtn('7', isDark),
-                      _buildNumBtn('8', isDark),
-                      _buildNumBtn('9', isDark)
-                    ]),
-                const SizedBox(height: 12),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _buildNumBtn('4', isDark),
-                      _buildNumBtn('5', isDark),
-                      _buildNumBtn('6', isDark)
-                    ]),
-                const SizedBox(height: 12),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _buildNumBtn('1', isDark),
-                      _buildNumBtn('2', isDark),
-                      _buildNumBtn('3', isDark)
-                    ]),
-                const SizedBox(height: 12),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _buildNumBtn('.', isDark, isAction: true),
-                      _buildNumBtn('0', isDark),
-                      _buildNumBtn('00', isDark, isAction: true)
-                    ]),
-              ])),
-          const SizedBox(width: 16),
-          Expanded(
-              flex: 1,
-              child: Column(children: [
-                _buildNumBtn('DEL', isDark, isAction: true),
-                const SizedBox(height: 12),
-                _buildNumBtn('C', isDark, isAction: true),
-                const SizedBox(height: 12),
-                // The Calculate Button spanning height
-                GestureDetector(
-                    onTap: _calculate,
-                    child: Container(
+      decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF0D0D0D) : const Color(0xFFF9F9FB),
+          border: Border(
+              top: BorderSide(
+                  color: isDark
+                      ? const Color(0xFF222222)
+                      : const Color(0xFFE6E8EC),
+                  width: 1.5))),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding:
+              const EdgeInsets.only(left: 24, right: 24, top: 20, bottom: 20),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 3,
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildNumBtn('7', isDark),
+                        _buildNumBtn('8', isDark),
+                        _buildNumBtn('9', isDark),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildNumBtn('4', isDark),
+                        _buildNumBtn('5', isDark),
+                        _buildNumBtn('6', isDark),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildNumBtn('1', isDark),
+                        _buildNumBtn('2', isDark),
+                        _buildNumBtn('3', isDark),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildNumBtn('.', isDark, isAction: true),
+                        _buildNumBtn('0', isDark),
+                        _buildNumBtn('00', isDark, isAction: true),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                flex: 1,
+                child: Column(
+                  children: [
+                    _buildNumBtn('DEL', isDark, isAction: true),
+                    const SizedBox(height: 12),
+                    _buildNumBtn('C', isDark, isAction: true),
+                    const SizedBox(height: 12),
+                    GestureDetector(
+                      onTap: _calculate,
+                      child: Container(
                         width: 72,
-                        height:
-                            72 * 2 + 12, // match Nothing OS tall equal button
+                        height: 72 * 2 + 12, // match Nothing OS tall equal button
                         decoration: BoxDecoration(
                           color: _accentColor,
                           borderRadius: BorderRadius.circular(36),
@@ -754,9 +772,17 @@ class _CgpaCalculatorScreenState extends State<CgpaCalculatorScreen>
                         child: const Center(
                           child: Icon(Iconsax.calculator,
                               color: Colors.white, size: 28),
-                        )))
-              ]))
-        ]));
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildNumBtn(String label, bool isDark, {bool isAction = false}) {
@@ -1002,29 +1028,26 @@ class _NothingModeSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final modes = CalculationMode.values;
-
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      physics: const BouncingScrollPhysics(),
+    final modes = CalculationMode.values;    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: modes.map((m) {
           final isActive = m == mode;
 
-          return GestureDetector(
-            onTap: () => onModeChanged(m),
-            behavior: HitTestBehavior.opaque,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+          return Expanded(
+            child: GestureDetector(
+              onTap: () => onModeChanged(m),
+              behavior: HitTestBehavior.opaque,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
                       curve: Curves.easeOutCubic,
-                      width: 72,
-                      height: 72,
+                      width: 64,
+                      height: 64,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: isActive
@@ -1041,17 +1064,18 @@ class _NothingModeSelector extends StatelessWidget {
                               : (isDark ? Colors.white : Colors.black),
                         ),
                       )),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   AnimatedDefaultTextStyle(
                     duration: const Duration(milliseconds: 300),
                     style: TextStyle(
                       fontFamily: 'NDOT',
-                      fontSize: 14,
-                      letterSpacing: 1.5,
+                      fontSize: 12,
+                      letterSpacing: 1.0,
                       color: isActive
                           ? (isDark ? Colors.white : Colors.black)
                           : (isDark ? Colors.white38 : Colors.black38),
                     ),
+                    textAlign: TextAlign.center,
                     child: Text(_getLabelForMode(m)),
                   )
                 ],

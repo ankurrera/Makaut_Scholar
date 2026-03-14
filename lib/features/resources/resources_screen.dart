@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../core/widgets/modern_folder.dart';
+import '../../core/widgets/solid_folder.dart';
 import '../../services/offline_service.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'category_downloads_screen.dart';
@@ -22,21 +22,26 @@ class ResourcesScreen extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      'Resources',
+                      'RESOURCES',
+                      textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 28,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w900,
                         color: isDark ? Colors.white : const Color(0xFF1E1E1E),
-                        letterSpacing: -0.5,
+                        letterSpacing: 2.0,
+                        fontFamily: 'NDOT',
                       ),
                     ),
+                    const SizedBox(height: 4),
                     Text(
                       'Access your downloaded offline files',
+                      textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
                         color: isDark
                             ? const Color(0xFF9AA0A6)
                             : const Color(0xFF8E8E93),
@@ -51,33 +56,33 @@ class ResourcesScreen extends StatelessWidget {
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   _CategoryTile(
-                    label: 'Notes',
+                    label: 'NOTES',
                     category: ResourceCategory.NOTES,
-                    color: const Color(0xFF8B7CF6),
+                    color: isDark ? Colors.white : const Color(0xFF1E1E1E),
                     icon: Iconsax.note_text,
                     isDark: isDark,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 14),
                   _CategoryTile(
-                    label: 'Syllabus',
+                    label: 'SYLLABUS',
                     category: ResourceCategory.SYLLABUS,
-                    color: const Color(0xFF34A875),
+                    color: isDark ? Colors.white : const Color(0xFF1E1E1E),
                     icon: Iconsax.document_text_1,
                     isDark: isDark,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 14),
                   _CategoryTile(
-                    label: 'PYQ Bank',
+                    label: 'PYQ BANK',
                     category: ResourceCategory.PYQ,
-                    color: const Color(0xFF5BAAEF),
+                    color: isDark ? Colors.white : const Color(0xFF1E1E1E),
                     icon: Iconsax.archive_book,
                     isDark: isDark,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 14),
                   _CategoryTile(
-                    label: 'Exam Focus',
+                    label: 'EXAM FOCUS',
                     category: ResourceCategory.EXAM_FOCUS,
-                    color: const Color(0xFFFF708D),
+                    color: isDark ? Colors.white : const Color(0xFF1E1E1E),
                     icon: Iconsax.flash,
                     isDark: isDark,
                   ),
@@ -122,23 +127,32 @@ class _CategoryTile extends StatelessWidget {
             ),
           );
         },
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         child: Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF1C2020) : Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+            borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC),
+              color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F2),
             ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.03),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: Row(
             children: [
               SizedBox(
-                width: 64,
-                height: 52,
-                child: ModernFolder(
-                  color: color,
+                width: 52,
+                height: 48,
+                child: SolidFolder(
+                  color: isDark ? Colors.white : const Color(0xFFF2F0EF),
+                  borderColor: isDark ? Colors.transparent : const Color(0xFFE5E5EA),
+                  tabHeight: 8,
                 ),
               ),
               const SizedBox(width: 16),
@@ -149,15 +163,19 @@ class _CategoryTile extends StatelessWidget {
                     Text(
                       label,
                       style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        fontFamily: 'NDOT',
+                        letterSpacing: 1.0,
                         color: isDark ? Colors.white : const Color(0xFF1E1E1E),
                       ),
                     ),
+                    const SizedBox(height: 2),
                     Text(
                       'View Offline',
                       style: TextStyle(
                         fontSize: 12,
+                        fontWeight: FontWeight.w500,
                         color: isDark
                             ? const Color(0xFF9AA0A6)
                             : const Color(0xFF8E8E93),
@@ -166,8 +184,15 @@ class _CategoryTile extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(Iconsax.arrow_right_3,
-                  size: 18, color: color.withValues(alpha: 0.5)),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Iconsax.arrow_right_3,
+                    size: 16, color: isDark ? Colors.white54 : Colors.black54),
+              ),
             ],
           ),
         ),

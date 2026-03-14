@@ -4,6 +4,7 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../services/auth_service.dart';
 import '../../providers/theme_provider.dart';
+import '../../core/widgets/shimmer_skeleton.dart';
 import '../../core/widgets/dot_loading.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -155,10 +156,38 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
 
     if (confirmed == true && mounted) {
-      setState(() => _isLoading = true);
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => Center(
+          child: Container(
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const ShimmerSkeleton(width: 64, height: 64, borderRadius: BorderRadius.all(Radius.circular(32))),
+                const SizedBox(height: 20),
+                Text('DELETING ACCOUNT',
+                    style: TextStyle(
+                        fontFamily: 'NDOT',
+                        color: _textP(isDark),
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.0)),
+              ],
+            ),
+          ),
+        ),
+      );
+
       try {
         await Provider.of<AuthService>(context, listen: false).deleteAccount();
         if (mounted) {
+          Navigator.pop(context); // Close loading dialog
           Navigator.pushReplacementNamed(context, '/login');
           _showSnack(
               'Account deleted successfully. We\'re sorry to see you go.',
@@ -166,7 +195,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         }
       } catch (e) {
         if (mounted) {
-          setState(() => _isLoading = false);
+          Navigator.pop(context); // Close loading dialog
           _showSnack('Deletion failed: $e');
         }
       }
@@ -204,8 +233,8 @@ class _ProfileScreenState extends State<ProfileScreen>
             '';
 
     return Scaffold(
-      body: _isLoading
-          ? Center(child: DotLoadingIndicator(color: accent))
+      body: _isLoading && _profile == null
+          ? _buildLoadingSkeleton(isDark)
           : CustomScrollView(
               slivers: [
                 // ── Header ──
@@ -257,7 +286,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                     const SizedBox(width: 8),
                   ],
                   flexibleSpace: FlexibleSpaceBar(
-                    background: _buildHeaderBackground(isDark, accent, email),
+                    background: _buildHeaderBackground(isDark, accent),
                   ),
                 ),
 
@@ -272,7 +301,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                           const SizedBox(height: 20),
                           _isEditing
                               ? _buildEditForm(isDark, accent)
-                              : _buildDetailSection(isDark, accent),
+                              : _buildDetailSection(isDark, accent, email),
                           const SizedBox(height: 24),
                           _buildSettingsSection(isDark, accent),
                           const SizedBox(height: 24),
@@ -291,132 +320,157 @@ class _ProfileScreenState extends State<ProfileScreen>
   }
 
   // ──────────────────────────── HEADER ────────────────────────────
-  Widget _buildHeaderBackground(bool isDark, Color accent, String email) {
+  Widget _buildHeaderBackground(bool isDark, Color accent) {
     final avatarUrl = _profile?['avatar_url'] as String?;
     final name = _profile?['name'] ?? 'Scholar';
     final dept = _profile?['department'] as String?;
     final hasPhoto = avatarUrl != null && avatarUrl.isNotEmpty;
 
-    return GestureDetector(
-      onTap: _isUploadingPhoto ? null : _pickAndUploadPhoto,
-      onLongPress: hasPhoto ? _removePhoto : null,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          // ── Full-bleed cover image ──
-          if (_isUploadingPhoto)
-            Container(
-              color: isDark ? const Color(0xFF1C2020) : Colors.grey[200],
-              child: Center(
-                  child: DotLoadingIndicator(color: Colors.white, size: 6)),
-            )
-          else if (hasPhoto)
-            Image.network(
-              avatarUrl!,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => _coverFallback(name, isDark),
-            )
-          else
-            _coverFallback(name, isDark),
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // ── Consistent brand gradient fallback ──
+        _coverFallback(name, isDark),
 
-          // ── Bottom gradient scrim for text readability ──
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            height: 160,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black.withValues(alpha: 0.55),
-                    Colors.black.withValues(alpha: 0.8),
-                  ],
-                  stops: const [0.0, 0.55, 1.0],
-                ),
+        // ── Bottom gradient scrim ──
+        Positioned(
+          left: 0, right: 0, bottom: 0,
+          height: 200,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.transparent,
+                  Colors.black.withValues(alpha: 0.5),
+                  Colors.black.withValues(alpha: 0.85),
+                ],
+                stops: const [0.0, 0.5, 1.0],
               ),
             ),
           ),
+        ),
 
-          // ── Overlaid user info ──
-          Positioned(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  name,
-                  style: const TextStyle(
-                    fontFamily: 'NDOT',
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 1.0,
-                    shadows: [Shadow(color: Colors.black54, blurRadius: 4)],
+        // ── Bottom-left: avatar + info ──
+        Positioned(
+          left: 20,
+          bottom: 20,
+          right: 20,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              // ── Square avatar with email badge at its bottom-left ──
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  GestureDetector(
+                    onTap: _isUploadingPhoto ? null : _pickAndUploadPhoto,
+                    onLongPress: hasPhoto ? _removePhoto : null,
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.25),
+                          width: 2,
+                        ),
+                        color: isDark ? const Color(0xFF1C1C1E) : Colors.grey[300],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: hasPhoto
+                            ? Image.network(avatarUrl!, fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => _avatarFallback(name))
+                            : _avatarFallback(name),
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    const Icon(Iconsax.sms, size: 13, color: Colors.white70),
-                    const SizedBox(width: 5),
-                    Flexible(
-                      child: Text(
-                        email,
-                        style: const TextStyle(
-                            fontFamily: 'NDOT',
-                            fontSize: 13,
-                            color: Colors.white70),
-                        overflow: TextOverflow.ellipsis,
+                  // ── Camera badge ──
+                  Positioned(
+                    right: -6,
+                    top: -6,
+                    child: Container(
+                      width: 26,
+                      height: 26,
+                      decoration: BoxDecoration(
+                        color: accent,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.black, width: 1.5),
                       ),
-                    ),
-                  ],
-                ),
-                if (dept != null && dept.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.18),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.25)),
-                    ),
-                    child: Text(
-                      dept,
-                      style: const TextStyle(
-                        fontFamily: 'NDOT',
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                        letterSpacing: 1.0,
-                      ),
+                      child: const Icon(Iconsax.camera, size: 12, color: Colors.white),
                     ),
                   ),
                 ],
-              ],
-            ),
-          ),
-
-          // ── Camera edit button ──
-          Positioned(
-            bottom: 20,
-            right: 20,
-            child: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: accent,
-                borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(Iconsax.camera, size: 16, color: Colors.white),
-            ),
+              const SizedBox(width: 16),
+              // ── Name + dept ──
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        fontFamily: 'NDOT',
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: 0.5,
+                        shadows: [Shadow(color: Colors.black54, blurRadius: 4)],
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (dept != null && dept.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.22)),
+                        ),
+                        child: Text(
+                          dept,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontFamily: 'NDOT',
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
+      ],
+    );
+  }
+
+  /// Small avatar fallback (used inside the 80x80 square avatar)
+  Widget _avatarFallback(String name) {
+    return Container(
+      color: const Color(0xFF1C1C1E),
+      child: Center(
+        child: Text(
+          name.isNotEmpty ? name[0].toUpperCase() : 'S',
+          style: const TextStyle(
+            fontSize: 32,
+            fontWeight: FontWeight.bold,
+            color: Colors.white54,
+          ),
+        ),
       ),
     );
   }
@@ -455,7 +509,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   }
 
   // ──────────────────────────── DETAILS VIEW ────────────────────────────
-  Widget _buildDetailSection(bool isDark, Color accent) {
+  Widget _buildDetailSection(bool isDark, Color accent, String email) {
     return _GlassCard(
       color: _card(isDark),
       borderColor: _border(isDark),
@@ -464,24 +518,29 @@ class _ProfileScreenState extends State<ProfileScreen>
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 18, 20, 10),
-            child: Text(
-              'PERSONAL INFORMATION',
-              style: TextStyle(
-                fontFamily: 'NDOT',
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: _textP(isDark),
-                letterSpacing: 1.2,
+            child: Center(
+              child: Text(
+                'PERSONAL INFORMATION',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'NDOT',
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: _textP(isDark),
+                  letterSpacing: 1.2,
+                ),
               ),
             ),
           ),
-          _detailRow(Iconsax.user, 'Full Name', _profile?['name'] ?? '—',
+          _detailRow(Iconsax.personalcard, 'Full Name', _profile?['name'] ?? '—',
               isDark, accent),
           _divider(isDark),
-          _detailRow(Iconsax.teacher, 'College',
+          _detailRow(Iconsax.sms, 'Email', email, isDark, accent),
+          _divider(isDark),
+          _detailRow(Iconsax.building_3, 'College',
               _profile?['college_name'] ?? '—', isDark, accent),
           _divider(isDark),
-          _detailRow(Iconsax.book_1, 'Department',
+          _detailRow(Iconsax.category, 'Department',
               _profile?['department'] ?? '—', isDark, accent),
           const SizedBox(height: 6),
         ],
@@ -546,14 +605,17 @@ class _ProfileScreenState extends State<ProfileScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'EDIT PROFILE',
-                style: TextStyle(
-                  fontFamily: 'NDOT',
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: _textP(isDark),
-                  letterSpacing: 1.2,
+              Center(
+                child: Text(
+                  'EDIT PROFILE',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: 'NDOT',
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: _textP(isDark),
+                    letterSpacing: 1.2,
+                  ),
                 ),
               ),
               const SizedBox(height: 18),
@@ -591,10 +653,12 @@ class _ProfileScreenState extends State<ProfileScreen>
                   ),
                   child: _isSaving
                       ? const SizedBox(
-                          width: 22,
-                          height: 22,
-                          child:
-                              DotLoadingIndicator(color: Colors.white, size: 6))
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ))
                       : const Text('SAVE CHANGES',
                           style: TextStyle(
                               fontFamily: 'NDOT',
@@ -658,24 +722,27 @@ class _ProfileScreenState extends State<ProfileScreen>
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 18, 20, 10),
-            child: Text(
-              'PREFERENCES',
-              style: TextStyle(
-                fontFamily: 'NDOT',
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: _textP(isDark),
-                letterSpacing: 1.2,
+            child: Center(
+              child: Text(
+                'PREFERENCES',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'NDOT',
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: _textP(isDark),
+                  letterSpacing: 1.2,
+                ),
               ),
             ),
           ),
 
           _settingsTile(
-              Iconsax.notification, 'Notifications', 'Enabled', isDark, accent),
+              Iconsax.notification_bing, 'Notifications', 'Enabled', isDark, accent),
           _divider(isDark),
           // ── Appearance Selection ────────────────────────────────────────
           _settingsTile(
-            Iconsax.sun_1,
+            Iconsax.paintbucket,
             'Appearance',
             _themeModeLabel(context),
             isDark,
@@ -683,11 +750,11 @@ class _ProfileScreenState extends State<ProfileScreen>
             onTap: () => _showThemeSelection(context),
           ),
           _divider(isDark),
-          _settingsTile(Iconsax.info_circle, 'About', 'v1.0.0', isDark, accent,
+          _settingsTile(Iconsax.code_circle, 'About', 'v1.0.0', isDark, accent,
               onTap: () => Navigator.pushNamed(context, '/about')),
           _divider(isDark),
           _settingsTile(
-              Iconsax.shield_tick, 'Privacy Policy', 'View', isDark, accent,
+              Iconsax.document_text, 'Privacy Policy', 'View', isDark, accent,
               onTap: () => Navigator.pushNamed(context, '/privacy')),
           const SizedBox(height: 6),
         ],
@@ -715,16 +782,27 @@ class _ProfileScreenState extends State<ProfileScreen>
             ),
             const SizedBox(width: 14),
             Expanded(
-              child: Text(title,
-                  style: TextStyle(
-                      fontFamily: 'NDOT',
-                      fontSize: 16,
-                      color: _textP(isDark),
-                      fontWeight: FontWeight.bold)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(title,
+                      style: TextStyle(
+                          fontFamily: 'NDOT',
+                          fontSize: 16,
+                          color: _textP(isDark),
+                          fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 2),
+                  Text(subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          fontFamily: 'NDOT',
+                          fontSize: 12,
+                          color: _textS(isDark))),
+                ],
+              ),
             ),
-            Text(subtitle,
-                style: TextStyle(
-                    fontFamily: 'NDOT', fontSize: 12, color: _textS(isDark))),
             const SizedBox(width: 4),
             Icon(Iconsax.arrow_right_3, size: 16, color: _textS(isDark)),
           ],
@@ -842,6 +920,87 @@ class _ProfileScreenState extends State<ProfileScreen>
           },
         );
       },
+    );
+  }
+
+  Widget _buildLoadingSkeleton(bool isDark) {
+    return CustomScrollView(
+      slivers: [
+        SliverAppBar(
+          expandedHeight: 340,
+          pinned: true,
+          backgroundColor: _bg(isDark),
+          flexibleSpace: FlexibleSpaceBar(
+            background: Stack(
+              fit: StackFit.expand,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: isDark
+                          ? [const Color(0xFF33080A), const Color(0xFF1A0505), const Color(0xFF000000)]
+                          : [const Color(0xFFff6b6b), const Color(0xFFE5252A), const Color(0xFFcccccc)],
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: 20,
+                  bottom: 20,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      ShimmerSkeleton(width: 80, height: 80, borderRadius: BorderRadius.circular(16)),
+                      const SizedBox(width: 16),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const ShimmerSkeleton(width: 150, height: 24),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: const ShimmerSkeleton(width: 60, height: 11),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF111111) : const Color(0xFFF5F5F5),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    children: List.generate(4, (index) => ShimmerSkeleton.listTile(isDark: isDark)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

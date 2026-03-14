@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../services/offline_service.dart';
+import '../../core/widgets/solid_folder.dart';
 import '../notes/pdf_viewer_screen.dart';
 
 class CategoryDownloadsScreen extends StatefulWidget {
@@ -56,32 +57,35 @@ class _CategoryDownloadsScreenState extends State<CategoryDownloadsScreen> {
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color:
-                              isDark ? const Color(0xFF1C2020) : Colors.white,
+                              isDark ? const Color(0xFF1C1C1E) : Colors.white,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                               color: isDark
-                                  ? const Color(0xFF2A3030)
-                                  : const Color(0xFFE6E8EC)),
+                                  ? const Color(0xFF2C2C2E)
+                                  : const Color(0xFFF2F2F2)),
                         ),
-                        child: Icon(Iconsax.arrow_left_2,
+                        child: Icon(Iconsax.arrow_left,
                             size: 20,
                             color: isDark ? Colors.white : Colors.black),
                       ),
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      widget.title,
+                      widget.title.toUpperCase(),
                       style: TextStyle(
                         fontSize: 28,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w900,
                         color: isDark ? Colors.white : const Color(0xFF1E1E1E),
-                        letterSpacing: -0.5,
+                        letterSpacing: 2.0,
+                        fontFamily: 'NDOT',
                       ),
                     ),
+                    const SizedBox(height: 4),
                     Text(
                       'Manage your local ${_downloads.length} file${_downloads.length == 1 ? '' : 's'}',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
                         color: isDark
                             ? const Color(0xFF9AA0A6)
                             : const Color(0xFF8E8E93),
@@ -97,13 +101,19 @@ class _CategoryDownloadsScreenState extends State<CategoryDownloadsScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Iconsax.document_download,
-                          size: 48,
-                          color: isDark ? Colors.white24 : Colors.black12),
+                      Icon(
+                        Iconsax.document_copy,
+                        size: 48,
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.1)
+                            : Colors.black.withValues(alpha: 0.1),
+                      ),
                       const SizedBox(height: 16),
                       Text(
                         'No offline files here',
                         style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
                             color: isDark ? Colors.white54 : Colors.black45),
                       ),
                     ],
@@ -112,7 +122,7 @@ class _CategoryDownloadsScreenState extends State<CategoryDownloadsScreen> {
               )
             else
               SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, i) => _DownloadTile(
@@ -147,70 +157,103 @@ class _DownloadTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tileBg = isDark ? const Color(0xFF1C1C1E) : Colors.white;
+    final tileBorder = isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F2);
+    final folderClr = isDark ? Colors.white : const Color(0xFFF2F0EF);
+    final folderBorder = isDark ? Colors.transparent : const Color(0xFFE5E5EA);
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1C2020) : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-            color: isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(Iconsax.document_text_1,
-                color: Theme.of(context).primaryColor, size: 24),
+        color: tileBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: tileBorder, width: 1.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  resource.title,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: isDark ? Colors.white : const Color(0xFF1E1E1E),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => PdfViewerScreen(
+                  filePath: resource.localPath,
+                  title: resource.title,
                 ),
-                Text(
-                  'Downloaded on ${resource.downloadedAt.day}/${resource.downloadedAt.month}/${resource.downloadedAt.year}',
-                  style: TextStyle(
-                      fontSize: 12,
-                      color: isDark ? Colors.white54 : Colors.black54),
+              ),
+            );
+          },
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 52,
+                  height: 48,
+                  child: SolidFolder(
+                    color: folderClr,
+                    borderColor: folderBorder,
+                    tabHeight: 8,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        resource.title,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: isDark ? Colors.white : const Color(0xFF1E1E1E),
+                          letterSpacing: -0.2,
+                          height: 1.2,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Offline · ${resource.downloadedAt.day}/${resource.downloadedAt.month}/${resource.downloadedAt.year}',
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white54 : Colors.black54),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Iconsax.trash, color: Colors.redAccent, size: 20),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        title: Text('DELETE FILE', style: TextStyle(fontFamily: 'NDOT', fontSize: 18, color: isDark ? Colors.white : Colors.black)),
+                        content: Text('Are you sure you want to remove this file from offline storage?', style: TextStyle(color: isDark ? Colors.white70 : Colors.black87)),
+                        actions: [
+                          TextButton(onPressed: () => Navigator.pop(ctx), child: Text('CANCEL', style: TextStyle(color: isDark ? Colors.white54 : Colors.black54))),
+                          TextButton(onPressed: () { Navigator.pop(ctx); onDelete(); }, child: const Text('DELETE', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold))),
+                        ],
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
           ),
-          IconButton(
-            icon: const Icon(Iconsax.trash, color: Colors.redAccent, size: 20),
-            onPressed: onDelete,
-          ),
-          IconButton(
-            icon: Icon(Iconsax.arrow_right_3,
-                color: isDark ? Colors.white24 : Colors.black12, size: 20),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => PdfViewerScreen(
-                    filePath: resource.localPath,
-                    title: resource.title,
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
+        ),
       ),
     );
   }

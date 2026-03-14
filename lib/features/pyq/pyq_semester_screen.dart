@@ -3,8 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../services/auth_service.dart';
 import '../../core/widgets/dot_loading.dart'; // Added this import
+import '../../core/widgets/shimmer_skeleton.dart';
 import 'pyq_subject_screen.dart';
-import '../../core/widgets/modern_folder.dart';
+import '../../core/widgets/solid_folder.dart';
 
 class PyqSemesterScreen extends StatefulWidget {
   final String department;
@@ -25,8 +26,8 @@ class _PyqSemesterScreenState extends State<PyqSemesterScreen>
   static const _accentLight = Color(0xFF5BAAEF);
   static const _accentDark = Color(0xFF7BC4FF);
 
-  Color _bg(bool d) => d ? const Color(0xFF121512) : const Color(0xFFF8F6F1);
-  Color _card(bool d) => d ? const Color(0xFF181B22) : Colors.white;
+  Color _bg(bool d) => d ? Colors.black : const Color(0xFFF8F6F1);
+  Color _card(bool d) => d ? const Color(0xFF1C1C1E) : Colors.white;
   Color _textP(bool d) => d ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E);
   Color _textS(bool d) => d ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
   Color _accent(bool d) => d ? _accentDark : _accentLight;
@@ -98,19 +99,8 @@ class _PyqSemesterScreenState extends State<PyqSemesterScreen>
 
     return Scaffold(
       backgroundColor: _bg(isDark),
-      body: _isLoading
-          ? Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  DotLoadingIndicator(
-                      color: accent), // Replaced CircularProgressIndicator
-                  const SizedBox(height: 16),
-                  Text('Loading semesters...',
-                      style: TextStyle(color: _textS(isDark), fontSize: 13)),
-                ],
-              ),
-            )
+      body: _isLoading && _semesters.isEmpty
+          ? _buildLoadingSkeleton(isDark)
           : _error != null
               ? _buildError(isDark, accent)
               : _semesters.isEmpty
@@ -152,37 +142,43 @@ class _PyqSemesterScreenState extends State<PyqSemesterScreen>
                                     20,
                                     0),
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 5),
-                                      decoration: BoxDecoration(
-                                        color: accent.withValues(
-                                            alpha: isDark ? 0.15 : 0.1),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Text(
-                                        _userDepartment,
-                                        style: TextStyle(
-                                            color: accent,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w600),
+                                    Center(
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 10, vertical: 5),
+                                        decoration: BoxDecoration(
+                                          color: isDark
+                                              ? const Color(0xFF2C2C2E)
+                                              : const Color(0xFFE6E8EC),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Text(
+                                          _userDepartment,
+                                          style: TextStyle(
+                                              color: _textS(isDark),
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600),
+                                        ),
                                       ),
                                     ),
                                     const SizedBox(height: 10),
                                     Text(
                                       'PYQ Bank',
+                                      textAlign: TextAlign.center,
                                       style: TextStyle(
                                         color: _textP(isDark),
                                         fontSize: 28,
                                         fontWeight: FontWeight.w700,
                                         letterSpacing: -0.5,
+                                        fontFamily: 'NDOT',
                                       ),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      'Select a semester',
+                                      'Previous year papers at your fingertips',
+                                      textAlign: TextAlign.center,
                                       style: TextStyle(
                                           color: _textS(isDark), fontSize: 14),
                                     ),
@@ -193,14 +189,7 @@ class _PyqSemesterScreenState extends State<PyqSemesterScreen>
                           ),
                           SliverPadding(
                             padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
-                            sliver: SliverGrid(
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                mainAxisSpacing: 12,
-                                crossAxisSpacing: 12,
-                                childAspectRatio: 1.3,
-                              ),
+                            sliver: SliverList(
                               delegate: SliverChildBuilderDelegate(
                                 (context, i) {
                                   final interval = Interval(
@@ -219,8 +208,12 @@ class _PyqSemesterScreenState extends State<PyqSemesterScreen>
                                             Opacity(opacity: v, child: child),
                                       );
                                     },
-                                    child:
-                                        _semesterTile(_semesters[i], i, isDark),
+                                    child: Padding(
+                                      padding:
+                                          const EdgeInsets.only(bottom: 12.0),
+                                      child: _semesterTile(
+                                          _semesters[i], i, isDark),
+                                    ),
                                   );
                                 },
                                 childCount: _semesters.length,
@@ -235,39 +228,59 @@ class _PyqSemesterScreenState extends State<PyqSemesterScreen>
 
   Widget _semesterTile(int semester, int index, bool isDark) {
     final grad = _gradients[index % _gradients.length];
-    return ModernFolder(
-      color: grad[0],
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => PyqSubjectScreen(
-            department: _userDepartment,
-            semester: semester,
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => PyqSubjectScreen(
+              department: _userDepartment,
+              semester: semester,
+            ),
           ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(Iconsax.archive_book, color: Colors.white, size: 24),
-          const Spacer(),
-          Text(
-            'Semester $semester',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              letterSpacing: -0.2,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFE6E8EC),
             ),
           ),
-          Text(
-            'View Bank',
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.7),
-              fontSize: 12,
-            ),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 64,
+                height: 52,
+                child: SolidFolder(
+                  color: isDark ? Colors.white : const Color(0xFFF2F0EF),
+                  borderColor:
+                      isDark ? Colors.transparent : const Color(0xFFE5E5EA),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Semester $semester',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : const Color(0xFF1E1E1E),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -347,6 +360,49 @@ class _PyqSemesterScreenState extends State<PyqSemesterScreen>
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildLoadingSkeleton(bool isDark) {
+    return CustomScrollView(
+      slivers: [
+        SliverAppBar(
+          backgroundColor: _bg(isDark),
+          elevation: 0,
+          pinned: true,
+          expandedHeight:
+              MediaQuery.of(context).padding.top + kToolbarHeight + 80,
+          leading: IconButton(
+            icon: const Icon(Iconsax.arrow_left),
+            onPressed: () => Navigator.pop(context),
+          ),
+          flexibleSpace: FlexibleSpaceBar(
+            background: Padding(
+              padding: EdgeInsets.fromLTRB(
+                  20, MediaQuery.of(context).padding.top + kToolbarHeight + 8, 20, 0),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Center(child: ShimmerSkeleton(width: 120, height: 20)),
+                  SizedBox(height: 10),
+                  ShimmerSkeleton(width: 180, height: 28, isNdot: true),
+                  SizedBox(height: 8),
+                  ShimmerSkeleton(width: 220, height: 14),
+                ],
+              ),
+            ),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, i) => ShimmerSkeleton.listTile(isDark: isDark),
+              childCount: 6,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

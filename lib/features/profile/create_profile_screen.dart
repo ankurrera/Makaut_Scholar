@@ -7,7 +7,11 @@ import 'package:image_picker/image_picker.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../services/auth_service.dart';
 import '../../core/widgets/dot_loading.dart';
+import '../auth/login/login_screen.dart' show AuthTheme;
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Create Profile Screen
+// ─────────────────────────────────────────────────────────────────────────────
 class CreateProfileScreen extends StatefulWidget {
   const CreateProfileScreen({super.key});
 
@@ -33,7 +37,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen>
   void initState() {
     super.initState();
     _fadeController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1000));
+        vsync: this, duration: const Duration(milliseconds: 600));
     _fadeAnimation =
         CurvedAnimation(parent: _fadeController, curve: Curves.easeOutCubic);
     _fadeController.forward();
@@ -103,11 +107,11 @@ class _CreateProfileScreenState extends State<CreateProfileScreen>
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Error saving profile: $e'),
-          backgroundColor: Colors.redAccent.shade400,
+          content: Text('Error saving profile: $e',
+              style: const TextStyle(fontFamily: 'NDOT')),
+          backgroundColor: AuthTheme.accent,
           behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ));
       }
     } finally {
@@ -118,15 +122,9 @@ class _CreateProfileScreenState extends State<CreateProfileScreen>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    // ── Refined Palette ──
-    const accent = Color(0xFFE5252A);
-    final bg = isDark ? const Color(0xFF121512) : const Color(0xFFF7F8FA);
-    final card = isDark ? const Color(0xFF1C2020) : Colors.white;
-    final border = isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC);
-    final textP = isDark ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E);
-    final textS = isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
-    final glowOp = isDark ? 0.2 : 0.1;
+    final bg = isDark ? AuthTheme.darkBg : AuthTheme.lightBg;
+    final textP = isDark ? AuthTheme.darkText : AuthTheme.lightText;
+    final textS = isDark ? AuthTheme.darkSubtext : AuthTheme.lightSubtext;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
@@ -134,19 +132,10 @@ class _CreateProfileScreenState extends State<CreateProfileScreen>
         backgroundColor: bg,
         body: Stack(
           children: [
-            // ── Background Aesthetic ──
-            Positioned(
-                top: -120,
-                right: -60,
-                child:
-                    _Glow(color: accent.withValues(alpha: glowOp), size: 400)),
-            Positioned(
-                bottom: -100,
-                left: -80,
-                child: _Glow(
-                    color:
-                        const Color(0xFF3B6FFF).withValues(alpha: glowOp * 0.8),
-                    size: 350)),
+            // ── Nothing OS dot-matrix grid texture ──
+            Positioned.fill(
+              child: CustomPaint(painter: _DotGridPainter(isDark: isDark)),
+            ),
 
             SafeArea(
               child: FadeTransition(
@@ -154,29 +143,33 @@ class _CreateProfileScreenState extends State<CreateProfileScreen>
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+                      const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
                   child: Form(
                     key: _formKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 56),
 
                         // ── Header Section ──
-                        Center(
-                          child: Column(
-                            children: [
-                              Text('Build your profile',
-                                  style: TextStyle(
-                                      color: textP,
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: -0.6)),
-                              const SizedBox(height: 8),
-                              Text('This helps us personalize your experience',
-                                  style: TextStyle(color: textS, fontSize: 15)),
-                            ],
-                          ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('BUILD YOUR\nPROFILE',
+                                style: TextStyle(
+                                    fontFamily: 'NDOT',
+                                    color: textP,
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 3.0,
+                                    height: 1.0)),
+                            const SizedBox(height: 12),
+                            Text('Complete your student record',
+                                style: TextStyle(
+                                    color: textS,
+                                    fontSize: 14,
+                                    letterSpacing: 0.3)),
+                          ],
                         ),
 
                         const SizedBox(height: 48),
@@ -188,50 +181,38 @@ class _CreateProfileScreenState extends State<CreateProfileScreen>
                             child: Stack(
                               alignment: Alignment.center,
                               children: [
-                                // Main Avatar Circle
+                                // Main Avatar Box — Nothing OS Square style
                                 Container(
-                                  width: 110,
-                                  height: 110,
+                                  width: 120,
+                                  height: 120,
                                   decoration: BoxDecoration(
-                                    color: card,
-                                    shape: BoxShape.circle,
+                                    color: isDark ? AuthTheme.darkSurface : AuthTheme.lightSurface,
+                                    borderRadius: BorderRadius.circular(12),
                                     image: _avatarFile != null
                                         ? DecorationImage(
                                             image: FileImage(_avatarFile!),
                                             fit: BoxFit.cover)
                                         : null,
-                                    border: Border.all(color: border, width: 2),
-                                    boxShadow: [
-                                      BoxShadow(
-                                          color: Colors.black.withValues(
-                                              alpha: isDark ? 0.4 : 0.06),
-                                          blurRadius: 24,
-                                          offset: const Offset(0, 8)),
-                                    ],
+                                    border: Border.all(
+                                        color: isDark ? AuthTheme.darkBorder : AuthTheme.lightBorder,
+                                        width: 1.5),
                                   ),
                                   child: _avatarFile == null
-                                      ? Icon(Iconsax.profile_circle_copy,
-                                          color: accent.withValues(alpha: 0.8),
-                                          size: 44)
+                                      ? Icon(Iconsax.user_add_copy,
+                                          color: textS,
+                                          size: 40)
                                       : null,
                                 ),
                                 // Edit Badge
                                 Positioned(
-                                  bottom: 2,
-                                  right: 2,
+                                  bottom: -8,
+                                  right: -8,
                                   child: Container(
-                                    padding: const EdgeInsets.all(8),
+                                    padding: const EdgeInsets.all(10),
                                     decoration: BoxDecoration(
-                                      color: accent,
+                                      color: AuthTheme.accent,
                                       shape: BoxShape.circle,
-                                      border: Border.all(color: bg, width: 3),
-                                      boxShadow: [
-                                        BoxShadow(
-                                            color:
-                                                accent.withValues(alpha: 0.3),
-                                            blurRadius: 10,
-                                            offset: const Offset(0, 4))
-                                      ],
+                                      border: Border.all(color: bg, width: 2),
                                     ),
                                     child: const Icon(Iconsax.camera_copy,
                                         color: Colors.white, size: 16),
@@ -244,128 +225,118 @@ class _CreateProfileScreenState extends State<CreateProfileScreen>
 
                         const SizedBox(height: 48),
 
-                        // ── Form Card ──
-                        _GlassCard(
-                          isDark: isDark,
-                          child: Padding(
-                            padding: const EdgeInsets.all(24),
-                            child: Column(
+                        // ── Form Section ──
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('PERSONAL DETAILS',
+                                style: TextStyle(
+                                    fontFamily: 'NDOT',
+                                    color: textS,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 1.5)),
+                            const SizedBox(height: 28),
+
+                            _ProfileField(
+                              controller: _nameController,
+                              label: 'FULL NAME',
+                              hint: 'Enter your name',
+                              icon: Iconsax.personalcard,
+                              isDark: isDark,
+                              validator: (v) => v!.trim().isEmpty
+                                  ? 'Name is required'
+                                  : null,
+                            ),
+                            const SizedBox(height: 28),
+
+                            _ProfileField(
+                              controller: _collegeController,
+                              label: 'COLLEGE NAME',
+                              hint: 'Search or type college',
+                              icon: Iconsax.building_3,
+                              isDark: isDark,
+                              validator: (v) => v!.trim().isEmpty
+                                  ? 'College name is required'
+                                  : null,
+                            ),
+                            const SizedBox(height: 28),
+
+                            // Department Dropdown
+                            Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildLabel('PERSONAL DETAILS', textS),
-                                const SizedBox(height: 20),
-
-                                _ProfileField(
-                                  controller: _nameController,
-                                  label: 'Full Name',
-                                  hint: 'Enter your name',
-                                  icon: Iconsax.user_copy,
-                                  isDark: isDark,
-                                  accent: accent,
-                                  validator: (v) => v!.trim().isEmpty
-                                      ? 'Name is required'
-                                      : null,
-                                ),
-                                const SizedBox(height: 20),
-
-                                _ProfileField(
-                                  controller: _collegeController,
-                                  label: 'College',
-                                  hint: 'Search or type college',
-                                  icon: Iconsax.teacher_copy,
-                                  isDark: isDark,
-                                  accent: accent,
-                                  validator: (v) => v!.trim().isEmpty
-                                      ? 'College name is required'
-                                      : null,
-                                ),
-                                const SizedBox(height: 20),
-
-                                // Department Dropdown
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                          left: 4, bottom: 8),
-                                      child: Text('Department',
-                                          style: TextStyle(
-                                              color: textS,
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w600)),
-                                    ),
-                                    DropdownButtonFormField<String>(
-                                      initialValue: _selectedDepartment,
-                                      dropdownColor: card,
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 0, bottom: 8),
+                                  child: Text('DEPARTMENT',
                                       style: TextStyle(
-                                          color: textP,
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w500),
-                                      icon: Icon(Iconsax.arrow_down_copy,
-                                          color: textS, size: 16),
-                                      decoration: _fieldDecoration(
-                                          Iconsax.hierarchy_copy,
-                                          'Select branch',
-                                          isDark,
-                                          accent),
-                                      items: _departments
-                                          .map((d) => DropdownMenuItem(
-                                              value: d, child: Text(d)))
-                                          .toList(),
-                                      onChanged: (v) => setState(
-                                          () => _selectedDepartment = v),
-                                      validator: (v) => v == null
-                                          ? 'Selection required'
-                                          : null,
-                                    ),
-                                  ],
+                                          fontFamily: 'NDOT',
+                                          color: textS,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: 1.5)),
+                                ),
+                                DropdownButtonFormField<String>(
+                                  initialValue: _selectedDepartment,
+                                  dropdownColor: isDark ? AuthTheme.darkSurface : AuthTheme.lightSurface,
+                                  style: TextStyle(
+                                      fontFamily: 'NDOT',
+                                      color: textP,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500),
+                                  icon: Icon(Iconsax.arrow_down_copy,
+                                      color: textS, size: 16),
+                                  decoration: _fieldDecoration(
+                                      Iconsax.category,
+                                      'Select branch',
+                                      isDark),
+                                  items: _departments
+                                      .map((d) => DropdownMenuItem(
+                                          value: d, child: Text(d)))
+                                      .toList(),
+                                  onChanged: (v) => setState(
+                                      () => _selectedDepartment = v),
+                                  validator: (v) => v == null
+                                      ? 'Selection required'
+                                      : null,
                                 ),
                               ],
                             ),
-                          ),
+                          ],
                         ),
 
-                        const SizedBox(height: 36),
+                        const SizedBox(height: 48),
 
                         // ── Action Button ──
                         GestureDetector(
                           onTap: _isLoading ? null : _saveProfile,
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
+                          child: Container(
                             height: 60,
                             decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFFE5252A), Color(0xFFE5252A)],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [
-                                BoxShadow(
-                                    color: accent.withValues(alpha: 0.35),
-                                    blurRadius: 20,
-                                    offset: const Offset(0, 8))
-                              ],
+                              color: AuthTheme.accent,
+                              borderRadius: BorderRadius.circular(12),
                             ),
                             child: Center(
                               child: _isLoading
                                   ? const SizedBox(
-                                      width: 24,
-                                      height: 24,
-                                      child: DotLoadingIndicator(
-                                          color: Colors.white, size: 6))
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2, color: Colors.white))
                                   : Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: const [
-                                        Text('Save & Continue',
+                                        Text('COMPLETE PROFILE',
                                             style: TextStyle(
+                                                fontFamily: 'NDOT',
                                                 color: Colors.white,
-                                                fontWeight: FontWeight.w700,
-                                                fontSize: 17,
-                                                letterSpacing: 0.2)),
-                                        SizedBox(width: 10),
+                                                fontWeight: FontWeight.w800,
+                                                fontSize: 14,
+                                                letterSpacing: 2.0)),
+                                        SizedBox(width: 12),
                                         Icon(Iconsax.arrow_right_copy,
-                                            color: Colors.white, size: 20),
+                                            color: Colors.white, size: 18),
                                       ],
                                     ),
                             ),
@@ -385,102 +356,44 @@ class _CreateProfileScreenState extends State<CreateProfileScreen>
     );
   }
 
-  Widget _buildLabel(String text, Color color) {
-    return Text(text,
-        style: TextStyle(
-            color: color,
-            fontSize: 11,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.2));
-  }
+  InputDecoration _fieldDecoration(IconData icon, String hint, bool isDark) {
+    final borderColor = isDark ? AuthTheme.darkBorder : AuthTheme.lightBorder;
+    final hintColor = isDark ? AuthTheme.darkHint : AuthTheme.lightHint;
 
-  InputDecoration _fieldDecoration(
-      IconData icon, String hint, bool isDark, Color accent) {
-    final borderCol =
-        isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC);
     return InputDecoration(
       hintText: hint,
       hintStyle: TextStyle(
-          color: isDark ? const Color(0xFF4A5568) : const Color(0xFFADB5BD),
-          fontSize: 14),
-      prefixIcon: Icon(icon,
-          color: isDark ? const Color(0xFF535F77) : const Color(0xFF94A3B8),
-          size: 20),
-      filled: true,
-      fillColor: isDark
-          ? const Color(0xFF121512).withValues(alpha: 0.5)
-          : const Color(0xFFF9FAFB),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+          color: hintColor,
+          fontSize: 14,
+          fontFamily: 'NDOT'),
+      prefixIcon: Icon(icon, color: hintColor, size: 18),
+      filled: false,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
       border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: borderColor, width: 1.0)),
       enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: borderCol, width: 1)),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: borderColor, width: 1.0)),
       focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: accent, width: 1.5)),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AuthTheme.accent, width: 1.5)),
       errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Colors.redAccent, width: 1)),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AuthTheme.accent, width: 1)),
     );
   }
 }
 
-// ─────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 // Support Widgets
-// ─────────────────────────────────────────
-
-class _Glow extends StatelessWidget {
-  final Color color;
-  final double size;
-  const _Glow({required this.color, required this.size});
-  @override
-  Widget build(BuildContext context) => Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: RadialGradient(colors: [color, Colors.transparent])));
-}
-
-class _GlassCard extends StatelessWidget {
-  final bool isDark;
-  final Widget child;
-  const _GlassCard({required this.isDark, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.white,
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.08)
-                : Colors.black.withValues(alpha: 0.05),
-            width: 1),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
-              blurRadius: 40,
-              offset: const Offset(0, 10))
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(30),
-        child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16), child: child),
-      ),
-    );
-  }
-}
+// ─────────────────────────────────────────────────────────────────────────────
 
 class _ProfileField extends StatelessWidget {
   final TextEditingController controller;
   final String label, hint;
   final IconData icon;
   final bool isDark;
-  final Color accent;
   final String? Function(String?)? validator;
 
   const _ProfileField({
@@ -489,63 +402,88 @@ class _ProfileField extends StatelessWidget {
     required this.hint,
     required this.icon,
     required this.isDark,
-    required this.accent,
     this.validator,
   });
 
   @override
   Widget build(BuildContext context) {
-    final textS = isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
-    final textP = isDark ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E);
+    final textS = isDark ? AuthTheme.darkSubtext : AuthTheme.lightSubtext;
+    final textP = isDark ? AuthTheme.darkText : AuthTheme.lightText;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          padding: const EdgeInsets.only(left: 0, bottom: 8),
           child: Text(label,
               style: TextStyle(
-                  color: textS, fontSize: 13, fontWeight: FontWeight.w600)),
+                  fontFamily: 'NDOT',
+                  color: textS,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.5)),
         ),
         TextFormField(
           controller: controller,
           validator: validator,
           style: TextStyle(
-              color: textP, fontSize: 15, fontWeight: FontWeight.w500),
-          decoration: _fieldDecoration(icon, hint, isDark, accent),
+              fontFamily: 'NDOT',
+              color: textP,
+              fontSize: 15,
+              fontWeight: FontWeight.w500),
+          decoration: _fieldDecoration(icon, hint, isDark),
         ),
       ],
     );
   }
 
-  InputDecoration _fieldDecoration(
-      IconData icon, String hint, bool isDark, Color accent) {
-    final borderCol =
-        isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC);
+  InputDecoration _fieldDecoration(IconData icon, String hint, bool isDark) {
+    final borderColor = isDark ? AuthTheme.darkBorder : AuthTheme.lightBorder;
+    final hintColor = isDark ? AuthTheme.darkHint : AuthTheme.lightHint;
+
     return InputDecoration(
       hintText: hint,
       hintStyle: TextStyle(
-          color: isDark ? const Color(0xFF4A5568) : const Color(0xFFADB5BD),
-          fontSize: 14),
-      prefixIcon: Icon(icon,
-          color: isDark ? const Color(0xFF535F77) : const Color(0xFF94A3B8),
-          size: 20),
-      filled: true,
-      fillColor: isDark
-          ? const Color(0xFF121512).withValues(alpha: 0.5)
-          : const Color(0xFFF9FAFB),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+          color: hintColor,
+          fontSize: 14,
+          fontFamily: 'NDOT'),
+      prefixIcon: Icon(icon, color: hintColor, size: 18),
+      filled: false,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
       border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: borderColor, width: 1.0)),
       enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: borderCol, width: 1)),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: borderColor, width: 1.0)),
       focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: accent, width: 1.5)),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AuthTheme.accent, width: 1.5)),
       errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Colors.redAccent, width: 1)),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AuthTheme.accent, width: 1)),
     );
   }
+}
+
+class _DotGridPainter extends CustomPainter {
+  final bool isDark;
+  const _DotGridPainter({required this.isDark});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = (isDark ? Colors.white : Colors.black).withOpacity(0.04)
+      ..style = PaintingStyle.fill;
+    const spacing = 20.0;
+    const radius = 1.0;
+    for (double x = 0; x < size.width; x += spacing) {
+      for (double y = 0; y < size.height; y += spacing) {
+        canvas.drawCircle(Offset(x, y), radius, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DotGridPainter old) => old.isDark != isDark;
 }

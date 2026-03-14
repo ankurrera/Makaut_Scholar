@@ -3,8 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../services/auth_service.dart';
 import '../../core/widgets/dot_loading.dart';
+import '../../core/widgets/shimmer_skeleton.dart';
 import 'pyq_papers_screen.dart';
-import '../../core/widgets/modern_folder.dart';
+import '../../core/widgets/solid_folder.dart';
 
 class PyqSubjectScreen extends StatefulWidget {
   final String department;
@@ -27,8 +28,8 @@ class _PyqSubjectScreenState extends State<PyqSubjectScreen>
   static const _accentLight = Color(0xFF5BAAEF);
   static const _accentDark = Color(0xFF7BC4FF);
 
-  Color _bg(bool d) => d ? const Color(0xFF121512) : const Color(0xFFF8F6F1);
-  Color _card(bool d) => d ? const Color(0xFF181B22) : Colors.white;
+  Color _bg(bool d) => d ? Colors.black : const Color(0xFFF8F6F1);
+  Color _card(bool d) => d ? const Color(0xFF1C1C1E) : Colors.white;
   Color _textP(bool d) => d ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E);
   Color _textS(bool d) => d ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
   Color _accent(bool d) => d ? _accentDark : _accentLight;
@@ -102,20 +103,8 @@ class _PyqSubjectScreenState extends State<PyqSubjectScreen>
 
     return Scaffold(
       backgroundColor: _bg(isDark),
-      body: _isLoading
-          ? Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Center(
-                    child: DotLoadingIndicator(color: accent),
-                  ),
-                  const SizedBox(height: 16),
-                  Text('Loading subjects...',
-                      style: TextStyle(color: _textS(isDark), fontSize: 13)),
-                ],
-              ),
-            )
+      body: _isLoading && _subjects.isEmpty
+          ? _buildLoadingSkeleton(isDark)
           : _error != null
               ? _buildError(isDark, accent)
               : _subjects.isEmpty
@@ -157,39 +146,48 @@ class _PyqSubjectScreenState extends State<PyqSubjectScreen>
                                     20,
                                     0),
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.center,
                                   children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 5),
-                                      decoration: BoxDecoration(
-                                        color: accent.withValues(
-                                            alpha: isDark ? 0.15 : 0.1),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Text(
-                                        'Sem ${widget.semester} · ${widget.department}',
-                                        style: TextStyle(
-                                            color: accent,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w600),
+                                    Center(
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 10, vertical: 5),
+                                        decoration: BoxDecoration(
+                                          color: accent.withOpacity(
+                                              isDark ? 0.15 : 0.1),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: Text(
+                                          'Sem ${widget.semester} · ${widget.department}',
+                                          style: TextStyle(
+                                              color: accent,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                              fontFamily: 'NDOT'),
+                                        ),
                                       ),
                                     ),
                                     const SizedBox(height: 10),
                                     Text(
                                       'PYQ Subjects',
+                                      textAlign: TextAlign.center,
                                       style: TextStyle(
                                         color: _textP(isDark),
                                         fontSize: 28,
                                         fontWeight: FontWeight.w700,
                                         letterSpacing: -0.5,
+                                        fontFamily: 'NDOT',
                                       ),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
                                       '${_subjects.length} subject${_subjects.length != 1 ? 's' : ''} available',
+                                      textAlign: TextAlign.center,
                                       style: TextStyle(
-                                          color: _textS(isDark), fontSize: 14),
+                                          color: _textS(isDark),
+                                          fontSize: 14),
                                     ),
                                   ],
                                 ),
@@ -197,15 +195,8 @@ class _PyqSubjectScreenState extends State<PyqSubjectScreen>
                             ),
                           ),
                           SliverPadding(
-                            padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
-                            sliver: SliverGrid(
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                mainAxisSpacing: 12,
-                                crossAxisSpacing: 12,
-                                childAspectRatio: 1.2,
-                              ),
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            sliver: SliverList(
                               delegate: SliverChildBuilderDelegate(
                                 (context, i) {
                                   final interval = Interval(
@@ -224,8 +215,12 @@ class _PyqSubjectScreenState extends State<PyqSubjectScreen>
                                             Opacity(opacity: v, child: child),
                                       );
                                     },
-                                    child:
-                                        _subjectTile(_subjects[i], i, isDark),
+                                    child: Padding(
+                                      padding:
+                                          const EdgeInsets.only(bottom: 12.0),
+                                      child:
+                                          _subjectTile(_subjects[i], i, isDark),
+                                    ),
                                   );
                                 },
                                 childCount: _subjects.length,
@@ -244,48 +239,82 @@ class _PyqSubjectScreenState extends State<PyqSubjectScreen>
     final String? paperCode = subjectData['paper_code'];
     final grad = _gradients[index % _gradients.length];
 
-    return ModernFolder(
-      color: grad[0],
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => PyqPapersScreen(
-            department: widget.department,
-            semester: widget.semester,
-            subject: subject,
-            paperCode: paperCode,
-          ),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Text(
-              subject,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                letterSpacing: -0.1,
-                height: 1.2,
-              ),
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => PyqPapersScreen(
+              department: widget.department,
+              semester: widget.semester,
+              subject: subject,
+              paperCode: paperCode,
             ),
           ),
-          const SizedBox(height: 8),
-          Row(
+        ),
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFE6E8EC),
+            ),
+          ),
+          child: Row(
             children: [
-              const Icon(Iconsax.archive_book, size: 10, color: Colors.white70),
-              const SizedBox(width: 4),
-              Text(
-                '${_paperCounts[subject] ?? 0} Papers',
-                style: const TextStyle(color: Colors.white70, fontSize: 11),
+              SizedBox(
+                width: 64,
+                height: 52,
+                child: SolidFolder(
+                  color: isDark ? Colors.white : const Color(0xFFF2F0EF),
+                  borderColor:
+                      isDark ? Colors.transparent : const Color(0xFFE5E5EA),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      subject,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : const Color(0xFF1E1E1E),
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(Iconsax.archive_book,
+                            size: 10,
+                            color: isDark
+                                ? const Color(0xFF9AA0A6)
+                                : const Color(0xFF8E8E93)),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${_paperCounts[subject] ?? 0} Papers',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: isDark
+                                ? const Color(0xFF9AA0A6)
+                                : const Color(0xFF8E8E93),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -365,6 +394,49 @@ class _PyqSubjectScreenState extends State<PyqSubjectScreen>
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildLoadingSkeleton(bool isDark) {
+    return CustomScrollView(
+      slivers: [
+        SliverAppBar(
+          backgroundColor: _bg(isDark),
+          elevation: 0,
+          pinned: true,
+          expandedHeight:
+              MediaQuery.of(context).padding.top + kToolbarHeight + 80,
+          leading: IconButton(
+            icon: const Icon(Iconsax.arrow_left),
+            onPressed: () => Navigator.pop(context),
+          ),
+          flexibleSpace: FlexibleSpaceBar(
+            background: Padding(
+              padding: EdgeInsets.fromLTRB(
+                  20, MediaQuery.of(context).padding.top + kToolbarHeight + 8, 20, 0),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Center(child: ShimmerSkeleton(width: 120, height: 20)),
+                  SizedBox(height: 10),
+                  ShimmerSkeleton(width: 180, height: 28, isNdot: true),
+                  SizedBox(height: 8),
+                  ShimmerSkeleton(width: 140, height: 14),
+                ],
+              ),
+            ),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, i) => ShimmerSkeleton.listTile(isDark: isDark),
+              childCount: 6,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

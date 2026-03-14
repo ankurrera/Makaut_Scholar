@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 
 class DotLoadingIndicator extends StatefulWidget {
-  final Color color;
+  final Color? color;
   final double size;
 
   const DotLoadingIndicator({
     super.key,
-    this.color = const Color(0xFFE5252A), // Nothing Red default
-    this.size = 8.0,
+    this.color,
+    this.size = 24.0,
   });
 
   @override
@@ -23,7 +24,7 @@ class _DotLoadingIndicatorState extends State<DotLoadingIndicator>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 1500),
     )..repeat();
   }
 
@@ -35,38 +36,46 @@ class _DotLoadingIndicatorState extends State<DotLoadingIndicator>
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(3, (index) {
-        return AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            // Calculate a staggered delay for each dot
-            final double delay = index * 0.2;
-            double opacity = 0.3;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    // User Requirement: White in dark mode, Blue in light mode
+    final defaultColor = isDark ? Colors.white : const Color(0xFF007BFF);
+    final Color activeColor = widget.color ?? defaultColor;
 
-            // The animation cycles from 0.0 to 1.0.
-            // We create a wave effect where opacity spikes then fades.
-            final double t = (_controller.value - delay) % 1.0;
-            if (t >= 0 && t < 0.5) {
-              // 0 to 0.5: opacity goes up to 1.0 and back down to 0.3
-              opacity =
-                  0.3 + (0.7 * (1.0 - (t * 4.0 - 1.0).abs().clamp(0.0, 1.0)));
-            }
-
-            return Container(
-              margin: EdgeInsets.symmetric(horizontal: widget.size * 0.3),
-              width: widget.size,
-              height: widget.size,
-              decoration: BoxDecoration(
-                color: widget.color.withValues(alpha: opacity),
-                shape: BoxShape.circle,
-              ),
-            );
-          },
-        );
-      }),
+    return SizedBox(
+      width: widget.size * 1.5,
+      height: widget.size * 1.5,
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          return Stack(
+            alignment: Alignment.center,
+            children: List.generate(4, (index) {
+              // Rotation radius is half of the total size
+              final double radius = widget.size * 0.4;
+              final double angle = (_controller.value * 2 * math.pi) + (index * math.pi / 2);
+              
+              // Pulsing effect for transparency and scale
+              final double pulse = 0.5 + (0.5 * math.sin(_controller.value * 2 * math.pi + (index * math.pi / 4)));
+              
+              return Transform.translate(
+                offset: Offset(
+                  math.cos(angle) * radius,
+                  math.sin(angle) * radius,
+                ),
+                child: Container(
+                  width: (widget.size * 0.25) * (0.8 + 0.4 * pulse),
+                  height: (widget.size * 0.25) * (0.8 + 0.4 * pulse),
+                  decoration: BoxDecoration(
+                    color: activeColor.withOpacity(0.3 + 0.7 * pulse),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              );
+            }),
+          );
+        },
+      ),
     );
   }
 }

@@ -80,7 +80,7 @@ class _NoticeBoardScreenState extends State<NoticeBoardScreen> {
     final primaryColor =
         isDark ? const Color(0xFFE5252A) : const Color(0xFFE5252A);
     final bgPrimary =
-        isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1);
+        isDark ? Colors.black : const Color(0xFFF8F6F1);
     final textPrimary = isDark ? Colors.white : const Color(0xFF1E1E1E);
     final textSecondary =
         isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
@@ -108,7 +108,7 @@ class _NoticeBoardScreenState extends State<NoticeBoardScreen> {
   Widget _buildBody(Color primaryColor, Color textPrimary, Color textSecondary,
       Color cardBg, bool isDark) {
     if (_isLoading && _notices.isEmpty) {
-      return Center(child: DotLoadingIndicator(color: primaryColor));
+      return const Center(child: DotLoadingIndicator());
     }
 
     if (_error != null) {

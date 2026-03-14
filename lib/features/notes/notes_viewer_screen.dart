@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'dart:ui';
 import 'package:provider/provider.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../services/auth_service.dart';
@@ -35,20 +36,20 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
   String? _error;
 
   // ── Palette ──
-  static const _accentLight = Color(0xFFE5252A);
-  static const _accentDark = Color(0xFFE5252A);
+  static const _accentLight = Color(0xFF111111);
+  static const _accentDark = Colors.white;
 
-  Color _bg(bool d) => d ? const Color(0xFF121512) : const Color(0xFFF8F6F1);
-  Color _card(bool d) => d ? const Color(0xFF181B22) : Colors.white;
+  Color _bg(bool isDark) => isDark ? Colors.black : Colors.white;
+  Color _card(bool d) => d ? const Color(0xFF0A0A0A) : Colors.white;
   Color _textP(bool d) => d ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E);
   Color _textS(bool d) => d ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
   Color _border(bool d) =>
-      d ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC);
+      d ? const Color(0xFF1A1A1A) : const Color(0xFFE6E8EC);
   Color _accent(bool d) => d ? _accentDark : _accentLight;
 
   // ── Luxury Palette ──
-  static const _goldGradient = [Color(0xFFFDB931), Color(0xFFFDC958)];
-  static const _premiumGold = Color(0xFFFDB931);
+  static const _brandRed = Color(0xFFE5252A);
+  static const _redGradient = [Color(0xFFE5252A), Color(0xFFFF4D4D)];
 
   @override
   void initState() {
@@ -165,7 +166,7 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Iconsax.star_1, color: Colors.orange, size: 48),
+            const Icon(Iconsax.star_1, color: _brandRed, size: 48),
             const SizedBox(height: 16),
             Text("Ready to master ${widget.subject}?",
                 style:
@@ -180,7 +181,7 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
-                backgroundColor: const Color(0xFFE5252A),
+                backgroundColor: _brandRed,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
@@ -202,7 +203,7 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
     );
   }
 
-  void _openCheckout(Map<String, dynamic> note, {int? unitOverride}) {
+  void _openCheckout(Map<String, dynamic> note, {int? unitOverride}) async {
     final int unit = unitOverride ?? (note['unit'] as int? ?? 1);
     final double unitPrice = _unitPrices[unit] ?? 0.0;
     final double subjectPrice =
@@ -251,7 +252,7 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
       }
     }
 
-    Navigator.push(
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => PremiumCheckoutScreen(
@@ -262,40 +263,26 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
           price: finalPrice,
         ),
       ),
-    ).then((result) {
-      if (result != null && result is Map && result['success'] == true) {
-        final String? itemUrl = result['itemUrl'];
-        final String itemName = result['itemName'] ?? 'Academic Note';
-        if (itemUrl != null) {
-          // Show non-blocking success feedback
+    );
+
+    // ALWAYS reload to update locked/unlocked state — even if cancelled.
+    if (mounted) {
+      _loadNotes();
+      if (result is Map && result['success'] == true) {
+        final String? itemUrl = result['itemUrl'] as String?;
+        final String itemName = result['itemName'] as String? ?? 'Academic Note';
+        if (itemUrl != null && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Unlock Successful! ✨ Preparing your content...'),
+              content: Text('Content unlocked! ✨'),
               backgroundColor: Color(0xFFE5252A),
               duration: Duration(seconds: 2),
             ),
           );
-          // Open PDF immediately for zero-friction experience
           _openPdf(url: itemUrl, title: itemName);
         }
-        // Reload notes in background after starting the PDF viewer
-        _loadNotes();
-      } else {
-        // Just reload if we returned without a specific success object
-        _loadNotes();
       }
-    });
-  }
-
-  /// Group notes by unit number
-  Map<int, List<Map<String, dynamic>>> _groupByUnit() {
-    final map = <int, List<Map<String, dynamic>>>{};
-    for (final n in _notes) {
-      final unit = n['unit'] as int;
-      map.putIfAbsent(unit, () => []).add(n);
     }
-    return Map.fromEntries(
-        map.entries.toList()..sort((a, b) => a.key.compareTo(b.key)));
   }
 
   @override
@@ -315,14 +302,35 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
         ),
         title: Column(
           children: [
-            Text(widget.subject,
-                style: TextStyle(
-                    color: _textP(isDark),
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600)),
-            Text('Sem ${widget.semester} · ${widget.department}',
-                style: TextStyle(
-                    color: accent, fontSize: 12, fontWeight: FontWeight.w500)),
+            ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 40),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      widget.subject,
+                      style: const TextStyle(
+                        fontFamily: 'NDOT',
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                  ),
+                ),
+            Text(
+                  widget.department,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: (Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white
+                            : Colors.black)
+                        .withOpacity(0.6),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
           ],
         ),
         centerTitle: true,
@@ -337,105 +345,31 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
                       color: accent,
                       onRefresh: _loadNotes,
                       child: ListView(
-                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
-                        children: _buildUnitSections(isDark, accent),
+                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
+                        children: _buildFlatNotesList(isDark, accent),
                       ),
                     ),
     );
   }
 
-  List<Widget> _buildUnitSections(bool isDark, Color accent) {
-    final grouped = _groupByUnit();
+  List<Widget> _buildFlatNotesList(bool isDark, Color accent) {
+    if (_notes.isEmpty) return [];
+
     final widgets = <Widget>[];
+    for (int i = 0; i < _notes.length; i++) {
+      final note = _notes[i];
+      final int unit = (note['unit'] as int?) ?? 1;
 
-    for (final entry in grouped.entries) {
-      final int unit = entry.key;
-      final double? unitPrice = _unitPrices[unit];
-      // Unit is locked if it has a price set AND user doesn't have unit/subject access
-      final bool unitLocked = !_hasAccess &&
-          !_unlockedUnits.contains(unit) &&
-          unitPrice != null &&
-          unitPrice > 0;
-      // Check if this unit has ANY premium notes
-      final bool hasAnyPremiumNotes =
-          entry.value.any((n) => n['is_premium'] == true);
-      final bool showUnitLock = unitLocked && hasAnyPremiumNotes;
+      final bool noteLocked = (note['is_premium'] == true) &&
+          !_hasAccess &&
+          !_unlockedUnits.contains(unit);
 
-      // Unit header
       widgets.add(Padding(
-        padding: EdgeInsets.only(top: widgets.isEmpty ? 0 : 24, bottom: 12),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: showUnitLock
-                    ? _premiumGold.withValues(alpha: isDark ? 0.15 : 0.1)
-                    : accent.withValues(alpha: isDark ? 0.15 : 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (showUnitLock) ...[
-                    const Icon(Iconsax.lock_1_copy,
-                        size: 11, color: _premiumGold),
-                    const SizedBox(width: 4),
-                  ],
-                  Text(
-                    'Unit $unit',
-                    style: TextStyle(
-                      color: showUnitLock ? _premiumGold : accent,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-                child: Divider(color: _border(isDark).withValues(alpha: 0.4))),
-            if (showUnitLock) ...[
-              const SizedBox(width: 10),
-              GestureDetector(
-                onTap: () =>
-                    _openCheckout(entry.value.first, unitOverride: unit),
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: _goldGradient),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    'Buy Unit $unit · ₹${unitPrice.toInt()}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
+        padding: const EdgeInsets.only(bottom: 12),
+        child:
+            _noteCard(note, isDark, accent, isLocked: noteLocked, unit: unit),
       ));
-
-      // Note cards — lock each note using is_premium flag + unit access check
-      for (final note in entry.value) {
-        final bool noteLocked = (note['is_premium'] == true) &&
-            !_hasAccess &&
-            !_unlockedUnits.contains(unit);
-        widgets.add(Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child:
-              _noteCard(note, isDark, accent, isLocked: noteLocked, unit: unit),
-        ));
-      }
     }
-
     return widgets;
   }
 
@@ -454,91 +388,84 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
       decoration: BoxDecoration(
         color: _card(isDark),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: isLocked
-              ? _premiumGold.withValues(alpha: 0.3)
-              : _border(isDark).withValues(alpha: 0.08),
-          width: isLocked ? 1.5 : 1,
-        ),
-        boxShadow: isLocked
-            ? [
-                BoxShadow(
-                  color: _premiumGold.withValues(alpha: 0.08),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
-                )
-              ]
-            : [],
+        border: isLocked
+            ? null
+            : Border.all(
+                color: isDark ? Colors.black : const Color(0xFFE5E5EA),
+                width: 1,
+              ),
+        boxShadow: [],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () {
-              if (isLocked) {
-                _openCheckout(note, unitOverride: unit);
-              } else if (isDownloaded) {
-                final resource = OfflineService().getResource(id);
-                _openPdf(filePath: resource!.localPath, title: title);
-              } else {
-                _openPdf(url: url, title: title);
-              }
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  // ── Icon Container ──
-                  Stack(
-                    children: [
-                      Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          color: isLocked
-                              ? _premiumGold.withValues(alpha: 0.1)
-                              : accent.withValues(alpha: isDark ? 0.1 : 0.05),
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                        child: Icon(
-                            isLocked
-                                ? Iconsax.lock_1_copy
-                                : Iconsax.document_text_1,
-                            color: isLocked ? _premiumGold : accent,
-                            size: 24),
-                      ),
-                      if (isLocked)
-                        Positioned(
-                          right: -2,
-                          top: -2,
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: const BoxDecoration(
-                              color: _premiumGold,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Iconsax.star_1,
-                                size: 8, color: Colors.white),
+      child: CustomPaint(
+        painter: isLocked ? _DottedBorderPainter(color: (isDark ? Colors.white : Colors.black).withOpacity(0.2)) : null,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: Stack(
+            children: [
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    if (isLocked) {
+                      _openCheckout(note, unitOverride: unit);
+                    } else if (isDownloaded) {
+                      final resource = OfflineService().getResource(id);
+                      _openPdf(filePath: resource!.localPath, title: title);
+                    } else {
+                      _openPdf(url: url, title: title);
+                    }
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        // ── Icon Container ──
+                        Container(
+                          width: 52,
+                          height: 52,
+                          decoration: BoxDecoration(
+                            color: isLocked
+                                ? (isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.04))
+                                : (isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F2)),
+                            borderRadius: BorderRadius.circular(16),
+                            border: isLocked ? Border.all(color: (isDark ? Colors.white : Colors.black).withOpacity(0.1), width: 0.5) : null,
+                          ),
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Icon(
+                                  isLocked ? Iconsax.lock_1_copy : Iconsax.document_1,
+                                  color: isDark ? Colors.white : Colors.black,
+                                  size: 22),
+                              if (isLocked)
+                                Positioned(
+                                  bottom: 4,
+                                  child: Text(
+                                    'PRO',
+                                    style: TextStyle(
+                                      fontFamily: 'NDOT',
+                                      color: (isDark ? Colors.white : Colors.black).withOpacity(0.4),
+                                      fontSize: 6,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
-                    ],
-                  ),
-                  const SizedBox(width: 16),
+                        const SizedBox(width: 16),
 
-                  // ── Info & Action Column ──
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Expanded(
-                              child: Text(
+                        // ── Info & Action Column ──
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
                                 title,
                                 style: TextStyle(
-                                  color: _textP(isDark),
+                                  color: isLocked 
+                                      ? _textP(isDark).withOpacity(0.5)
+                                      : _textP(isDark),
                                   fontSize: 15,
                                   fontWeight: FontWeight.w600,
                                   letterSpacing: -0.2,
@@ -547,110 +474,95 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                            ),
-                            if (isLocked) ...[
-                              const SizedBox(width: 8),
-                              Container(
-                                alignment: Alignment.center,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                        colors: _goldGradient),
-                                    borderRadius: BorderRadius.circular(
-                                        100), // pill shape looks better
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color:
-                                            _premiumGold.withValues(alpha: 0.2),
-                                        blurRadius: 4,
-                                        offset: const Offset(0, 2),
-                                      )
-                                    ]),
-                                child: const Text(
-                                  'PRO',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 0.5,
-                                    height: 1.1,
+                              const SizedBox(height: 6),
+                              Row(
+                                children: [
+                                  if (!isLocked)
+                                    Icon(
+                                      isDownloaded
+                                          ? Iconsax.cloud_drizzle
+                                          : Iconsax.document_text,
+                                      size: 12,
+                                      color: isDownloaded
+                                          ? Colors.green
+                                          : _textS(isDark),
+                                    ),
+                                  if (!isLocked) const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      isLocked
+                                          ? 'SPEC: UNIT-${unit.toString().padLeft(2, '0')} // VAL: ${_unitPrices[unit]?.toInt() ?? '--'}'
+                                          : (isDownloaded
+                                              ? 'Unit $unit · Available Offline'
+                                              : 'Unit $unit · Ready to Read · PDF'),
+                                      style: TextStyle(
+                                        fontFamily: isLocked ? 'NDOT' : null,
+                                        color: isLocked
+                                            ? _brandRed
+                                            : _textS(isDark),
+                                        fontSize: isLocked ? 10 : 12,
+                                        fontWeight: isLocked
+                                            ? FontWeight.w600
+                                            : FontWeight.normal,
+                                        letterSpacing: isLocked ? 0.5 : null,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
-                                ),
+                                ],
                               ),
                             ],
-                          ],
+                          ),
                         ),
-                        const SizedBox(height: 6),
-                        Row(
-                          children: [
-                            Icon(
-                              isLocked
-                                  ? Iconsax.flash_1
-                                  : (isDownloaded
-                                      ? Iconsax.cloud_drizzle
-                                      : Iconsax.document_text),
-                              size: 12,
-                              color: isLocked
-                                  ? _premiumGold
-                                  : (isDownloaded
-                                      ? Colors.green
-                                      : _textS(isDark)),
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              isLocked
-                                  ? 'Unlock Unit $unit · ₹${_unitPrices[unit]?.toInt() ?? '--'}'
-                                  : (isDownloaded
-                                      ? 'Available Offline'
-                                      : 'Ready to Read · PDF'),
-                              style: TextStyle(
-                                color: isLocked
-                                    ? _premiumGold.withValues(alpha: 0.8)
-                                    : _textS(isDark),
-                                fontSize: 12,
-                                fontWeight: isLocked
-                                    ? FontWeight.w500
-                                    : FontWeight.normal,
-                              ),
-                            ),
-                          ],
-                        ),
+
+                        // ── Download Action (only for unlocked) ──
+                        if (!isLocked)
+                          IconButton(
+                            icon: isDownloaded
+                                ? const Icon(Iconsax.tick_circle,
+                                    color: Colors.green, size: 22)
+                                : Image.asset(
+                                    'assets/icons/down_to_line.png',
+                                    width: 22,
+                                    height: 22,
+                                    color: isDark ? Colors.white : Colors.black,
+                                  ),
+                            onPressed: isDownloaded
+                                ? null
+                                : () async {
+                                    try {
+                                      await OfflineService().downloadResource(
+                                        id: id,
+                                        title: title,
+                                        url: url,
+                                        category: ResourceCategory.NOTES,
+                                      );
+                                      if (mounted) setState(() {});
+                                    } catch (e) {
+                                      if (mounted)
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(content: Text(e.toString())));
+                                    }
+                                  },
+                          ),
                       ],
                     ),
                   ),
-
-                  // ── Download Action (only for unlocked) ──
-                  if (!isLocked)
-                    IconButton(
-                      icon: Icon(
-                        isDownloaded
-                            ? Iconsax.tick_circle
-                            : Iconsax.document_download,
-                        color: isDownloaded ? Colors.green : _textS(isDark),
-                        size: 22,
-                      ),
-                      onPressed: isDownloaded
-                          ? null
-                          : () async {
-                              try {
-                                await OfflineService().downloadResource(
-                                  id: id,
-                                  title: title,
-                                  url: url,
-                                  category: ResourceCategory.NOTES,
-                                );
-                                if (mounted) setState(() {});
-                              } catch (e) {
-                                if (mounted)
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text(e.toString())));
-                              }
-                            },
-                    ),
-                ],
+                ),
               ),
-            ),
+              if (isLocked)
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 0.5, sigmaY: 0.5),
+                      child: Container(
+                        color: (isDark ? Colors.black : Colors.white).withOpacity(0.05),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
       ),
@@ -703,4 +615,46 @@ class _NotesViewerScreenState extends State<NotesViewerScreen> {
       ),
     );
   }
+}
+
+class _DottedBorderPainter extends CustomPainter {
+  final Color color;
+  _DottedBorderPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
+
+    final path = Path()
+      ..addRRect(RRect.fromRectAndRadius(
+        Rect.fromLTWH(0, 0, size.width, size.height),
+        const Radius.circular(24),
+      ));
+
+    final dashPath = _dashPath(path, 4, 4);
+    canvas.drawPath(dashPath, paint);
+  }
+
+  Path _dashPath(Path source, double dashWidth, double dashSpace) {
+    final dest = Path();
+    for (final metric in source.computeMetrics()) {
+      double distance = 0;
+      bool draw = true;
+      while (distance < metric.length) {
+        final len = draw ? dashWidth : dashSpace;
+        if (draw) {
+          dest.addPath(metric.extractPath(distance, distance + len), Offset.zero);
+        }
+        distance += len;
+        draw = !draw;
+      }
+    }
+    return dest;
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

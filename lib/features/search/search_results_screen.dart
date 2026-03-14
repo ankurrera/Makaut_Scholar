@@ -102,7 +102,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // --- Palette ---
-    final Color bg = isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1);
+    final Color bg = isDark ? Colors.black : const Color(0xFFF8F6F1);
     final Color card = isDark ? const Color(0xFF1C2020) : Colors.white;
     final Color textP =
         isDark ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E);
@@ -233,7 +233,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             Expanded(
               child: _isLoading
                   ? const Center(
-                      child: DotLoadingIndicator(color: Color(0xFFE5252A)))
+                      child: const DotLoadingIndicator())
                   : _results.isEmpty
                       ? _buildEmptyState(textS, textP)
                       : ListView.builder(

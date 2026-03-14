@@ -3,10 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:makaut_scholar/domain/repositories/billing_repository.dart';
+import 'package:makaut_scholar/core/config/payment_config.dart';
 import 'package:makaut_scholar/core/widgets/dot_loading.dart';
+import 'package:makaut_scholar/core/widgets/shimmer_skeleton.dart';
 import 'package:provider/provider.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
-import 'dart:async';
+import '../auth/login/login_screen.dart' show AuthTheme;
+import 'dart:async' show StreamSubscription, Timer;
+
 
 class PremiumCheckoutScreen extends StatefulWidget {
   final String itemId;
@@ -35,16 +39,19 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
   bool _successHandled = false;
   late BillingRepository _billingRepository;
   ProductDetails? _productDetails;
-  StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
+  // NOTE: We do NOT subscribe to purchaseStream directly.
+  // The global listener in BillingRepositoryImpl handles purchase completion
+  // and reports to backend. We only listen to the resulting alternativePurchaseStream,
+  // which fires after the purchase is synced. This prevents a double-notification loop.
   StreamSubscription<Map<String, dynamic>>? _alternativePurchaseSubscription;
+  Timer? _paymentTimeoutTimer;
 
   @override
   void initState() {
     super.initState();
     _billingRepository = context.read<BillingRepository>();
     _loadProducts();
-    _purchaseSubscription =
-        _billingRepository.purchaseStream.listen(_listenToPurchases);
+    // Only listen to the alternativePurchaseStream (fired by BillingRepo after backend sync).
     _alternativePurchaseSubscription = _billingRepository
         .alternativePurchaseStream
         .listen(_listenToAlternativePurchases);
@@ -52,7 +59,7 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
 
   @override
   void dispose() {
-    _purchaseSubscription?.cancel();
+    _paymentTimeoutTimer?.cancel();
     _alternativePurchaseSubscription?.cancel();
     super.dispose();
   }
@@ -82,23 +89,12 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
     }
   }
 
-  void _listenToPurchases(List<PurchaseDetails> purchases) {
-    for (var purchase in purchases) {
-      // Standard IAP or UCB Google Play choice
-      if (purchase.status == PurchaseStatus.purchased ||
-          purchase.status == PurchaseStatus.restored) {
-        if (purchase.pendingCompletePurchase) {
-          InAppPurchase.instance.completePurchase(purchase);
-        }
-        _handleSuccess();
-      } else if (purchase.status == PurchaseStatus.error) {
-        _handleError(purchase.error?.message ?? 'Unknown error');
-      }
-    }
-  }
-
   void _listenToAlternativePurchases(Map<String, dynamic> purchase) {
-    if (purchase['status'] == 'purchased') {
+    // Fired by BillingRepositoryImpl after it has synced the purchase to the backend.
+    // Both 'purchased' (success) and 'purchased_finished' (sync done, possibly with error)
+    // should trigger a success unlock since the OS already confirmed the payment.
+    final status = purchase['status'] as String? ?? '';
+    if (status == 'purchased' || status == 'purchased_finished') {
       _handleSuccess();
     }
   }
@@ -106,28 +102,44 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
   Future<void> _handlePayment() async {
     if (_productDetails == null && _selectedMethod == 'GooglePlay') {
       _handleError(
-          "Product not found in Google Play Console. Please try UPI instead.");
+          "Product not found in Google Play Console. Please try again later.");
       return;
     }
 
     setState(() => _isLoading = true);
     try {
-      // 1. Create an order in Supabase FIRST (for both methods)
+      // 1. Create an order in Supabase FIRST
       final orderData = await _billingRepository.createOrder(
         itemId: widget.itemId,
         itemType: widget.itemType,
         amount: widget.price,
-        gateway: _selectedMethod == 'GooglePlay' ? 'google_play' : 'razorpay',
+        // Always 'google_play' when Razorpay is disabled
+        gateway: (!PaymentConfig.razorpayEnabled || _selectedMethod == 'GooglePlay')
+            ? 'google_play'
+            : 'razorpay',
       );
 
       final String orderId = orderData['orderId'];
 
-      if (_selectedMethod == 'GooglePlay') {
-        // 2a. Launch Google Play with orderId for tracking
+      if (!PaymentConfig.razorpayEnabled || _selectedMethod == 'GooglePlay') {
+        // Launch Google Play Billing.
+        // After the user completes payment, Google Play will:
+        //   1. Fire a purchaseStream event (caught by BillingRepo global listener)
+        //   2. BillingRepo reports to backend
+        //   3. BillingRepo fires alternativePurchaseStream
+        //   4. Our _listenToAlternativePurchases calls _handleSuccess
         await _billingRepository.launchBillingFlow(_productDetails!,
             orderId: orderId);
+        // Start a safety timeout: if no signal comes in 45s, show an error
+        _paymentTimeoutTimer?.cancel();
+        _paymentTimeoutTimer = Timer(const Duration(seconds: 45), () {
+          if (mounted && !_successHandled) {
+            setState(() => _isLoading = false);
+            _handleError('Payment timed out. If payment was charged, it will be processed shortly.');
+          }
+        });
       } else {
-        // 2b. Launch Razorpay using the pre-created order data
+        // Launch Razorpay (only reachable when PaymentConfig.razorpayEnabled = true)
         final String razorpayOrderId = orderData['razorpayOrderId'] ?? '';
         final String keyId = orderData['keyId'] ?? '';
         if (razorpayOrderId.isEmpty || keyId.isEmpty) {
@@ -150,12 +162,21 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
   Future<void> _handleSuccess() async {
     if (mounted && !_successHandled) {
       _successHandled = true;
-      // Pop immediately to avoid visibility gap
-      Navigator.pop(context, {
-        'success': true,
-        'itemUrl': widget.itemUrl,
-        'itemName': widget.itemName,
-      });
+      
+      // Stop local loading state
+      setState(() => _isLoading = false);
+
+      // Show the beautiful success dialog defined below
+      await _showSuccessDialog();
+
+      if (mounted) {
+        // Pop to the originating screen with success flag
+        Navigator.pop(context, {
+          'success': true,
+          'itemUrl': widget.itemUrl,
+          'itemName': widget.itemName,
+        });
+      }
     }
   }
 
@@ -166,7 +187,6 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
         Navigator.pop(context);
       }
     });
-
     return showDialog(
       context: context,
       barrierDismissible: false,
@@ -179,11 +199,10 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Theme.of(context).brightness == Brightness.dark
-                  ? const Color(0xFF1A1D21).withOpacity(0.9)
-                  : Colors.white.withOpacity(0.9),
-              borderRadius: BorderRadius.circular(32),
-              border:
-                  Border.all(color: const Color(0xFFE5252A).withOpacity(0.3)),
+                  ? AuthTheme.darkSurface
+                  : AuthTheme.lightSurface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AuthTheme.accent.withValues(alpha: 0.3)),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -191,19 +210,20 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE5252A).withOpacity(0.1),
+                    color: AuthTheme.accent.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(Iconsax.tick_circle_copy,
-                      color: Color(0xFFE5252A), size: 48),
+                      color: AuthTheme.accent, size: 48),
                 ),
                 const SizedBox(height: 24),
                 const Text(
-                  "Unlock Successful! ✨",
+                  "SUCCESSFUL! ✨",
                   style: TextStyle(
+                      fontFamily: 'NDOT',
                       fontSize: 22,
                       fontWeight: FontWeight.w900,
-                      letterSpacing: -0.5),
+                      letterSpacing: 2.0),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 12),
@@ -216,10 +236,10 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
-                const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: DotLoadingIndicator(color: Color(0xFFE5252A), size: 6),
+                const ShimmerSkeleton(
+                  width: 80,
+                  height: 4,
+                  borderRadius: BorderRadius.all(Radius.circular(2)),
                 ),
                 const SizedBox(height: 24),
               ],
@@ -232,35 +252,49 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
 
   void _handleError(String message) {
     if (mounted) {
+      final isDark = Theme.of(context).brightness == Brightness.dark;
       showModalBottomSheet(
         context: context,
-        shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-        builder: (_) => Padding(
+        backgroundColor: Colors.transparent,
+        builder: (_) => Container(
           padding: const EdgeInsets.all(28),
+          decoration: BoxDecoration(
+            color: isDark ? AuthTheme.darkBg : AuthTheme.lightBg,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Error',
-                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20)),
-              const SizedBox(height: 12),
+              const Text('ERROR',
+                  style: TextStyle(
+                      fontFamily: 'NDOT',
+                      fontWeight: FontWeight.w900,
+                      fontSize: 20,
+                      letterSpacing: 1.5)),
+              const SizedBox(height: 16),
               Text(message,
-                  style: const TextStyle(fontSize: 15, color: Colors.black87)),
-              const SizedBox(height: 24),
+                  style: TextStyle(
+                      fontSize: 15,
+                      color: isDark ? Colors.white70 : Colors.black87)),
+              const SizedBox(height: 28),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFE5252A),
+                      backgroundColor: AuthTheme.accent,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
+                      elevation: 0,
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16))),
+                          borderRadius: BorderRadius.circular(12))),
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Got it',
-                      style:
-                          TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                  child: const Text('GOT IT',
+                      style: TextStyle(
+                          fontFamily: 'NDOT',
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
+                          letterSpacing: 1.0)),
                 ),
               ),
               const SizedBox(height: 8),
@@ -276,38 +310,22 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     // Theme-aware Color Palette
-    final Color bgColor =
-        isDarkMode ? const Color(0xFF0B0D11) : const Color(0xFFF8F9FE);
-    final Color surfaceColor = isDarkMode
-        ? Colors.white.withOpacity(0.05)
-        : Colors.black.withOpacity(0.03);
-    final Color borderColor = isDarkMode
-        ? Colors.white.withOpacity(0.1)
-        : Colors.black.withOpacity(0.08);
-    final Color textColor = isDarkMode ? Colors.white : const Color(0xFF1A1D21);
-    final Color textDimColor =
-        isDarkMode ? Colors.white70 : const Color(0xFF4A4D54);
-    final Color accentColor = const Color(0xFFE5252A); // Forest Green
+    final Color bgColor = isDarkMode ? AuthTheme.darkBg : AuthTheme.lightBg;
+    final Color surfaceColor = isDarkMode ? AuthTheme.darkSurface : AuthTheme.lightSurface;
+    final Color borderColor = isDarkMode ? AuthTheme.darkBorder : AuthTheme.lightBorder;
+    final Color textColor = isDarkMode ? AuthTheme.darkText : AuthTheme.lightText;
+    final Color textDimColor = isDarkMode ? AuthTheme.darkSubtext : AuthTheme.lightSubtext;
+    final Color accentColor = AuthTheme.accent;
 
     return Scaffold(
       backgroundColor: bgColor,
       body: Stack(
         children: [
-          // Dynamic Ambient Background Glows
-          if (isDarkMode) ...[
-            Positioned(
-              top: -150,
-              right: -100,
-              child:
-                  _AmbientGlow(color: accentColor.withOpacity(0.12), size: 400),
-            ),
-            Positioned(
-              bottom: -150,
-              left: -100,
-              child:
-                  _AmbientGlow(color: Colors.blue.withOpacity(0.08), size: 400),
-            ),
-          ],
+          // ── Nothing OS dot-matrix grid texture ──
+          Positioned.fill(
+            child: CustomPaint(painter: _DotGridPainter(isDark: isDarkMode)),
+          ),
+
 
           SafeArea(
             child: Column(
@@ -321,7 +339,9 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Text(
-                    "Secure Payment",
+                    PaymentConfig.razorpayEnabled
+                        ? "Secure Payment"
+                        : "Pay with Google Play",
                     style: TextStyle(
                       color: textColor,
                       fontSize: 18,
@@ -341,8 +361,8 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
                           : 'Currently unavailable for this item',
                   icon: FontAwesomeIcons.googlePlay,
                   color: _productDetails != null
-                      ? const Color(0xFF34A853)
-                      : Colors.grey,
+                      ? textColor
+                      : textDimColor,
                   isSelected: _selectedMethod == 'GooglePlay',
                   onTap: _productDetails != null
                       ? () => setState(() => _selectedMethod = 'GooglePlay')
@@ -352,20 +372,23 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
                   textColor: textColor,
                   textDimColor: textDimColor,
                 ),
-                const SizedBox(height: 16),
-                _buildMethodOption(
-                  id: 'Razorpay',
-                  name: 'Other UPI / Razorpay',
-                  subtitle: 'Alternative Choice Billing',
-                  icon: Iconsax.shield_tick_copy,
-                  color: accentColor,
-                  isSelected: _selectedMethod == 'Razorpay',
-                  onTap: () => setState(() => _selectedMethod = 'Razorpay'),
-                  surfaceColor: surfaceColor,
-                  borderColor: borderColor,
-                  textColor: textColor,
-                  textDimColor: textDimColor,
-                ),
+                // Razorpay option — only shown when the feature flag is enabled
+                if (PaymentConfig.razorpayEnabled) ...[
+                  const SizedBox(height: 16),
+                  _buildMethodOption(
+                    id: 'Razorpay',
+                    name: 'Other UPI / Razorpay',
+                    subtitle: 'Alternative Choice Billing',
+                    icon: Iconsax.shield_tick_copy,
+                    color: accentColor,
+                    isSelected: _selectedMethod == 'Razorpay',
+                    onTap: () => setState(() => _selectedMethod = 'Razorpay'),
+                    surfaceColor: surfaceColor,
+                    borderColor: borderColor,
+                    textColor: textColor,
+                    textDimColor: textDimColor,
+                  ),
+                ],
                 const Spacer(),
                 _buildSecurityBadges(textDimColor),
                 const SizedBox(height: 100), // Space for bottom bar
@@ -378,8 +401,12 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
           if (_isLoading)
             Container(
               color: isDarkMode ? Colors.black54 : Colors.white60,
-              child: Center(
-                child: DotLoadingIndicator(color: accentColor),
+              child: const Center(
+                child: ShimmerSkeleton(
+                  width: 120,
+                  height: 20,
+                  isNdot: true,
+                ),
               ),
             ),
         ],
@@ -398,12 +425,13 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
           ),
           const SizedBox(width: 4),
           Text(
-            "Checkout",
+            "CHECKOUT",
             style: TextStyle(
               color: textColor,
+              fontFamily: 'NDOT',
               fontSize: 22,
               fontWeight: FontWeight.w900,
-              letterSpacing: -1,
+              letterSpacing: 2.0,
             ),
           ),
         ],
@@ -414,20 +442,19 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
   Widget _buildOrderSummary(
       Color surface, Color border, Color text, Color textDim, Color accent) {
     final bool isBundle = widget.itemType == 'semester_bundle';
-    final Color itemAccent =
-        isBundle ? const Color(0xFFFFB347) : accent; // Orange for bundle
+    final Color itemAccent = accent; // Standardize to Nothing Red
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
       decoration: BoxDecoration(
         color: surface,
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
-            color: isBundle ? itemAccent.withValues(alpha: 0.5) : border,
-            width: isBundle ? 1.5 : 1),
+            color: isBundle ? itemAccent : border,
+            width: isBundle ? 1.5 : 1.0),
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(12),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
           child: Padding(
@@ -441,20 +468,21 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: itemAccent.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: itemAccent, width: 1),
+                      borderRadius: BorderRadius.circular(4),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Iconsax.star_1, size: 14, color: itemAccent),
+                        Icon(Iconsax.star_1, size: 10, color: itemAccent),
                         const SizedBox(width: 6),
                         Text('RECOMMENDED UPGRADE',
                             style: TextStyle(
+                                fontFamily: 'NDOT',
                                 color: itemAccent,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.5)),
+                                fontSize: 8,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 1.5)),
                       ],
                     ),
                   ),
@@ -463,8 +491,9 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: itemAccent.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
+                        color: isBundle ? itemAccent.withValues(alpha: 0.05) : itemAccent.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: isBundle ? Border.all(color: itemAccent.withValues(alpha: 0.2)) : null,
                       ),
                       child: Icon(
                           isBundle
@@ -480,17 +509,20 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
                         children: [
                           Text(
                               isBundle
-                                  ? "Complete Your Semester"
-                                  : "Item Summary",
+                                  ? "SEMESTER BUNDLE"
+                                  : "ITEM SUMMARY",
                               style: TextStyle(
+                                  fontFamily: 'NDOT',
                                   color: textDim,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold)),
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.0)),
                           Text(widget.itemName,
                               style: TextStyle(
+                                  fontFamily: 'NDOT',
                                   color: text,
                                   fontSize: 16,
-                                  fontWeight: FontWeight.w700)),
+                                  fontWeight: FontWeight.w900)),
                         ],
                       ),
                     ),
@@ -503,16 +535,19 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("Total Amount",
+                    Text("TOTAL AMOUNT",
                         style: TextStyle(
+                            fontFamily: 'NDOT',
                             color: text,
-                            fontSize: 17,
-                            fontWeight: FontWeight.w800)),
+                            fontSize: 15,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.0)),
                     Text(
                       "₹${widget.price.toStringAsFixed(2)}",
                       style: TextStyle(
+                        fontFamily: 'NDOT',
                         color: itemAccent,
-                        fontSize: 22,
+                        fontSize: 24,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
@@ -545,11 +580,11 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 24),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.08) : surfaceColor,
-          borderRadius: BorderRadius.circular(24),
+          color: isSelected ? color.withValues(alpha: 0.08) : surfaceColor,
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? color.withOpacity(0.5) : borderColor,
-            width: isSelected ? 2 : 1,
+            color: isSelected ? color.withValues(alpha: 0.5) : borderColor,
+            width: isSelected ? 1.5 : 1.0,
           ),
         ),
         child: Row(
@@ -567,11 +602,13 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(name,
+                  Text(name.toUpperCase(),
                       style: TextStyle(
+                          fontFamily: 'NDOT',
                           color: textColor,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800)),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1.0)),
                   Text(subtitle,
                       style: TextStyle(
                           color: textDimColor,
@@ -598,22 +635,34 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
             children: [
               Icon(Iconsax.lock_copy, color: color, size: 14),
               const SizedBox(width: 6),
-              Text("256-bit SSL Secure Transaction",
-                  style: TextStyle(
-                      color: color, fontSize: 12, fontWeight: FontWeight.w600)),
+              Text(
+                (PaymentConfig.razorpayEnabled
+                    ? "256-BIT SSL SECURE TRANSACTION"
+                    : "SECURED BY GOOGLE PLAY").toUpperCase(),
+                style: TextStyle(
+                    fontFamily: 'NDOT',
+                    color: color,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1.5)),
             ],
           ),
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _Badge(icon: FontAwesomeIcons.ccVisa, color: color),
-              const SizedBox(width: 20),
-              _Badge(icon: FontAwesomeIcons.ccMastercard, color: color),
-              const SizedBox(width: 20),
+              // Show all badges when Razorpay enabled; only Google Pay when disabled
+              if (PaymentConfig.razorpayEnabled) ...[
+                _Badge(icon: FontAwesomeIcons.ccVisa, color: color),
+                const SizedBox(width: 20),
+                _Badge(icon: FontAwesomeIcons.ccMastercard, color: color),
+                const SizedBox(width: 20),
+              ],
               _Badge(icon: FontAwesomeIcons.googlePay, color: color),
-              const SizedBox(width: 20),
-              _Badge(icon: FontAwesomeIcons.applePay, color: color),
+              if (PaymentConfig.razorpayEnabled) ...[
+                const SizedBox(width: 20),
+                _Badge(icon: FontAwesomeIcons.applePay, color: color),
+              ],
             ],
           ),
         ],
@@ -627,37 +676,47 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
       left: 0,
       right: 0,
       child: Container(
-        padding: const EdgeInsets.fromLTRB(24, 20, 24, 34),
         decoration: BoxDecoration(
           color: bg,
           border: Border(
               top: BorderSide(
                   color: isDarkMode
-                      ? Colors.white.withOpacity(0.05)
-                      : Colors.black.withOpacity(0.05))),
+                      ? Colors.white.withValues(alpha: 0.05)
+                      : Colors.black.withValues(alpha: 0.05))),
         ),
-        child: ElevatedButton(
-          onPressed: _isLoading ? null : _handlePayment,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: accent,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 20),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            elevation: 8,
-            shadowColor: accent.withOpacity(0.4),
-          ),
-          child: const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text("Authorize Payment",
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.5)),
-              SizedBox(width: 10),
-              Icon(Iconsax.arrow_right_3_copy, size: 20),
-            ],
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
+            child: ElevatedButton(
+              onPressed: _isLoading ? null : _handlePayment,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: accent,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    (PaymentConfig.razorpayEnabled
+                            ? "AUTHORIZE PAYMENT"
+                            : "PAY WITH GOOGLE PLAY")
+                        .toUpperCase(),
+                    style: const TextStyle(
+                        fontFamily: 'NDOT',
+                        fontSize: 15,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.5),
+                  ),
+                  const SizedBox(width: 10),
+                  const Icon(Iconsax.arrow_right_3_copy, size: 20),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -665,22 +724,26 @@ class _PremiumCheckoutScreenState extends State<PremiumCheckoutScreen> {
   }
 }
 
-class _AmbientGlow extends StatelessWidget {
-  final Color color;
-  final double size;
-  const _AmbientGlow({required this.color, required this.size});
+class _DotGridPainter extends CustomPainter {
+  final bool isDark;
+  const _DotGridPainter({required this.isDark});
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: RadialGradient(colors: [color, color.withOpacity(0)]),
-      ),
-    );
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = (isDark ? Colors.white : Colors.black).withValues(alpha: 0.04)
+      ..style = PaintingStyle.fill;
+    const spacing = 20.0;
+    const radius = 1.0;
+    for (double x = 0; x < size.width; x += spacing) {
+      for (double y = 0; y < size.height; y += spacing) {
+        canvas.drawCircle(Offset(x, y), radius, paint);
+      }
+    }
   }
+
+  @override
+  bool shouldRepaint(_DotGridPainter old) => old.isDark != isDark;
 }
 
 class _Badge extends StatelessWidget {

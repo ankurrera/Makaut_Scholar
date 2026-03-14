@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
+import '../../services/cache_service.dart';
 import '../../core/widgets/dot_loading.dart';
+import '../../core/widgets/shimmer_skeleton.dart';
+import '../../core/widgets/premium_route.dart';
 import 'mock_test_subject_screen.dart';
 
 class PracticeScreen extends StatefulWidget {
@@ -28,11 +31,22 @@ class _PracticeScreenState extends State<PracticeScreen> {
 
   Future<void> _loadSemesters() async {
     setState(() {
-      _isLoading = true;
       _error = null;
     });
+
     try {
       final auth = Provider.of<AuthService>(context, listen: false);
+      
+      // 1. Try to load from cache first
+      final cachedSems = CacheService().get('mock_test_semesters');
+      if (cachedSems != null && cachedSems is List) {
+        setState(() {
+          _semesters = List<int>.from(cachedSems);
+          _isLoading = false;
+        });
+      } else {
+        setState(() => _isLoading = true);
+      }
       final profile = await auth.getProfile();
       if (profile?['department'] != null) {
         _userDepartment = profile!['department'];
@@ -49,6 +63,10 @@ class _PracticeScreenState extends State<PracticeScreen> {
       }
 
       final semesters = await auth.fetchMockTestSemesters(_userDepartment!);
+      
+      // Update cache
+      CacheService().set('mock_test_semesters', semesters);
+
       if (mounted) {
         setState(() {
           _semesters = semesters;
@@ -69,14 +87,13 @@ class _PracticeScreenState extends State<PracticeScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // Palette
     final Color bgPrimary =
         isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1);
     final Color textPrimary =
-        isDark ? const Color(0xFFF5F6FA) : const Color(0xFF1E1E1E);
+        isDark ? Colors.white : const Color(0xFF1E1E1E);
     final Color textSecondary =
         isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
-    final Color cardBg = isDark ? const Color(0xFF1C2020) : Colors.white;
+    final Color cardBg = isDark ? const Color(0xFF1C1C1E) : Colors.white;
 
     return Scaffold(
       backgroundColor: bgPrimary,
@@ -92,21 +109,26 @@ class _PracticeScreenState extends State<PracticeScreen> {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        'Practice',
+                        'PRACTICE',
+                        textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 28,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w900,
                           color: textPrimary,
-                          letterSpacing: -0.5,
+                          letterSpacing: 2.0,
+                          fontFamily: 'NDOT',
                         ),
                       ),
+                      const SizedBox(height: 4),
                       Text(
                         'Sharpen your skills with mock tests',
+                        textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
                           color: textSecondary,
                         ),
                       ),
@@ -124,9 +146,12 @@ class _PracticeScreenState extends State<PracticeScreen> {
 
   Widget _buildContentSliver(
       bool isDark, Color textPrimary, Color textSecondary, Color cardBg) {
-    if (_isLoading) {
-      return const SliverFillRemaining(
-        child: Center(child: DotLoadingIndicator(color: _accentColor)),
+    if (_isLoading && _semesters.isEmpty) {
+      return SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) => ShimmerSkeleton.listTile(isDark: isDark),
+          childCount: 6,
+        ),
       );
     }
 
@@ -139,18 +164,20 @@ class _PracticeScreenState extends State<PracticeScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(Iconsax.profile_delete,
-                    size: 64, color: textSecondary.withValues(alpha: 0.3)),
+                    size: 64, color: textSecondary.withValues(alpha: 0.1)),
                 const SizedBox(height: 16),
-                Text('Department Required',
+                Text('DEPARTMENT REQUIRED',
                     style: TextStyle(
+                        fontFamily: 'NDOT',
                         color: textPrimary,
                         fontSize: 18,
-                        fontWeight: FontWeight.bold)),
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.0)),
                 const SizedBox(height: 8),
                 Text(
                   'Please update your department in the Profile section to practice quizzes.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: textSecondary, height: 1.4),
+                  style: TextStyle(color: textSecondary, height: 1.4, fontSize: 13, fontWeight: FontWeight.w500),
                 ),
               ],
             ),
@@ -167,14 +194,24 @@ class _PracticeScreenState extends State<PracticeScreen> {
             children: [
               const Icon(Iconsax.warning_2, size: 48, color: Colors.redAccent),
               const SizedBox(height: 16),
-              Text('Failed to load quizzes',
+              const Text('FAILED TO LOAD QUIZZES',
                   style: TextStyle(
-                      color: textPrimary, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              TextButton(
-                  onPressed: _loadSemesters,
-                  child: const Text('Retry',
-                      style: TextStyle(color: _accentColor))),
+                      fontFamily: 'NDOT',
+                      color: Colors.redAccent,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.0)),
+              const SizedBox(height: 12),
+              GestureDetector(
+                onTap: _loadSemesters,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: _accentColor,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Text('RETRY', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, letterSpacing: 1.0)),
+                ),
+              ),
             ],
           ),
         ),
@@ -188,16 +225,18 @@ class _PracticeScreenState extends State<PracticeScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(Iconsax.document_filter,
-                  size: 64, color: textSecondary.withValues(alpha: 0.3)),
+                  size: 64, color: textSecondary.withValues(alpha: 0.1)),
               const SizedBox(height: 16),
-              Text('No quizzes available',
+              Text('NO QUIZZES AVAILABLE',
                   style: TextStyle(
+                      fontFamily: 'NDOT',
                       color: textPrimary,
                       fontSize: 18,
-                      fontWeight: FontWeight.bold)),
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.0)),
               const SizedBox(height: 8),
               Text('Try later for ${_userDepartment ?? 'your department'}',
-                  style: TextStyle(color: textSecondary)),
+                  style: TextStyle(color: textSecondary, fontWeight: FontWeight.w500)),
             ],
           ),
         ),
@@ -205,7 +244,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
     }
 
     return SliverPadding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       sliver: SliverList(
         delegate: SliverChildBuilderDelegate(
           (context, index) {
@@ -221,53 +260,77 @@ class _PracticeScreenState extends State<PracticeScreen> {
 
   Widget _buildSemesterCard(int semester, bool isDark, Color textPrimary,
       Color textSecondary, Color cardBg) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-            color: isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC)),
-        boxShadow: [
-          if (!isDark)
+    final borderColor = isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F2);
+    
+    return PressableWidget(
+      onTap: () {
+        if (_userDepartment != null) {
+          Navigator.push(
+            context,
+            PremiumPageRoute(
+              page: MockTestSubjectScreen(
+                department: _userDepartment!,
+                semester: semester,
+              ),
+            ),
+          );
+        }
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 14),
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: borderColor, width: 1.0),
+          boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
+              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.03),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
-        ],
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        leading: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: _accentColor.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: const Icon(Iconsax.book_1, color: _accentColor, size: 24),
+          ],
         ),
-        title: Text(
-          'Semester $semester',
-          style: TextStyle(
-              color: textPrimary, fontWeight: FontWeight.bold, fontSize: 16),
-        ),
-        subtitle: Text('Select to view subjects',
-            style: TextStyle(color: textSecondary, fontSize: 13)),
-        trailing: Icon(Iconsax.arrow_right_3, color: textSecondary, size: 18),
-        onTap: () {
-          if (_userDepartment != null) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => MockTestSubjectScreen(
-                  department: _userDepartment!,
-                  semester: semester,
-                ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(12),
               ),
-            );
-          }
-        },
+              child: Icon(Iconsax.book_1, color: textPrimary, size: 24),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'SEMESTER $semester',
+                    style: TextStyle(
+                        fontFamily: 'NDOT',
+                        color: textPrimary,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                        letterSpacing: 1.0),
+                  ),
+                  const SizedBox(height: 2),
+                  Text('Select to view subjects',
+                      style: TextStyle(color: textSecondary, fontSize: 13, fontWeight: FontWeight.w500)),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Iconsax.arrow_right_3, color: textSecondary, size: 16),
+            ),
+          ],
+        ),
       ),
     );
   }

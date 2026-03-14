@@ -6,30 +6,30 @@ import '../../../services/auth_service.dart';
 import '../../../core/widgets/dot_loading.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Colour palette — single source of truth for both auth screens
+// Nothing OS-inspired Colour Palette
+// Monochrome base · Red brand accent · NDOT dot typography
 // ─────────────────────────────────────────────────────────────────────────────
 class AuthTheme {
-  // Brand
-  static const accent = Color(0xFF7C6EF5);
-  static const accentDark = Color(0xFF6459D4);
+  // Brand accent (matches app-wide accent)
+  static const accent = Color(0xFFE5252A);
 
   // Dark
-  static const darkBg = Color(0xFF0F0F13);
-  static const darkSurface = Color(0xFF18181F);
-  static const darkBorder = Color(0xFF2A2A38);
-  static const darkBorderFocus = Color(0xFF7C6EF5);
-  static const darkText = Color(0xFFF1F0FF);
-  static const darkSubtext = Color(0xFF9A9AB0);
-  static const darkHint = Color(0xFF5A5A72);
+  static const darkBg = Color(0xFF000000);
+  static const darkSurface = Color(0xFF0F0F0F);
+  static const darkBorder = Color(0xFF222222);
+  static const darkBorderFocus = Color(0xFFE5252A);
+  static const darkText = Color(0xFFFFFFFF);
+  static const darkSubtext = Color(0xFF888888);
+  static const darkHint = Color(0xFF444444);
 
   // Light
-  static const lightBg = Color(0xFFF7F7FB);
-  static const lightSurface = Color(0xFFFFFFFF);
-  static const lightBorder = Color(0xFFE4E4EF);
-  static const lightBorderFocus = Color(0xFF7C6EF5);
-  static const lightText = Color(0xFF0E0E1A);
-  static const lightSubtext = Color(0xFF6B6B85);
-  static const lightHint = Color(0xFFB0B0C8);
+  static const lightBg = Color(0xFFFFFFFF);
+  static const lightSurface = Color(0xFFF5F5F5);
+  static const lightBorder = Color(0xFFDDDDDD);
+  static const lightBorderFocus = Color(0xFFE5252A);
+  static const lightText = Color(0xFF000000);
+  static const lightSubtext = Color(0xFF666666);
+  static const lightHint = Color(0xFFBBBBBB);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -58,8 +58,8 @@ class _LoginScreenState extends State<LoginScreen>
   void initState() {
     super.initState();
     _fadeCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 500));
-    _fadeAnim = CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeOut);
+        vsync: this, duration: const Duration(milliseconds: 600));
+    _fadeAnim = CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeOutCubic);
     _fadeCtrl.forward();
   }
 
@@ -115,46 +115,42 @@ class _LoginScreenState extends State<LoginScreen>
   void _showError(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(msg,
-          style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w500)),
-      backgroundColor: const Color(0xFFD94F4F),
+          style: const TextStyle(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'NDOT')),
+      backgroundColor: AuthTheme.accent,
       behavior: SnackBarBehavior.floating,
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     ));
   }
 
   String _friendlyError(String raw) {
     final lower = raw.toLowerCase();
-
-    // Specifically handle the "Instance of 'NotInitializedError'" or related strings
     if (lower.contains('notinitializederror') ||
         lower.contains('not been initialized')) {
-      return 'Supabase is still initializing. Please check your internet and try again in a few seconds.';
+      return 'Supabase is still initializing. Please check your internet and try again.';
     }
-
     if (lower.contains('supabase') && lower.contains('initialization')) {
       return 'Supabase is still starting up. Please try again in a moment.';
     }
-
     if (lower.contains('invalid') ||
         lower.contains('credentials') ||
         lower.contains('password')) {
       return 'Incorrect email or password.';
     }
-
     if (lower.contains('timed out') ||
         lower.contains('socket') ||
         lower.contains('network')) {
       return 'Network error. Check your connection or retry.';
     }
-
     return raw.replaceAll('Exception:', '').trim();
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
     final bg = isDark ? AuthTheme.darkBg : AuthTheme.lightBg;
     final text = isDark ? AuthTheme.darkText : AuthTheme.lightText;
     final subtext = isDark ? AuthTheme.darkSubtext : AuthTheme.lightSubtext;
@@ -167,166 +163,292 @@ class _LoginScreenState extends State<LoginScreen>
               .copyWith(statusBarColor: Colors.transparent),
       child: Scaffold(
         backgroundColor: bg,
-        body: SafeArea(
-          child: FadeTransition(
-            opacity: _fadeAnim,
-            child: Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 28),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const SizedBox(height: 48),
+        body: Stack(
+          children: [
+            // ── Nothing OS dot-matrix grid texture ──
+            Positioned.fill(
+              child: CustomPaint(painter: _DotGridPainter(isDark: isDark)),
+            ),
 
-                      // ── Logo ──────────────────────────────────────────────────
-                      _Logo(isDark: isDark),
-                      const SizedBox(height: 40),
+            SafeArea(
+              child: FadeTransition(
+                opacity: _fadeAnim,
+                child: Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 28),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const SizedBox(height: 56),
 
-                      // ── Headline ──────────────────────────────────────────────
-                      Text(
-                        'Welcome back',
-                        style: TextStyle(
-                          color: text,
-                          fontSize: 28,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.8,
-                          height: 1.15,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Sign in to continue to ScholarX',
-                        style: TextStyle(
-                          color: subtext,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w400,
-                          height: 1.4,
-                        ),
-                      ),
+                          // ── Nothing OS logo block ──────────────────────────────
+                          _NothingLogo(isDark: isDark),
+                          const SizedBox(height: 48),
 
-                      const SizedBox(height: 36),
-
-                      // ── Fields ────────────────────────────────────────────────
-                      AuthField(
-                        controller: _emailController,
-                        label: 'Email address',
-                        hint: 'you@example.com',
-                        icon: Iconsax.sms_copy,
-                        isDark: isDark,
-                        keyboardType: TextInputType.emailAddress,
-                        validator: (v) =>
-                            v!.isEmpty ? 'Email is required' : null,
-                      ),
-                      const SizedBox(height: 18),
-                      AuthField(
-                        controller: _passwordController,
-                        label: 'Password',
-                        hint: 'Enter your password',
-                        icon: Iconsax.lock_1_copy,
-                        isDark: isDark,
-                        obscureText: !_isPasswordVisible,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _isPasswordVisible
-                                ? Iconsax.eye_slash_copy
-                                : Iconsax.eye_copy,
-                            size: 18,
-                            color: isDark
-                                ? AuthTheme.darkHint
-                                : AuthTheme.lightHint,
-                          ),
-                          onPressed: () => setState(
-                              () => _isPasswordVisible = !_isPasswordVisible),
-                        ),
-                        validator: (v) =>
-                            v!.isEmpty ? 'Password is required' : null,
-                      ),
-
-                      const SizedBox(height: 10),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () =>
-                              _showError('Password reset coming soon'),
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: Text(
-                            'Forgot password?',
+                          // ── Headline ──────────────────────────────────────────
+                          Text(
+                            'SIGN IN',
                             style: TextStyle(
-                              color: AuthTheme.accent,
-                              fontSize: 13.5,
-                              fontWeight: FontWeight.w600,
+                              fontFamily: 'NDOT',
+                              color: text,
+                              fontSize: 32,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 3.0,
+                              height: 1.0,
                             ),
                           ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 28),
-
-                      // ── Primary button ────────────────────────────────────────
-                      AuthPrimaryButton(
-                        label: 'Sign in',
-                        isLoading: _isLoading,
-                        onTap: _login,
-                      ),
-
-                      const SizedBox(height: 24),
-                      AuthDivider(isDark: isDark),
-                      const SizedBox(height: 24),
-
-                      // ── Google ────────────────────────────────────────────────
-                      AuthGoogleButton(
-                        isDark: isDark,
-                        onTap: () async {
-                          try {
-                            await Provider.of<AuthService>(context,
-                                    listen: false)
-                                .signInWithGoogle();
-                          } catch (e) {
-                            if (!mounted) return;
-                            _showError(e.toString());
-                          }
-                        },
-                      ),
-
-                      const SizedBox(height: 36),
-
-                      // ── Footer ────────────────────────────────────────────────
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
+                          const SizedBox(height: 8),
                           Text(
-                            "Don't have an account?  ",
-                            style: TextStyle(color: subtext, fontSize: 14),
+                            'Access your academic universe',
+                            style: TextStyle(
+                              color: subtext,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              letterSpacing: 0.3,
+                              height: 1.4,
+                            ),
                           ),
-                          GestureDetector(
-                            onTap: () => Navigator.pushReplacementNamed(
-                                context, '/signup'),
-                            child: Text(
-                              'Sign up',
-                              style: TextStyle(
-                                color: AuthTheme.accent,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
+
+                          const SizedBox(height: 40),
+
+                          // ── Fields ────────────────────────────────────────────
+                          AuthField(
+                            controller: _emailController,
+                            label: 'EMAIL ADDRESS',
+                            hint: 'you@example.com',
+                            icon: Iconsax.sms_copy,
+                            isDark: isDark,
+                            keyboardType: TextInputType.emailAddress,
+                            validator: (v) =>
+                                v!.isEmpty ? 'Email is required' : null,
+                          ),
+                          const SizedBox(height: 28),
+                          AuthField(
+                            controller: _passwordController,
+                            label: 'PASSWORD',
+                            hint: '••••••••',
+                            icon: Iconsax.lock_1_copy,
+                            isDark: isDark,
+                            obscureText: !_isPasswordVisible,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _isPasswordVisible
+                                    ? Iconsax.eye_slash_copy
+                                    : Iconsax.eye_copy,
+                                size: 18,
+                                color: isDark
+                                    ? AuthTheme.darkHint
+                                    : AuthTheme.lightHint,
+                              ),
+                              onPressed: () => setState(
+                                  () => _isPasswordVisible = !_isPasswordVisible),
+                            ),
+                            validator: (v) =>
+                                v!.isEmpty ? 'Password is required' : null,
+                          ),
+
+                          const SizedBox(height: 12),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: () =>
+                                  _showError('Password reset coming soon'),
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              child: Text(
+                                'Forgot password?',
+                                style: TextStyle(
+                                  fontFamily: 'NDOT',
+                                  color: subtext,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.5,
+                                ),
                               ),
                             ),
                           ),
+
+                          const SizedBox(height: 32),
+
+                          // ── Primary button ────────────────────────────────────
+                          AuthPrimaryButton(
+                            label: 'CONTINUE',
+                            isLoading: _isLoading,
+                            onTap: _login,
+                          ),
+
+                          const SizedBox(height: 28),
+                          AuthDivider(isDark: isDark),
+                          const SizedBox(height: 28),
+
+                          // ── Google ────────────────────────────────────────────
+                          AuthGoogleButton(
+                            isDark: isDark,
+                            onTap: () async {
+                              try {
+                                await Provider.of<AuthService>(context,
+                                        listen: false)
+                                    .signInWithGoogle();
+                              } catch (e) {
+                                if (!mounted) return;
+                                _showError(e.toString());
+                              }
+                            },
+                          ),
+
+                          const SizedBox(height: 40),
+
+                          // ── Footer ────────────────────────────────────────────
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "No account?  ",
+                                style: TextStyle(
+                                    fontFamily: 'NDOT',
+                                    color: subtext,
+                                    fontSize: 13,
+                                    letterSpacing: 0.3),
+                              ),
+                              GestureDetector(
+                                onTap: () => Navigator.pushReplacementNamed(
+                                    context, '/signup'),
+                                child: const Text(
+                                  'CREATE ONE',
+                                  style: TextStyle(
+                                    fontFamily: 'NDOT',
+                                    color: AuthTheme.accent,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 1.0,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 40),
                         ],
                       ),
-                      const SizedBox(height: 40),
-                    ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
+          ],
         ),
       ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Nothing OS dot-matrix grid background painter
+// ─────────────────────────────────────────────────────────────────────────────
+class _DotGridPainter extends CustomPainter {
+  final bool isDark;
+  const _DotGridPainter({required this.isDark});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = (isDark ? Colors.white : Colors.black).withOpacity(0.04)
+      ..style = PaintingStyle.fill;
+    const spacing = 20.0;
+    const radius = 1.0;
+    for (double x = 0; x < size.width; x += spacing) {
+      for (double y = 0; y < size.height; y += spacing) {
+        canvas.drawCircle(Offset(x, y), radius, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DotGridPainter old) => old.isDark != isDark;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Nothing OS-style Logo
+// ─────────────────────────────────────────────────────────────────────────────
+class _NothingLogo extends StatelessWidget {
+  final bool isDark;
+  const _NothingLogo({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final text = isDark ? AuthTheme.darkText : AuthTheme.lightText;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Glyph mark — two stacked squares (Nothing-OS style)
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 12,
+              height: 12,
+              color: AuthTheme.accent,
+            ),
+            const SizedBox(width: 4),
+            Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                border: Border.all(color: AuthTheme.accent, width: 1.5),
+              ),
+            ),
+            const SizedBox(width: 4),
+            Container(
+              width: 12,
+              height: 12,
+              color: text.withOpacity(0.15),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Text(
+              'Scholar',
+              style: TextStyle(
+                fontFamily: 'NDOT',
+                color: text,
+                fontSize: 26,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.5,
+                height: 1.0,
+              ),
+            ),
+            Text(
+              'X',
+              style: const TextStyle(
+                fontFamily: 'NDOT',
+                color: AuthTheme.accent,
+                fontSize: 26,
+                fontWeight: FontWeight.w900,
+                height: 1.0,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'MAKAUT EDITION',
+          style: TextStyle(
+            fontFamily: 'NDOT',
+            color: text.withOpacity(0.3),
+            fontSize: 9,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 3.5,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -335,59 +457,7 @@ class _LoginScreenState extends State<LoginScreen>
 // Shared Auth Widgets (exported for SignupScreen)
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Logo mark — icon + wordmark.
-class _Logo extends StatelessWidget {
-  final bool isDark;
-  const _Logo({required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: AuthTheme.accent,
-            borderRadius: BorderRadius.circular(11),
-          ),
-          child:
-              const Icon(Icons.school_rounded, color: Colors.white, size: 22),
-        ),
-        const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'ScholarX',
-              style: TextStyle(
-                color: isDark ? AuthTheme.darkText : AuthTheme.lightText,
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.5,
-                height: 1.0,
-              ),
-            ),
-            Text(
-              'MAKAUT',
-              style: TextStyle(
-                color: AuthTheme.accent.withValues(alpha: 0.9),
-                fontSize: 9.5,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 2.5,
-                height: 1.2,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-/// Clean input field with visible label + border.
+/// Input field — Nothing OS style: no fill, sharp border, NDOT label.
 class AuthField extends StatefulWidget {
   final TextEditingController controller;
   final String label, hint;
@@ -433,16 +503,14 @@ class _AuthFieldState extends State<AuthField> {
   @override
   Widget build(BuildContext context) {
     final borderColor = _isFocused
-        ? (widget.isDark
-            ? AuthTheme.darkBorderFocus
-            : AuthTheme.lightBorderFocus)
+        ? AuthTheme.accent
         : (widget.isDark ? AuthTheme.darkBorder : AuthTheme.lightBorder);
-    final fieldBg =
-        widget.isDark ? AuthTheme.darkSurface : AuthTheme.lightSurface;
+    final textColor =
+        widget.isDark ? AuthTheme.darkText : AuthTheme.lightText;
+    final hintColor =
+        widget.isDark ? AuthTheme.darkHint : AuthTheme.lightHint;
     final labelColor =
-        widget.isDark ? AuthTheme.darkSubtext : AuthTheme.lightSubtext;
-    final textColor = widget.isDark ? AuthTheme.darkText : AuthTheme.lightText;
-    final hintColor = widget.isDark ? AuthTheme.darkHint : AuthTheme.lightHint;
+        _isFocused ? AuthTheme.accent : (widget.isDark ? AuthTheme.darkSubtext : AuthTheme.lightSubtext);
     final iconColor = _isFocused
         ? AuthTheme.accent
         : (widget.isDark ? AuthTheme.darkHint : AuthTheme.lightHint);
@@ -453,40 +521,49 @@ class _AuthFieldState extends State<AuthField> {
         Text(
           widget.label,
           style: TextStyle(
+            fontFamily: 'NDOT',
             color: labelColor,
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.1,
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.5,
           ),
         ),
         const SizedBox(height: 8),
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          decoration: BoxDecoration(
-            color: fieldBg,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: borderColor, width: 1.5),
-          ),
-          child: TextFormField(
-            controller: widget.controller,
-            focusNode: _node,
-            obscureText: widget.obscureText,
-            keyboardType: widget.keyboardType,
-            style: TextStyle(
-                color: textColor, fontSize: 15, fontWeight: FontWeight.w500),
-            validator: widget.validator,
-            decoration: InputDecoration(
-              hintText: widget.hint,
-              hintStyle: TextStyle(
-                  color: hintColor,
-                  fontSize: 14.5,
-                  fontWeight: FontWeight.w400),
-              prefixIcon: Icon(widget.icon, color: iconColor, size: 18),
-              suffixIcon: widget.suffixIcon,
-              border: InputBorder.none,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
-            ),
+        TextFormField(
+          controller: widget.controller,
+          focusNode: _node,
+          obscureText: widget.obscureText,
+          keyboardType: widget.keyboardType,
+          style: TextStyle(
+              color: textColor,
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'NDOT'),
+          validator: widget.validator,
+          decoration: InputDecoration(
+            hintText: widget.hint,
+            hintStyle: TextStyle(
+                color: hintColor,
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+                fontFamily: 'NDOT'),
+            prefixIcon: Icon(widget.icon, color: iconColor, size: 18),
+            suffixIcon: widget.suffixIcon,
+            filled: false,
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+            border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: borderColor, width: 1.0)),
+            enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: borderColor, width: 1.0)),
+            focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AuthTheme.accent, width: 1.5)),
+            errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AuthTheme.accent, width: 1.0)),
           ),
         ),
       ],
@@ -494,7 +571,7 @@ class _AuthFieldState extends State<AuthField> {
   }
 }
 
-/// Solid accent CTA button.
+/// Sharp rectangular CTA button — Nothing OS style.
 class AuthPrimaryButton extends StatelessWidget {
   final String label;
   final bool isLoading;
@@ -516,24 +593,26 @@ class AuthPrimaryButton extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         child: Container(
           height: 52,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: AuthTheme.accent,
-            borderRadius: BorderRadius.circular(12),
+            // Softened corners
+            borderRadius: BorderRadius.all(Radius.circular(12)),
           ),
           child: Center(
             child: isLoading
                 ? const SizedBox(
-                    width: 20,
+                    width: 40,
                     height: 20,
-                    child: DotLoadingIndicator(color: Colors.white, size: 6),
+                    child: const DotLoadingIndicator(size: 16),
                   )
                 : Text(
                     label,
                     style: const TextStyle(
+                      fontFamily: 'NDOT',
                       color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.2,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 2.5,
                     ),
                   ),
           ),
@@ -543,15 +622,17 @@ class AuthPrimaryButton extends StatelessWidget {
   }
 }
 
-/// "or" divider.
+/// Horizontal "or" divider.
 class AuthDivider extends StatelessWidget {
   final bool isDark;
   const AuthDivider({super.key, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
-    final divColor = isDark ? const Color(0xFF2A2A38) : const Color(0xFFE4E4EF);
-    final txtColor = isDark ? AuthTheme.darkHint : AuthTheme.lightHint;
+    final divColor =
+        isDark ? const Color(0xFF222222) : const Color(0xFFDDDDDD);
+    final txtColor =
+        isDark ? AuthTheme.darkHint : AuthTheme.lightHint;
 
     return Row(
       children: [
@@ -559,9 +640,13 @@ class AuthDivider extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14),
           child: Text(
-            'or continue with',
+            'OR',
             style: TextStyle(
-                color: txtColor, fontSize: 12.5, fontWeight: FontWeight.w500),
+                fontFamily: 'NDOT',
+                color: txtColor,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 2.0),
           ),
         ),
         Expanded(child: Divider(color: divColor, thickness: 1, height: 1)),
@@ -570,7 +655,7 @@ class AuthDivider extends StatelessWidget {
   }
 }
 
-/// Google sign-in button.
+/// Google sign-in button — Nothing OS border style.
 class AuthGoogleButton extends StatelessWidget {
   final bool isDark;
   final VoidCallback onTap;
@@ -580,7 +665,6 @@ class AuthGoogleButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textColor = isDark ? AuthTheme.darkText : AuthTheme.lightText;
-    final bg = isDark ? AuthTheme.darkSurface : AuthTheme.lightSurface;
     final border = isDark ? AuthTheme.darkBorder : AuthTheme.lightBorder;
 
     return GestureDetector(
@@ -588,19 +672,19 @@ class AuthGoogleButton extends StatelessWidget {
       child: Container(
         height: 52,
         decoration: BoxDecoration(
-          color: bg,
+          color: Colors.transparent,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: border, width: 1.5),
+          border: Border.all(color: border, width: 1.0),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 22,
-              height: 22,
+              width: 20,
+              height: 20,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(2),
               ),
               padding: const EdgeInsets.all(2),
               child: Image.asset(
@@ -608,17 +692,19 @@ class AuthGoogleButton extends StatelessWidget {
                 fit: BoxFit.contain,
                 errorBuilder: (_, __, ___) => const Icon(
                     Icons.g_mobiledata_rounded,
-                    size: 18,
+                    size: 16,
                     color: Color(0xFF4285F4)),
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 12),
             Text(
-              'Continue with Google',
+              'CONTINUE WITH GOOGLE',
               style: TextStyle(
+                fontFamily: 'NDOT',
                 color: textColor,
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.5,
               ),
             ),
           ],

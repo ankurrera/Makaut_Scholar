@@ -1,7 +1,7 @@
 name: makaut_scholar
 description: A new Flutter project.
 publish_to: 'none'
-version: 1.1.1+9
+version: 1.2.1+11
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -24,13 +24,14 @@ dependencies:
   in_app_purchase: ^3.2.3
   in_app_purchase_android: ^0.4.0+8
   font_awesome_flutter: ^10.7.0
-  razorpay_flutter: ^1.4.1
+  # razorpay_flutter: ^1.4.1 # Commented out for Google Play compliance
   http: ^1.2.1
   url_launcher: ^6.3.0
   package_info_plus: ^9.0.0
   firebase_core: ^4.5.0
   firebase_messaging: ^16.1.2
   google_fonts: ^8.0.2
+  shimmer: ^3.0.0
 
 dev_dependencies:
   flutter_test:
@@ -42,19 +43,22 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # CRITICAL: This allows Flutter to read your .env file
   assets:
-    - .env
+    # - .env # Removed for security (use --dart-define)
     - assets/logo.png
     - assets/scholarx_logo.png
     - assets/google_logo.png
     - assets/lightmode.png
     - assets/darkmode.png
+    - assets/icons/
 
   fonts:
     - family: NDOT
       fonts:
         - asset: assets/fonts/Ndot.ttf
+    - family: CallingCode
+      fonts:
+        - asset: assets/fonts/CallingCode-Regular.ttf
 
 flutter_launcher_icons:
   android: true

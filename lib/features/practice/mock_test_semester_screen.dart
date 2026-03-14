@@ -65,7 +65,7 @@ class _MockTestSemesterScreenState extends State<MockTestSemesterScreen>
         isDark ? const Color(0xFF9AA0A6) : const Color(0xFF8E8E93);
     final bgPrimary =
         isDark ? const Color(0xFF121512) : const Color(0xFFF8F6F1);
-    final cardBg = isDark ? const Color(0xFF1C2020) : Colors.white;
+    final cardBg = isDark ? const Color(0xFF1C1C1E) : Colors.white;
 
     return Scaffold(
       backgroundColor: bgPrimary,
@@ -76,13 +76,19 @@ class _MockTestSemesterScreenState extends State<MockTestSemesterScreen>
           icon: Icon(Iconsax.arrow_left, color: textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
+        centerTitle: true,
         title: Text(
-          'Mock Tests',
-          style: TextStyle(color: textPrimary, fontWeight: FontWeight.bold),
+          'MOCK TESTS',
+          style: TextStyle(
+            fontFamily: 'NDOT',
+            color: textPrimary,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 2.0,
+          ),
         ),
       ),
-      body: _isLoading
-          ? const Center(child: DotLoadingIndicator(color: _accentColor))
+      body: _isLoading && _semesters.isEmpty
+          ? _buildLoadingSkeleton(isDark)
           : _error != null
               ? _buildError(isDark, textPrimary, textSecondary)
               : _semesters.isEmpty
@@ -91,7 +97,7 @@ class _MockTestSemesterScreenState extends State<MockTestSemesterScreen>
                       onRefresh: _loadSemesters,
                       color: _accentColor,
                       child: ListView.builder(
-                        padding: const EdgeInsets.all(24),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                         itemCount: _semesters.length,
                         itemBuilder: (context, index) {
                           final semester = _semesters[index];
@@ -105,43 +111,81 @@ class _MockTestSemesterScreenState extends State<MockTestSemesterScreen>
 
   Widget _buildSemesterCard(int semester, bool isDark, Color textPrimary,
       Color textSecondary, Color cardBg) {
+    final borderColor = isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F2);
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-            color: isDark ? const Color(0xFF2A3030) : const Color(0xFFE6E8EC)),
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        leading: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: _accentColor.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor, width: 1.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
-          child: const Icon(Iconsax.book_1, color: _accentColor, size: 24),
-        ),
-        title: Text(
-          'Semester $semester',
-          style: TextStyle(
-              color: textPrimary, fontWeight: FontWeight.bold, fontSize: 16),
-        ),
-        subtitle: Text('Select to view subjects',
-            style: TextStyle(color: textSecondary, fontSize: 13)),
-        trailing: Icon(Iconsax.arrow_right_3, color: textSecondary, size: 18),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => MockTestSubjectScreen(
-                department: _userDepartment,
-                semester: semester,
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => MockTestSubjectScreen(
+                  department: _userDepartment,
+                  semester: semester,
+                ),
               ),
+            );
+          },
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(Iconsax.book_1, color: textPrimary, size: 24),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'SEMESTER $semester',
+                        style: TextStyle(
+                            fontFamily: 'NDOT',
+                            color: textPrimary,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 16,
+                            letterSpacing: 1.0),
+                      ),
+                      const SizedBox(height: 2),
+                      Text('Select to view subjects',
+                          style: TextStyle(color: textSecondary, fontSize: 13, fontWeight: FontWeight.w500)),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Iconsax.arrow_right_3, color: textSecondary, size: 16),
+                ),
+              ],
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
@@ -152,16 +196,18 @@ class _MockTestSemesterScreenState extends State<MockTestSemesterScreen>
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Iconsax.document_filter,
-              size: 64, color: textSecondary.withValues(alpha: 0.3)),
+              size: 64, color: textSecondary.withValues(alpha: 0.1)),
           const SizedBox(height: 16),
-          Text('No quizzes available',
-              style: TextStyle(
-                  color: textPrimary,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold)),
+          Text('NO QUIZZES AVAILABLE',
+                  style: TextStyle(
+                      fontFamily: 'NDOT',
+                      color: textPrimary,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.0)),
           const SizedBox(height: 8),
           Text('Try later for this department',
-              style: TextStyle(color: textSecondary)),
+              style: TextStyle(color: textSecondary, fontWeight: FontWeight.w500)),
         ],
       ),
     );
@@ -174,16 +220,34 @@ class _MockTestSemesterScreenState extends State<MockTestSemesterScreen>
         children: [
           const Icon(Iconsax.warning_2, size: 48, color: Colors.redAccent),
           const SizedBox(height: 16),
-          Text('Failed to load quizzes',
-              style:
-                  TextStyle(color: textPrimary, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          TextButton(
-              onPressed: _loadSemesters,
-              child:
-                  const Text('Retry', style: TextStyle(color: _accentColor))),
+          const Text('FAILED TO LOAD QUIZZES',
+                  style: TextStyle(
+                      fontFamily: 'NDOT',
+                      color: Colors.redAccent,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.0)),
+          const SizedBox(height: 12),
+          GestureDetector(
+                onTap: _loadSemesters,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: _accentColor,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Text('RETRY', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, letterSpacing: 1.0)),
+                ),
+              ),
         ],
       ),
+    );
+  }
+
+  Widget _buildLoadingSkeleton(bool isDark) {
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      itemCount: 6,
+      itemBuilder: (context, index) => ShimmerSkeleton.listTile(isDark: isDark),
     );
   }
 }

@@ -2,14 +2,15 @@ import 'dart:async';
 import 'dart:io';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
-import 'package:razorpay_flutter/razorpay_flutter.dart';
+// import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/repositories/billing_repository.dart';
 import '../../core/supabase_client.dart';
+import '../../core/config/payment_config.dart';
 
 class BillingRepositoryImpl implements BillingRepository {
   final InAppPurchase _iap = InAppPurchase.instance;
-  late Razorpay _razorpay;
+  // Razorpay? _razorpay; // null when PaymentConfig.razorpayEnabled == false
   SupabaseClient get _supabase => SupabaseClientService.client;
 
   // To keep track of the current alternative billing token if provided by Google
@@ -27,10 +28,15 @@ class BillingRepositoryImpl implements BillingRepository {
   }
 
   BillingRepositoryImpl() {
-    _razorpay = Razorpay();
-    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handleRazorpaySuccess);
-    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handleRazorpayError);
-    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+    // Razorpay SDK is only initialised when the feature flag is enabled.
+    // This keeps the Play Store build clean while Alternative Billing
+    // approval is pending. Flip PaymentConfig.razorpayEnabled to re-enable.
+    if (PaymentConfig.razorpayEnabled) {
+      // _razorpay = Razorpay();
+      // _razorpay?.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handleRazorpaySuccess);
+      // _razorpay?.on(Razorpay.EVENT_PAYMENT_ERROR, _handleRazorpayError);
+      // _razorpay?.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+    }
 
     // Defer Google Play init to avoid blocking the first few frames
     Future.microtask(() => _initializeUserChoiceBilling());
@@ -102,8 +108,21 @@ class BillingRepositoryImpl implements BillingRepository {
           'externalTransactionToken': null,
         },
       );
+      
+      // Notify UI that the purchase is now synced and content should be unlocked
+      _alternativePurchaseController.add({
+        'status': 'purchased',
+        'orderId': _activeSupabaseOrderId ?? purchase.purchaseID,
+        'gateway': 'google_play',
+      });
     } catch (e) {
       print('Error reporting Google Play purchase: $e');
+    } finally {
+      // Notify UI to stop any loading indicators, even if the sync failed in DB
+      _alternativePurchaseController.add({
+        'status': 'purchased_finished',
+        'orderId': _activeSupabaseOrderId ?? purchase.purchaseID,
+      });
     }
   }
 
@@ -137,9 +156,19 @@ class BillingRepositoryImpl implements BillingRepository {
     required double amount,
     String? externalTransactionToken,
   }) async {
+    // Defensive guard: this method must never be reached when the flag is off.
+    // The UI already prevents it, but this makes the contract explicit.
+    if (!PaymentConfig.razorpayEnabled) {
+      throw UnsupportedError(
+        'Razorpay is currently disabled. '  
+        'Set PaymentConfig.razorpayEnabled = true to re-enable.',
+      );
+    }
+
     _pendingExternalToken = externalTransactionToken;
     _activeSupabaseOrderId = internalOrderId;
     try {
+      /*
       // Open Razorpay Checkout using the already-created order
       var options = {
         'key': keyId,
@@ -160,12 +189,14 @@ class BillingRepositoryImpl implements BillingRepository {
         }
       };
 
-      _razorpay.open(options);
+      _razorpay!.open(options);
+      */
     } catch (e) {
       rethrow;
     }
   }
 
+  /*
   void _handleRazorpaySuccess(PaymentSuccessResponse response) async {
     final orderId = _activeSupabaseOrderId ?? response.orderId;
 
@@ -233,9 +264,13 @@ class BillingRepositoryImpl implements BillingRepository {
   void _handleExternalWallet(ExternalWalletResponse response) {
     print("External Wallet: ${response.walletName}");
   }
+  */
 
   @override
   void dispose() {
-    _razorpay.clear();
+    if (PaymentConfig.razorpayEnabled) {
+      // _razorpay?.clear();
+    }
   }
 }
+
